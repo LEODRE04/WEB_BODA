@@ -14,10 +14,9 @@
  *     "completa")
  *
  *   Respuestas  (se llena sola cuando alguien confirma)
- *     codigo | nombre | contacto | asistencia | num_acompanantes | menu |
- *     acompanante_1_nombre | acompanante_1_menu |
- *     acompanante_2_nombre | acompanante_2_menu |
- *     alergias | cancion | mensaje | enviado_en | actualizado_en
+ *     codigo | nombre | num_asistentes | asistencia | enviado_en | actualizado_en
+ *     (formulario simplificado: nombre y num_asistentes ya vienen fijados
+ *     por la invitación, la única decisión real del invitado es asistencia)
  *
  * Deploy: Extensiones > Apps Script > pega este archivo > Desplegar >
  * Nueva implementación > tipo "Aplicación web" > Ejecutar como "Yo" >
@@ -28,12 +27,7 @@
 var SHEET_INVITADOS = "Invitados";
 var SHEET_RESPUESTAS = "Respuestas";
 
-var RESPUESTA_COLUMNAS = [
-  "codigo", "nombre", "contacto", "asistencia", "num_acompanantes", "menu",
-  "acompanante_1_nombre", "acompanante_1_menu",
-  "acompanante_2_nombre", "acompanante_2_menu",
-  "alergias", "cancion", "mensaje", "enviado_en", "actualizado_en",
-];
+var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "enviado_en", "actualizado_en"];
 
 // Nota: ContentService no permite devolver códigos de estado HTTP propios
 // (Apps Script Web Apps siempre responden 200). Por eso el frontend
@@ -70,13 +64,16 @@ function doPost(e) {
   if (codigo) {
     var guest = findGuest(codigo);
     if (!guest) return jsonOut({ error: "código de invitado no reconocido" });
-    var numAcomp = Number(data.num_acompanantes || 0);
-    if (numAcomp > guest.acompanantes_permitidos) {
-      return jsonOut({ error: "supera los acompañantes permitidos (" + guest.acompanantes_permitidos + ")" });
+    // num_asistentes es de solo lectura en el formulario — esto es más una
+    // red de seguridad que una validación real, por si alguien lo edita a
+    // mano en el navegador.
+    var esperado = 1 + guest.acompanantes_permitidos;
+    if (Number(data.num_asistentes || esperado) > esperado) {
+      return jsonOut({ error: "supera los asistentes de tu invitación (" + esperado + ")" });
     }
   }
 
-  if (!data.nombre || !data.contacto || !data.asistencia) {
+  if (!data.nombre || !data.asistencia) {
     return jsonOut({ error: "faltan campos requeridos" });
   }
 
@@ -121,7 +118,7 @@ function findRespuestaRow(codigo) {
 
 function upsertRespuesta(codigo, data) {
   var sheet = getSheet(SHEET_RESPUESTAS);
-  var key = codigo || data.contacto;
+  var key = codigo || data.nombre;
   var existing = key ? findRespuestaByKey(sheet, key) : null;
 
   var row = RESPUESTA_COLUMNAS.map(function (col) { return data[col] || ""; });
@@ -139,7 +136,7 @@ function upsertRespuesta(codigo, data) {
 function findRespuestaByKey(sheet, key) {
   var rows = sheet.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() === key || String(rows[i][2]).trim() === key) { // codigo o contacto
+    if (String(rows[i][0]).trim() === key || String(rows[i][1]).trim() === key) { // codigo o nombre
       var data = {};
       RESPUESTA_COLUMNAS.forEach(function (col, j) { data[col] = rows[i][j]; });
       return { rowIndex: i + 1, data: data };

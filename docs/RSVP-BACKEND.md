@@ -52,11 +52,12 @@ Cada invitado entra con `tusitio.com/?codigo=SU-CODIGO`. El frontend
 (`js/site.js`):
 
 1. Al cargar, si hay `?codigo=`, le pregunta a la API quién es ese código.
-2. Si existe: precarga su nombre, limita el selector de acompañantes al
-   número real que le corresponde, y si ya había confirmado antes, rellena
-   todo el formulario con su respuesta anterior (para editarla).
+2. Si existe: precarga su nombre y el número de asistentes (ambos de solo
+   lectura), y si ya había confirmado antes, marca su respuesta anterior
+   (sí/no) para poder editarla.
 3. Si el código no existe, o la API no responde: el formulario sigue
-   funcionando abierto (nadie se queda sin poder confirmar).
+   funcionando abierto (nombre editable, 1 asistente) — nadie se queda sin
+   poder confirmar.
 
 El campo oculto `codigo` viaja con el formulario para que el backend sepa
 a qué invitado actualizar.
@@ -66,19 +67,32 @@ a qué invitado actualizar.
 La columna `tipo_invitacion` de cada invitado (`"ceremonia"` o
 `"completa"`) cambia la página para esa persona:
 
-- **`"completa"`** (o la celda vacía — es el valor por defecto): ve todo,
-  igual que ahora.
+- **`"completa"`** (o la celda vacía — es el valor por defecto en la lista
+  de invitados): ve todo.
 - **`"ceremonia"`**: no ve el itinerario de la recepción (cóctel, cena,
   baile, cierre), ni el bloque de ubicación de la recepción en "Cuándo y
-  dónde", ni los campos de Menú/Alergias/Canción en el RSVP (tampoco el
-  menú de sus acompañantes). El saludo de arriba también dice "...en la
-  ceremonia" en vez de "...en la ceremonia y la recepción".
+  dónde". El saludo de arriba también dice "...en la ceremonia" en vez de
+  "...en la ceremonia y la recepción".
 
-Técnicamente: `js/site.js` agrega la clase `solo-ceremonia` al `<body>`
-cuando corresponde, y `css/site.css` oculta con esa clase todo lo marcado
+**Por defecto (medida de seguridad):** la página parte SIEMPRE asumiendo
+"solo ceremonia" — `applyInvitationType()` en `js/site.js` agrega la clase
+`solo-ceremonia` al `<body>` de entrada, y recién la quita si el backend
+confirma un código válido con `tipo_invitacion` "completa". Esto es al
+revés de cómo funciona `tipo_invitacion` en la lista (ahí la celda vacía
+= completa) a propósito: si alguien borra el `?codigo=` del link, escribe
+uno inventado, o el backend no responde, tiene que ver lo mínimo, no lo
+máximo. `css/site.css` oculta con esa clase todo lo marcado
 `[data-reception-only]` en el HTML — para agregar o quitar algo de la
 versión recortada, es agregar o quitar ese atributo en `index.html`, sin
 tocar JS.
+
+Esto frena el "borro el código del link para curiosear" — no protege
+contra alguien que abre las herramientas de desarrollador del navegador a
+propósito (el HTML de la recepción sigue estando en la página, solo
+oculto por CSS). Para ese nivel de protección haría falta que el backend
+mandara el HTML ya recortado por invitado, que es un cambio de
+arquitectura bastante más grande — no debería hacer falta para una web de
+boda familiar/de amigos.
 
 La recepción es en un **local distinto** a la iglesia (columna nueva en
 "Cuándo y dónde") — cuando tengan el lugar confirmado, ponlo en
@@ -98,7 +112,14 @@ La recepción es en un **local distinto** a la iglesia (columna nueva en
    | carlos-mendoza | Carlos Mendoza | 0 | ceremonia |
 
    **`Respuestas`** (se llena sola — solo pon los encabezados)
-   | codigo | nombre | contacto | asistencia | num_acompanantes | menu | acompanante_1_nombre | acompanante_1_menu | acompanante_2_nombre | acompanante_2_menu | alergias | cancion | mensaje | enviado_en | actualizado_en |
+   | codigo | nombre | num_asistentes | asistencia | enviado_en | actualizado_en |
+
+   Formulario simplificado a propósito: como ya tienen el celular de cada
+   invitado (el link se los mandan por WhatsApp), no hace falta pedir
+   contacto de nuevo. Nombre y número de asistentes vienen fijados por la
+   invitación (de solo lectura en el formulario) — lo único que decide el
+   invitado es si va o no. Más rápido de responder, y una fila de
+   `Respuestas` más simple de leer.
 
 3. Carga ahí tu lista real de invitados (una fila por invitado/familia, con
    el código que le vas a mandar por WhatsApp).

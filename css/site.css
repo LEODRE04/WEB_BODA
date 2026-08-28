@@ -177,12 +177,11 @@ body { background: var(--color-neutral-100); }
 .rsvp-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .rsvp-form .row + .row { margin-top: 14px; }
 .rsvp-form .field { margin-top: 14px; }
+.input[readonly] { opacity: .65; cursor: not-allowed; }
 .rsvp-form .attending-toggle { display: flex; gap: 10px; }
 .rsvp-form .attending-toggle label {
   flex: 1; background: var(--color-surface); border-radius: 999px; padding: 11px 16px;
 }
-.companion-card { margin-top: 14px; padding: 14px 16px; background: var(--color-surface); border-radius: 24px; }
-.companion-card .row { grid-template-columns: 1fr 1fr; }
 .rsvp-actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
 .rsvp-note { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 .rsvp-success {
@@ -198,7 +197,7 @@ body { background: var(--color-neutral-100); }
 .rsvp-guest-banner.is-warning { background: var(--color-accent-100); color: var(--color-accent-800); }
 @media (max-width: 860px) {
   .rsvp-grid { grid-template-columns: 1fr; }
-  .rsvp-form .row, .companion-card .row { grid-template-columns: 1fr; }
+  .rsvp-form .row { grid-template-columns: 1fr; }
 }
 
 /* — FAQ — */
@@ -239,13 +238,11 @@ body { background: var(--color-neutral-100); }
    site.js lo quita en cuanto config.js tiene el dato real. */
 [aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 
-/* Invitación solo a la ceremonia (según ?codigo=... y tipo_invitacion en
-   la lista de invitados, ver js/site.js): oculta todo lo marcado como
-   propio de la recepción — itinerario, ubicación, y campos del RSVP que
-   no aplican (menú, alergias, canción). */
+/* Invitación solo a la ceremonia — por defecto SIEMPRE (ver
+   applyInvitationType en js/site.js: se asume lo más restrictivo hasta
+   que el backend confirme lo contrario). Oculta todo lo marcado como
+   propio de la recepción: itinerario y su bloque de ubicación. */
 body.solo-ceremonia [data-reception-only] { display: none !important; }
-body.solo-ceremonia #rsvp-row-acompanantes-menu { grid-template-columns: 1fr; }
-body.solo-ceremonia .companion-card .row { grid-template-columns: 1fr; }
 
 /* — botón de WhatsApp: mismo tamaño de .btn pero con su color de marca,
    más grande y con sombra para que resalte como acción principal — */

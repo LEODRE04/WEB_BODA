@@ -46,9 +46,19 @@
   // oculta por CSS todo lo marcado [data-reception-only] — itinerario,
   // ubicación de la recepción, y campos del RSVP que no aplican.
   function applyInvitationType(guestPromise) {
+    // Por defecto se asume lo más restrictivo (solo ceremonia): si alguien
+    // borra el "?codigo=" del link, escribe uno inventado, o el backend no
+    // responde, NO debe ver que existe una recepción. Solo se desbloquea
+    // la versión completa cuando el backend CONFIRMA un código válido con
+    // tipo_invitacion "completa".
+    // (Esto no oculta el HTML del navegador: alguien con las herramientas
+    // de desarrollador podría igual ver el contenido marcado
+    // [data-reception-only]. Frena el "borro el link y miro", no a alguien
+    // que abre el inspector a propósito.)
+    document.body.classList.add("solo-ceremonia");
     guestPromise.then(function (guest) {
-      if (guest && guest.found && guest.tipo_invitacion === "ceremonia") {
-        document.body.classList.add("solo-ceremonia");
+      if (guest && guest.found && guest.tipo_invitacion !== "ceremonia") {
+        document.body.classList.remove("solo-ceremonia");
       }
     });
   }
@@ -265,55 +275,11 @@
     var form = document.querySelector("#rsvp-form");
     if (!form) return;
 
-    var addCompanionBtn = form.querySelector("#rsvp-add-companion");
-    var companionsWrap = form.querySelector("#rsvp-companions");
-    var acompanantesSelect = form.querySelector("#rsvp-acompanantes");
+    var nombreInput = form.querySelector('[name="nombre"]');
+    var asistentesInput = form.querySelector('[name="num_asistentes"]');
     var codigoInput = form.querySelector("#rsvp-codigo");
     var banner = form.querySelector("#rsvp-guest-banner");
     var submitBtn = form.querySelector("#rsvp-submit");
-    var companionCount = 0;
-    var MAX_COMPANIONS = 2;
-
-    function setMaxCompanions(max) {
-      MAX_COMPANIONS = max;
-      var current = acompanantesSelect.value;
-      acompanantesSelect.innerHTML = "";
-      for (var i = 0; i <= max; i++) {
-        var opt = document.createElement("option");
-        opt.value = String(i);
-        opt.textContent = i === 0 ? "Sin acompañantes" : i + (i === 1 ? " acompañante" : " acompañantes");
-        acompanantesSelect.appendChild(opt);
-      }
-      if (Number(current) <= max) acompanantesSelect.value = current;
-      addCompanionBtn.disabled = companionCount >= MAX_COMPANIONS;
-      var maxLabel = form.querySelector("#rsvp-max-label");
-      if (maxLabel) maxLabel.textContent = "máx. " + max;
-    }
-
-    function addCompanionCard(prefillNombre, prefillMenu) {
-      if (companionCount >= MAX_COMPANIONS) return;
-      companionCount++;
-      var card = document.createElement("div");
-      card.className = "companion-card";
-      card.innerHTML =
-        '<div style="font-size:12px;color:rgba(32,30,29,.7);margin-bottom:8px">Acompañante ' +
-        companionCount +
-        '</div><div class="row">' +
-        '<input class="input" name="acompanante_' + companionCount + '_nombre" placeholder="Nombre completo">' +
-        '<select class="input" name="acompanante_' + companionCount + '_menu" data-reception-only>' +
-        "<option>Carne</option><option>Pescado</option><option>Vegetariano</option><option>Sin gluten</option>" +
-        "</select></div>";
-      companionsWrap.appendChild(card);
-      if (prefillNombre) card.querySelector("input").value = prefillNombre;
-      if (prefillMenu) card.querySelector("select").value = prefillMenu;
-      if (companionCount >= MAX_COMPANIONS) addCompanionBtn.disabled = true;
-    }
-
-    if (addCompanionBtn) {
-      addCompanionBtn.addEventListener("click", function () {
-        addCompanionCard();
-      });
-    }
 
     function showBanner(text, isWarning) {
       banner.textContent = text;
@@ -322,11 +288,10 @@
     }
 
     // Invitado identificado por link personal: pagina.html?codigo=familia-garcia
-    // Precarga nombre, límite real de acompañantes, y si ya había respondido
-    // antes, toda su respuesta (para editarla). Si el código no existe, o si
-    // la API no responde (todavía no hay backend desplegado), el formulario
-    // sigue funcionando abierto, como hasta ahora.
-    var params = new URLSearchParams(window.location.search);
+    // Precarga nombre y número de asistentes (fijos — ver más abajo por
+    // qué), y si ya había respondido antes, si va o no (para editarla). Si
+    // el código no existe, o si la API no responde (todavía no hay backend
+    // desplegado), el formulario sigue funcionando abierto, como antes.
     if (codigo) {
       codigoInput.value = codigo;
       guestPromise.then(function (guest) {
@@ -335,39 +300,33 @@
           showBanner("No reconocemos este link de invitación, pero puedes confirmar igual.", true);
           return;
         }
-        setMaxCompanions(guest.acompanantes_permitidos);
-        form.querySelector('[name="nombre"]').value = guest.nombre;
+        nombreInput.value = guest.nombre;
+        nombreInput.readOnly = true;
+        asistentesInput.value = 1 + (Number(guest.acompanantes_permitidos) || 0);
 
         if (guest.respuesta) {
           showBanner("Ya habías confirmado como " + guest.nombre + " — puedes actualizar tu respuesta.");
-          fillForm(form, guest.respuesta, addCompanionCard);
-          submitBtn.textContent = "Actualizar confirmación";
+          if (guest.respuesta.asistencia) {
+            var radio = form.querySelector('input[name="asistencia"][value="' + guest.respuesta.asistencia + '"]');
+            if (radio) radio.checked = true;
+          }
+          submitBtn.textContent = "Actualizar";
         } else {
           showBanner("Confirmando para: " + guest.nombre);
         }
       });
-    } else {
-      // Fallback antiguo, sin código: solo escribe el nombre en el campo.
-      var invitado = params.get("invitado");
-      if (invitado) form.querySelector('[name="nombre"]').value = invitado;
     }
+    // Sin código: el formulario queda abierto y editable, como antes
+    // (nombre y número de asistentes normales, sin precargar).
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var data = Object.fromEntries(new FormData(form).entries());
       data.enviado_en = new Date().toISOString();
 
-      // Campos ocultos (menú, alergias, canción) igual viajan en el
-      // FormData con su valor por defecto aunque no se vean — se limpian
-      // para que la respuesta guardada no traiga datos que no aplican.
-      if (document.body.classList.contains("solo-ceremonia")) {
-        ["menu", "alergias", "cancion"].forEach(function (k) { delete data[k]; });
-        [1, 2].forEach(function (i) { delete data["acompanante_" + i + "_menu"]; });
-      }
-
       var errorEl = form.querySelector(".rsvp-error");
-      if (!data.nombre || !data.contacto || !data.asistencia) {
-        errorEl.textContent = "Completa nombre, contacto y si podrás asistir.";
+      if (!data.nombre || !data.asistencia) {
+        errorEl.textContent = "Completa tu nombre y si podrás asistir.";
         errorEl.hidden = false;
         return;
       }
@@ -377,36 +336,12 @@
         .then(function () {
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
-          var keepCodigo = data.codigo;
-          form.reset();
-          codigoInput.value = keepCodigo || "";
-          companionsWrap.innerHTML = "";
-          companionCount = 0;
-          addCompanionBtn.disabled = false;
         })
         .catch(function (err) {
           errorEl.textContent = err.message || "No se pudo enviar tu confirmación. Intenta de nuevo.";
           errorEl.hidden = false;
           console.error("RSVP error:", err);
         });
-    });
-  }
-
-  // Rellena el formulario con una respuesta previa (para editarla).
-  function fillForm(form, r, addCompanionCard) {
-    if (r.contacto) form.querySelector('[name="contacto"]').value = r.contacto;
-    if (r.asistencia) {
-      var radio = form.querySelector('input[name="asistencia"][value="' + r.asistencia + '"]');
-      if (radio) radio.checked = true;
-    }
-    if (r.num_acompanantes != null) form.querySelector('[name="num_acompanantes"]').value = r.num_acompanantes;
-    if (r.menu) form.querySelector('[name="menu"]').value = r.menu;
-    if (r.alergias) form.querySelector('[name="alergias"]').value = r.alergias;
-    if (r.cancion) form.querySelector('[name="cancion"]').value = r.cancion;
-    if (r.mensaje) form.querySelector('[name="mensaje"]').value = r.mensaje;
-    [1, 2].forEach(function (i) {
-      var nombre = r["acompanante_" + i + "_nombre"];
-      if (nombre) addCompanionCard(nombre, r["acompanante_" + i + "_menu"]);
     });
   }
 

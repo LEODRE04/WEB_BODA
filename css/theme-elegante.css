@@ -1,15 +1,14 @@
 /* theme-elegante.css — prueba de diseño inspirada en festejabonito.com
-   (paleta dorado/marfil, tipografía script + serif clásica, tarjetas con
-   más aire y sombra). NO copia ningún asset de esa web (ni fotos, ni
-   ilustraciones florales) — es una interpretación propia con la misma
-   idea de paleta/tipografía sobre la maqueta que ya existe.
+   (paleta dorado/marfil, tarjetas con más aire y sombra, sobre de
+   apertura). La tipografía se queda la original (Caprasimo/Figtree) —
+   solo cambia color/forma. NO copia ningún asset de esa web (ni fotos,
+   ni ilustraciones florales) — es una interpretación propia sobre la
+   maqueta que ya existía.
 
    Para volver al diseño anterior: borra la línea que enlaza este archivo
    en index.html (o toda la rama "diseno-elegante-gold" si no gustó nada).
    No toca js/site.js ni el HTML de las secciones — solo colores,
    tipografía y algunos acabados (sombras, viñetas). */
-
-@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap');
 
 :root {
   /* — paleta: marfil cálido + dorado + bronce (reemplaza crema/terracota/salvia) — */
@@ -52,32 +51,13 @@
   --color-accent-2-800: #5f3a24;
   --color-accent-2-900: #3d2517;
 
-  /* tipografía: serif clásica para todo lo estructural (botones, textos
-     grandes, horas…), script solo para los títulos display (ver abajo) */
-  --font-heading: "Cormorant Garamond", "Caprasimo", serif;
-  --font-heading-weight: 600;
-  --font-body: "Cormorant Garamond", "Figtree", serif;
-  --font-script: "Alex Brush", cursive;
+  /* tipografía: se queda la original (Caprasimo/Figtree, ver tokens.css) —
+     este tema solo toca color/sombras/forma, no letras */
 
   --shadow-sm: 0 1px 3px color-mix(in srgb, #372c1d 16%, transparent);
   --shadow-md: 0 4px 16px color-mix(in srgb, #372c1d 14%, transparent);
   --shadow-lg: 0 16px 40px color-mix(in srgb, #372c1d 20%, transparent);
 }
-
-body { font-size: 16.5px; }
-
-/* — títulos display en script, solo donde el original de referencia lo usa
-   (nombres de la portada y títulos de sección) — el resto (botones,
-   horas, nombres de tarjetas) se queda en la serif, para que siga siendo
-   legible en tamaños chicos — */
-.hero h1,
-.section-title,
-.site-footer .names {
-  font-family: var(--font-script);
-  font-weight: 400;
-  letter-spacing: 0;
-}
-.hero-amp span.amp { font-family: var(--font-script); font-size: 32px; }
 
 /* — viñeta "línea – punto – línea" sobre los antetítulos, solo donde el
    encabezado ya está centrado (si se agregara donde el texto es a la
@@ -153,13 +133,13 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 .envelope-eyebrow {
   margin: 0 0 4px; font-size: 13px; letter-spacing: .1em; color: color-mix(in srgb, var(--color-text) 70%, transparent);
 }
-.envelope-title { font-family: var(--font-script); font-weight: 400; font-size: 44px; margin: 0; color: var(--color-accent-700); }
+.envelope-title { font-family: var(--font-heading); font-weight: 400; font-size: 44px; margin: 0; color: var(--color-accent-700); }
 .envelope-names { margin: 6px 0 0; font-size: 17px; color: var(--color-text); }
 .envelope-guest {
   margin: 14px auto 0; max-width: 32ch; font-size: 13.5px; line-height: 1.6;
   color: color-mix(in srgb, var(--color-text) 75%, transparent);
 }
-.envelope-date { margin: 14px 0 18px; font-family: var(--font-script); font-size: 26px; color: var(--color-accent); }
+.envelope-date { margin: 14px 0 18px; font-family: var(--font-heading); font-size: 26px; color: var(--color-accent); }
 
 .envelope {
   position: relative; width: 220px; height: 132px; margin: 0 auto 28px; perspective: 700px;
@@ -180,7 +160,7 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: 46px; height: 46px; border-radius: 999px; background: var(--color-accent); color: #fff;
   display: flex; align-items: center; justify-content: center; z-index: 2;
-  font-family: var(--font-script); font-size: 18px; box-shadow: var(--shadow-sm);
+  font-family: var(--font-heading); font-size: 18px; box-shadow: var(--shadow-sm);
 }
 .envelope-gate.is-opening .envelope-flap { transform: rotateX(180deg); }
 

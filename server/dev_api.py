@@ -110,24 +110,27 @@ class Handler(SimpleHTTPRequestHandler):
             guests = load_guests()
             if codigo not in guests:
                 return self._json(400, {"error": "código de invitado no reconocido"})
-            allowed = guests[codigo]["acompanantes_permitidos"]
+            # num_asistentes es de solo lectura en el formulario (nombre +
+            # cantidad ya vienen fijados por su invitación) — esto es más
+            # una red de seguridad que una validación real, por si alguien
+            # edita el campo a mano en el navegador.
+            esperado = 1 + guests[codigo]["acompanantes_permitidos"]
             try:
-                if int(data.get("num_acompanantes", 0)) > allowed:
-                    return self._json(400, {"error": "supera los acompañantes permitidos (%d)" % allowed})
+                if int(data.get("num_asistentes", esperado)) > esperado:
+                    return self._json(400, {"error": "supera los asistentes de tu invitación (%d)" % esperado})
             except (TypeError, ValueError):
                 pass
 
-        if not data.get("nombre") or not data.get("contacto") or not data.get("asistencia"):
+        if not data.get("nombre") or not data.get("asistencia"):
             return self._json(400, {"error": "faltan campos requeridos"})
 
         with _lock:
             rows = load_responses()
-            key = codigo or data.get("contacto")
-            idx = next((i for i, r in enumerate(rows) if (r.get("codigo") or r.get("contacto")) == key), None)
+            key = codigo or data.get("nombre")
+            idx = next((i for i, r in enumerate(rows) if (r.get("codigo") or r.get("nombre")) == key), None)
             if idx is not None:
-                # Reemplaza la fila entera (no la mezcla): si un campo ya no
-                # viaja (p.ej. "menu" para un invitado solo-ceremonia), debe
-                # desaparecer, no quedarse con el valor de la vez anterior.
+                # Reemplaza la fila entera (no la mezcla): si algún campo ya
+                # no viaja, debe desaparecer, no quedarse con el valor viejo.
                 data["enviado_en"] = rows[idx].get("enviado_en", data.get("enviado_en"))
                 data["actualizado_en"] = datetime.now(timezone.utc).isoformat()
                 rows[idx] = data
