@@ -53,6 +53,13 @@ body { background: var(--color-neutral-100); }
   .site-nav .nav-toggle { display: inline-flex; margin-left: auto; }
 }
 
+/* — saludo personalizado (?codigo=... en el link) — */
+.guest-greeting {
+  background: var(--color-accent-100); color: var(--color-accent-800);
+  text-align: center; padding: 12px 20px; font-size: 14px; line-height: 1.5;
+}
+.guest-greeting p { margin: 0; max-width: 60ch; margin-inline: auto; }
+
 /* — hero — */
 .hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; }
 .hero-copy {

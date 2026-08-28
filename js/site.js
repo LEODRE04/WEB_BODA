@@ -28,7 +28,30 @@
     initCountdown();
     initCopyButtons();
     initDynamicLinks();
-    initRsvpForm();
+
+    // Se resuelve una sola vez el invitado del link (?codigo=...) y se
+    // comparte entre el saludo de arriba y el formulario de RSVP, para no
+    // consultar la API dos veces.
+    var codigo = new URLSearchParams(window.location.search).get("codigo");
+    var guestPromise = codigo ? fetchGuest(codigo) : Promise.resolve(null);
+
+    initGuestGreeting(guestPromise);
+    initRsvpForm(codigo, guestPromise);
+  }
+
+  // — saludo personalizado arriba de la página, para quien entra con un
+  // link de invitado (?codigo=...): nombre + cuántos pases tiene. —
+  function initGuestGreeting(guestPromise) {
+    var el = document.querySelector("#guest-greeting");
+    if (!el) return;
+    guestPromise.then(function (guest) {
+      if (!guest || !guest.found) return; // sin código, no reconocido, o API no disponible: no se muestra nada
+      var passes = 1 + (Number(guest.acompanantes_permitidos) || 0);
+      var passLabel = passes === 1 ? "1 pase reservado" : passes + " pases reservados";
+      el.querySelector("[data-guest-text]").textContent =
+        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en nuestra boda — tienes " + passLabel + " para ti.";
+      el.hidden = false;
+    });
   }
 
   // — nav móvil —
@@ -180,7 +203,7 @@
   }
 
   // — formulario de confirmación —
-  function initRsvpForm() {
+  function initRsvpForm(codigo, guestPromise) {
     var form = document.querySelector("#rsvp-form");
     if (!form) return;
 
@@ -244,10 +267,9 @@
     // la API no responde (todavía no hay backend desplegado), el formulario
     // sigue funcionando abierto, como hasta ahora.
     var params = new URLSearchParams(window.location.search);
-    var codigo = params.get("codigo");
     if (codigo) {
       codigoInput.value = codigo;
-      fetchGuest(codigo).then(function (guest) {
+      guestPromise.then(function (guest) {
         if (!guest) return; // sin respuesta de la API: formulario abierto normal
         if (!guest.found) {
           showBanner("No reconocemos este link de invitación, pero puedes confirmar igual.", true);
