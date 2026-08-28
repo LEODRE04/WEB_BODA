@@ -1,0 +1,234 @@
+/* theme-airbnb.css — reinterpretación completa siguiendo
+   docs/design-references/Airbnb.md (paleta, tipografía, forma, sombra).
+   Cambio deliberadamente grande respecto al tema anterior ("elegante
+   dorado"): blanco+Rausch en vez de crema+dorado, botones de 8px en vez
+   de píldora, tarjetas de 14px con borde hairline en vez de sombra
+   ornamental, tipografía Inter en vez de Caprasimo/script, fotos sin
+   filtro (Airbnb confía en la fotografía tal cual), pie de página claro
+   (Airbnb no tiene modo oscuro en su web pública).
+
+   No copia ningún asset de Airbnb — son sus tokens de color/tipografía/
+   forma documentados en el DESIGN.md, aplicados a la maqueta que ya
+   existía. Para volver atrás: borra el <link> a este archivo en
+   index.html, o toda la rama "diseno-airbnb" si no gustó nada. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* — superficie: blanco puro, Airbnb no tiene modo oscuro en la web pública — */
+  --color-bg: #ffffff;
+  --color-surface: #f7f7f7;
+  --color-text: #222222;
+  --color-divider: #dddddd;
+
+  --color-neutral-100: #ffffff;
+  --color-neutral-200: #f7f7f7;
+  --color-neutral-300: #f2f2f2;
+  --color-neutral-400: #ebebeb;
+  --color-neutral-500: #dddddd;
+  --color-neutral-600: #c1c1c1;
+  --color-neutral-700: #929292;
+  --color-neutral-800: #6a6a6a;
+  --color-neutral-900: #222222;
+
+  /* Rausch — el único acento de marca, usado con moderación (spec: "90%
+     blanco+tinta, uno o dos momentos Rausch") */
+  --color-accent: #ff385c;
+  --color-accent-100: #fff2f4;
+  --color-accent-200: #ffd1da;
+  --color-accent-300: #ffb3c1;
+  --color-accent-400: #ff7a95;
+  --color-accent-500: #ff5470;
+  --color-accent-600: #ff385c;
+  --color-accent-700: #e00b41;
+  --color-accent-800: #c21f4a;
+  --color-accent-900: #8f1636;
+
+  /* Luxe — acento secundario documentado (sub-marca), lo reusamos para
+     distinguir "recepción" del acento principal */
+  --color-accent-2: #460479;
+  --color-accent-2-100: #f5eafc;
+  --color-accent-2-200: #e6cdf7;
+  --color-accent-2-300: #cb9aef;
+  --color-accent-2-400: #a35cd9;
+  --color-accent-2-500: #7a2fb0;
+  --color-accent-2-600: #460479;
+  --color-accent-2-700: #38035f;
+  --color-accent-2-800: #2a0248;
+  --color-accent-2-900: #1c0230;
+
+  /* tipografía: Airbnb Cereal VF es una fuente propietaria — Inter es el
+     sustituto de código abierto que el propio DESIGN.md recomienda */
+  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-heading-weight: 700;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+
+  /* forma: 8px botones/inputs, 14px tarjetas — nada de píldora salvo tags */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  /* una sola sombra en todo el sistema (spec: "essentially one shadow
+     tier plus the flat baseline") */
+  --shadow-sm: 0 0 0 1px rgba(0, 0, 0, .06);
+  --shadow-md: rgba(0, 0, 0, .02) 0 0 0 1px, rgba(0, 0, 0, .04) 0 2px 6px, rgba(0, 0, 0, .1) 0 4px 8px;
+  --shadow-lg: var(--shadow-md);
+}
+
+body { font-size: 16px; }
+
+/* botones e inputs: Airbnb usa 8px, no píldora (tokens.css los pone en
+   999px por defecto) */
+.btn, .input { border-radius: var(--radius-sm); }
+.btn { font-weight: 500; }
+.btn-primary:active { background: var(--color-accent-700); }
+
+/* — quita el look "invitación" (sin ornamentos, sin dorado) de kickers — */
+.section-kicker { color: var(--color-neutral-800); letter-spacing: .08em; }
+.section-kicker.sage { color: var(--color-accent-2-700); }
+.details-label { color: var(--color-neutral-800); }
+.details-label.sage { color: var(--color-accent-2-700); }
+/* el spec pide usar Rausch "con moderación, uno o dos momentos por
+   página" — el resto de las etiquetas/textos van en tinta o gris */
+.hero-eyebrow, .hero-venue { color: var(--color-neutral-800); }
+
+/* — fotos: sin filtro — el sistema confía en la fotografía tal cual — */
+.photo img { filter: none; }
+.photo {
+  background: var(--color-surface);
+  background-image: none;
+}
+.photo .photo-label {
+  background: var(--color-bg); color: var(--color-neutral-800);
+  border: 1px solid var(--color-divider);
+}
+
+/* — recortes: fuera los arcos ornamentales, tarjetas rectas de 14px
+   (mismo lenguaje que una property-card) — */
+.welcome .photo, .rsvp .photo, .gallery-grid .photo, .map-embed {
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+/* — tarjetas: blanco + borde hairline + radio 14px, sin degradados — */
+.venue-card, .money-card, .faq-item, .prayer-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.rsvp-form {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  box-shadow: var(--shadow-md);
+}
+.money-row { background: var(--color-surface); border-radius: var(--radius-sm); }
+.dresscode { border: 1px solid var(--color-divider); border-radius: var(--radius-md); }
+
+/* — saludo del invitado: banda plana, sin tinte de color — */
+.guest-greeting { background: var(--color-surface); color: var(--color-text); }
+.rsvp-guest-banner {
+  background: var(--color-surface); color: var(--color-text);
+  border: 1px solid var(--color-divider); border-radius: var(--radius-sm);
+}
+.rsvp-guest-banner.is-warning { background: var(--color-accent-100); color: var(--color-accent-800); border-color: var(--color-accent-200); }
+
+/* — pie de página: claro, no oscuro (Airbnb no tiene modo oscuro público) — */
+.site-footer {
+  background: var(--color-bg); color: var(--color-text);
+  border-top: 1px solid var(--color-divider);
+}
+.countdown-label { color: var(--color-neutral-800); }
+.site-footer .when { color: var(--color-neutral-800); }
+
+/* — cuenta regresiva: tarjeta clara con borde hairline, igual en
+   portada y pie ahora que ambos fondos son blancos — */
+.countdown-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  box-shadow: none;
+}
+.site-footer .countdown-box { background: var(--color-surface); }
+.countdown-num { color: var(--color-text); font-variant-numeric: tabular-nums; }
+.countdown-lbl { color: var(--color-neutral-800); }
+
+/* — botón de música: círculo con contorno, como el ícono de favoritos — */
+.music-toggle {
+  background: var(--color-bg); color: var(--color-text);
+  border: 1px solid var(--color-divider); box-shadow: var(--shadow-sm);
+}
+.music-toggle:hover { background: var(--color-surface); }
+
+/* — sección de oración: banda gris clara con tarjeta blanca dentro — */
+.prayer { background: var(--color-surface); }
+.prayer-signature { color: var(--color-accent-700); font-weight: 600; }
+
+/* ══════════════════ Sobre de apertura (reescrito entero) ══════════════════
+   Blanco + Rausch, sin viñetas doradas ni script — el envelope-gate y
+   todo lo de dentro solo existe en este archivo de tema, así que se
+   redefine completo. */
+html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
+
+.envelope-gate {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-bg);
+  opacity: 1; transition: opacity .5s ease, transform .5s ease;
+}
+.envelope-gate.is-open { opacity: 0; transform: translateY(-16px); pointer-events: none; }
+
+.envelope-gate-inner { text-align: center; padding: 24px; max-width: 420px; }
+.envelope-eyebrow {
+  margin: 0 0 8px; font-size: 14px; font-weight: 500; letter-spacing: 0;
+  color: var(--color-neutral-800);
+}
+.envelope-title {
+  font-family: var(--font-heading); font-weight: 700; font-size: 28px;
+  line-height: 1.2; margin: 0; color: var(--color-text);
+}
+.envelope-names { margin: 10px 0 0; font-size: 16px; font-weight: 500; color: var(--color-text); }
+.envelope-guest {
+  margin: 16px auto 0; max-width: 34ch; font-size: 14px; line-height: 1.6;
+  color: var(--color-neutral-800);
+}
+.envelope-date {
+  margin: 16px 0 22px; font-family: var(--font-heading); font-weight: 700;
+  font-size: 21px; color: var(--color-accent);
+}
+
+.envelope {
+  position: relative; width: 290px; height: 172px; margin: 0 auto 28px; perspective: 700px;
+}
+.envelope::before {
+  content: ""; position: absolute; inset: 0; top: 24px;
+  background: var(--color-bg); border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+}
+.envelope-flap {
+  position: absolute; top: 24px; left: 0; right: 0; height: 102px;
+  background: var(--color-surface); border: 1px solid var(--color-divider);
+  clip-path: polygon(0 0, 100% 0, 50% 92%);
+  transform-origin: top center; backface-visibility: hidden;
+  transition: transform .7s cubic-bezier(.65, 0, .35, 1);
+}
+.envelope-seal {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 58px; height: 58px; border-radius: 999px; background: var(--color-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; z-index: 2;
+  font-family: var(--font-heading); font-weight: 700; font-size: 20px;
+}
+.envelope-gate.is-opening .envelope-flap { transform: rotateX(180deg); }
+
+.envelope-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-heading); font-size: 16px; font-weight: 500; color: var(--color-accent);
+  padding: 8px 4px;
+}
+.envelope-cta:hover { text-decoration: underline; }
+.envelope-cta svg { transition: transform .2s ease; }
+.envelope-cta:hover svg { transform: translateX(3px); }
+
+@media (max-width: 480px) {
+  .envelope-title { font-size: 24px; }
+  .envelope { width: 240px; height: 142px; }
+}
