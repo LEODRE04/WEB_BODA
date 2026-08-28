@@ -1,30 +1,28 @@
 # Fotos
 
-El diseño aprobado (opción **3a**, turno 3 del proyecto en Claude Design) usa
-cuatro fotos de la pareja: `p1`, `p2`, `p3` y `p4`. Ese proyecto las tiene en
-`img/p1.png`…`p4.png`, pero son archivos de más de 256 KB y la herramienta de
-sincronización con Claude Design solo puede traer archivos de hasta 256 KB, así
-que no se pudieron descargar completas — por eso el prototipo se entrega con
-placeholders (un fondo a rayas con una etiqueta) en su lugar, para no commitear
-imágenes corruptas.
+`img/p1.jpg`…`p4.jpg` son 4 fotos de la sesión de pedida de la pareja
+(carpeta `Fotos de Pedida` del usuario), redimensionadas para web con
+`sips` (macOS): 1280px de ancho máx., calidad ~55% — quedan entre 300-390KB
+cada una, livianas para cargar desde el celular de un invitado.
 
-## Cómo poner las fotos reales
+- `p1.jpg` — sección "Bienvenida"
+- `p2.jpg` — sección de confirmación (RSVP)
+- `p3.jpg` — portada
+- `p4.jpg` — galería
 
-1. Abre el proyecto en Claude Design: <https://claude.ai/design/p/55459373-7343-4ae2-afbe-6d9a74702b3e>
-2. Descarga (o exporta) las imágenes `p1.png`, `p2.png`, `p3.png`, `p4.png`
-   — o directamente tus fotos originales de la pareja.
-3. Guárdalas en `img/` de este proyecto **con estos nombres exactos**:
-   - `img/p1.jpg` (o `.png`) — bienvenida
-   - `img/p2.jpg` — sección de confirmación (RSVP)
-   - `img/p3.jpg` — portada
-   - `img/p4.jpg` — galería
-   - Si usas `.png` en vez de `.jpg`, actualiza el atributo `src` en
-     `index.html` (búscalo, son 6 apariciones).
+## Si quieres cambiarlas
 
-En cuanto el archivo existe y carga correctamente, el placeholder ("Foto —
-coloca img/pX.jpg") desaparece solo — no hay que tocar nada más en el HTML ni
-en el CSS (ver `initPhotoFallbacks()` en `js/site.js`).
+Reemplaza el archivo correspondiente en `img/` manteniendo el mismo nombre
+— el placeholder ("Foto — coloca img/pX.jpg") solo aparece si el archivo
+falta o no carga, así que no hay que tocar el HTML.
 
-También existen en el proyecto de diseño fotos reales ya subidas
-(`img/pareja-1.jpg`…`pareja-4.jpg`, `uploads/photos-*.jpg`) que puedes usar
-para ampliar la galería más adelante.
+Para comprimir una foto nueva de cámara (varios MB) a un tamaño razonable
+para web, en Terminal (macOS, sin instalar nada):
+
+```bash
+sips -Z 1280 -s format jpeg -s formatOptions 55 "original.jpg" --out img/p1.jpg
+```
+
+`-Z 1280` limita el lado más largo a 1280px; `formatOptions 55` es la
+calidad JPEG (0-100). Para la galería (`#galeria`) se puede agregar más
+fotos directamente en el HTML siguiendo el mismo patrón `<div class="photo">`.
