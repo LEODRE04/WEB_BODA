@@ -78,20 +78,7 @@ body { background: var(--color-neutral-100); }
   margin: 22px 0 0; font-size: 13px; line-height: 1.9; letter-spacing: .06em;
   text-transform: uppercase; color: var(--color-accent-700);
 }
-.hero-countdown { display: flex; gap: 10px; justify-content: center; margin: 18px 0 0; }
-.hero-countdown .unit {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 58px; height: 58px; border-radius: 999px; border: 1px solid var(--color-divider);
-}
-.hero-countdown .num { font-family: var(--font-heading); font-size: 18px; line-height: 1; color: var(--color-accent-700); }
-.hero-countdown .lbl {
-  font-size: 8px; letter-spacing: .1em; text-transform: uppercase; margin-top: 2px;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
-}
-@media (max-width: 480px) {
-  .hero-countdown .unit { width: 48px; height: 48px; }
-  .hero-countdown .num { font-size: 15px; }
-}
+.hero-copy .countdown-grid { margin: 18px 0 0; }
 .hero-cta { margin-top: auto; padding-top: 26px; }
 .hero .photo { min-height: 320px; }
 @media (max-width: 860px) {
@@ -226,16 +213,37 @@ body { background: var(--color-neutral-100); }
 /* — footer / cuenta regresiva — */
 .site-footer { background: var(--color-neutral-900); color: var(--color-bg); padding: 44px; text-align: center; }
 .countdown-label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--color-accent-400); }
-.countdown { display: flex; gap: 12px; justify-content: center; margin: 16px 0 24px; flex-wrap: wrap; }
-.countdown .unit {
-  border: 1px solid color-mix(in srgb, var(--color-bg) 25%, transparent);
-  border-radius: 999px; width: 92px; padding: 14px 0;
+.site-footer .countdown-grid { margin: 16px 0 24px; }
+
+/* — cuenta regresiva: mismo componente en la portada y en el pie — */
+.countdown-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.countdown-box {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 66px; padding: 14px 8px; border-radius: var(--radius-md);
+  background: var(--color-neutral-900); box-shadow: var(--shadow-sm);
 }
-.countdown .unit .num { font-family: var(--font-heading); font-size: 28px; line-height: 1; }
-.countdown .unit .lbl {
-  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-bg) 60%, transparent);
+/* el pie ya tiene fondo oscuro — un tono apenas más claro para que las
+   cajas se distingan de ese fondo en vez de fundirse con él */
+.site-footer .countdown-box { background: color-mix(in srgb, var(--color-bg) 10%, var(--color-neutral-900)); box-shadow: none; }
+.countdown-num {
+  font-family: var(--font-heading); font-size: 30px; line-height: 1;
+  font-variant-numeric: tabular-nums; color: var(--color-accent-400);
+  display: inline-block; transition: transform .2s ease;
 }
+.countdown-num.tick { animation: countdown-pop .3s ease; }
+@keyframes countdown-pop {
+  0% { transform: translateY(-5px) scale(1.08); opacity: .5; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.countdown-lbl {
+  display: block; margin-top: 5px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bg) 65%, transparent);
+}
+@media (max-width: 480px) {
+  .countdown-box { min-width: 54px; padding: 10px 6px; }
+  .countdown-num { font-size: 22px; }
+}
+
 .site-footer .names { font-family: var(--font-heading); font-size: 24px; }
 .site-footer .when { font-size: 12px; letter-spacing: .2em; color: color-mix(in srgb, var(--color-bg) 55%, transparent); margin-top: 8px; }
 

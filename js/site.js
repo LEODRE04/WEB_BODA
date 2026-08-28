@@ -9,6 +9,12 @@
   "use strict";
   var W = window.WEDDING || {};
 
+  // El navegador puede "recordar" el scroll de la visita anterior y
+  // restaurarlo solo, incluso con el sobre tapando todo — lo desactivamos
+  // para que siempre arranque arriba (además del scrollTo explícito al
+  // abrir el sobre, más abajo).
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
   // Marca "esto no vino de nuestra API" (p.ej. el 404 HTML de GitHub Pages
   // antes de desplegar el backend real) para distinguirlo de un error de
   // validación real que sí hay que mostrarle al usuario.
@@ -106,9 +112,12 @@
     if (!btn) return;
     btn.addEventListener("click", function () {
       if (gate.classList.contains("is-opening")) return; // evita doble click
+      // Si llegó con un link a una sección (o quedó scrolleado de antes),
+      // que al abrir el sobre siempre arranque desde arriba.
+      window.scrollTo(0, 0);
       gate.classList.add("is-opening");
       setTimeout(function () { gate.classList.add("is-open"); }, 650);
-      setTimeout(function () { gate.hidden = true; }, 1300);
+      setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 1300);
     });
   }
 
@@ -160,8 +169,16 @@
     if (!els.dias.length || !W.weddingDateISO) return;
     var target = new Date(W.weddingDateISO).getTime();
 
+    // Pequeño "tick" (rebote) cada vez que el número realmente cambia —
+    // se ve en las dos apariciones (portada y pie de página).
     function setAll(nodeList, text) {
-      nodeList.forEach(function (el) { el.textContent = text; });
+      nodeList.forEach(function (el) {
+        if (el.textContent === text) return;
+        el.textContent = text;
+        el.classList.remove("tick");
+        void el.offsetWidth; // fuerza reflow para poder repetir la animación
+        el.classList.add("tick");
+      });
     }
 
     function tick() {
