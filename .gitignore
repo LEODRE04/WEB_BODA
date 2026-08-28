@@ -12,3 +12,4 @@ server/respuestas.local.json
 # se despliegue el backend real (ver docs/RSVP-BACKEND.md).
 server/invitados.real.json
 server/invitados.real.csv
+server/invitados.real-links.csv
