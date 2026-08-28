@@ -149,6 +149,12 @@
         maps.removeAttribute("aria-disabled");
       }
     });
+    document.querySelectorAll("[data-directions-url]").forEach(function (dir) {
+      if (W.venue && (W.venue.directionsUrl || W.venue.mapsUrl)) {
+        dir.href = W.venue.directionsUrl || W.venue.mapsUrl;
+        dir.removeAttribute("aria-disabled");
+      }
+    });
     var embed = document.querySelector("[data-maps-embed]");
     if (embed && W.venue && W.venue.mapEmbedSrc) {
       var iframe = document.createElement("iframe");

@@ -12,10 +12,20 @@ window.WEDDING = {
     name: "Iglesia Vida Nueva Rinconada",
     area: "La Rinconada, La Molina — Lima",
     addressPending: true,
-    // Cuando tengan la dirección exacta, reemplaza este mapa por el embed real:
-    // Google Maps > Compartir > Insertar un mapa > copia el <iframe src="...">.
-    mapEmbedSrc: null,
-    mapsUrl: null,
+    // Mapa armado con el nombre del lugar (sin API key) — funciona ya, sin
+    // esperar la dirección exacta. Cuando la tengan, lo más preciso es
+    // reemplazar mapSearchQuery por la dirección completa, o pegar aquí el
+    // <iframe src="..."> que da Google Maps en Compartir > Insertar un mapa.
+    mapSearchQuery: "Iglesia Vida Nueva Rinconada, La Molina, Lima, Perú",
+    get mapEmbedSrc() {
+      return "https://www.google.com/maps?q=" + encodeURIComponent(this.mapSearchQuery) + "&output=embed";
+    },
+    get mapsUrl() {
+      return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(this.mapSearchQuery);
+    },
+    get directionsUrl() {
+      return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(this.mapSearchQuery);
+    },
   },
 
   rsvp: {
