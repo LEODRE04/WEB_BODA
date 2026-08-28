@@ -28,6 +28,24 @@ window.WEDDING = {
     },
   },
 
+  // Local aparte para la recepción (distinto de la iglesia). Se muestra
+  // solo a invitados con tipo_invitacion "completa" — ver js/site.js y
+  // docs/RSVP-BACKEND.md. mapSearchQuery en null = mapa/links deshabilitados
+  // (el bloque igual se ve, pero como "por confirmar"); en cuanto tengan
+  // el local, pon aquí su nombre y dirección tal como harías con `venue`.
+  venueReception: {
+    mapSearchQuery: null,
+    get mapEmbedSrc() {
+      return this.mapSearchQuery ? "https://www.google.com/maps?q=" + encodeURIComponent(this.mapSearchQuery) + "&output=embed" : null;
+    },
+    get mapsUrl() {
+      return this.mapSearchQuery ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(this.mapSearchQuery) : null;
+    },
+    get directionsUrl() {
+      return this.mapSearchQuery ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(this.mapSearchQuery) : null;
+    },
+  },
+
   rsvp: {
     deadlineISO: "2026-11-30",
     deadlineLabel: "30 de noviembre de 2026",

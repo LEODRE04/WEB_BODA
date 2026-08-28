@@ -16,6 +16,7 @@ Uso:
 import json
 import sys
 import threading
+from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -88,6 +89,7 @@ class Handler(SimpleHTTPRequestHandler):
             "found": True,
             "nombre": guest["nombre"],
             "acompanantes_permitidos": guest["acompanantes_permitidos"],
+            "tipo_invitacion": guest.get("tipo_invitacion", "completa"),
             "respuesta": existing,
         })
 
@@ -119,8 +121,12 @@ class Handler(SimpleHTTPRequestHandler):
             key = codigo or data.get("contacto")
             idx = next((i for i, r in enumerate(rows) if (r.get("codigo") or r.get("contacto")) == key), None)
             if idx is not None:
-                data["actualizado_en"] = data.get("enviado_en")
-                rows[idx] = {**rows[idx], **data}
+                # Reemplaza la fila entera (no la mezcla): si un campo ya no
+                # viaja (p.ej. "menu" para un invitado solo-ceremonia), debe
+                # desaparecer, no quedarse con el valor de la vez anterior.
+                data["enviado_en"] = rows[idx].get("enviado_en", data.get("enviado_en"))
+                data["actualizado_en"] = datetime.now(timezone.utc).isoformat()
+                rows[idx] = data
             else:
                 rows.append(data)
             save_responses(rows)

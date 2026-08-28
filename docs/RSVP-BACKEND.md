@@ -52,6 +52,30 @@ Cada invitado entra con `tusitio.com/?codigo=SU-CODIGO`. El frontend
 El campo oculto `codigo` viaja con el formulario para que el backend sepa
 a qué invitado actualizar.
 
+## Dos tipos de invitación: solo ceremonia, o ceremonia + recepción
+
+La columna `tipo_invitacion` de cada invitado (`"ceremonia"` o
+`"completa"`) cambia la página para esa persona:
+
+- **`"completa"`** (o la celda vacía — es el valor por defecto): ve todo,
+  igual que ahora.
+- **`"ceremonia"`**: no ve el itinerario de la recepción (cóctel, cena,
+  baile, cierre), ni el bloque de ubicación de la recepción en "Cuándo y
+  dónde", ni los campos de Menú/Alergias/Canción en el RSVP (tampoco el
+  menú de sus acompañantes). El saludo de arriba también dice "...en la
+  ceremonia" en vez de "...en la ceremonia y la recepción".
+
+Técnicamente: `js/site.js` agrega la clase `solo-ceremonia` al `<body>`
+cuando corresponde, y `css/site.css` oculta con esa clase todo lo marcado
+`[data-reception-only]` en el HTML — para agregar o quitar algo de la
+versión recortada, es agregar o quitar ese atributo en `index.html`, sin
+tocar JS.
+
+La recepción es en un **local distinto** a la iglesia (columna nueva en
+"Cuándo y dónde") — cuando tengan el lugar confirmado, ponlo en
+`js/config.js` en `venueReception.mapSearchQuery`, igual que se hizo con
+`venue.mapSearchQuery` para la ceremonia.
+
 ## Desplegar el backend real (Google Sheets + Apps Script)
 
 1. Crea un Google Sheet nuevo. Nómbralo como quieras (p.ej. "Boda André y
@@ -59,9 +83,10 @@ a qué invitado actualizar.
 2. Crea 2 pestañas con estos encabezados exactos en la fila 1:
 
    **`Invitados`**
-   | código | nombre | acompañantes_permitidos |
-   |---|---|---|
-   | familia-garcia | Familia García | 2 |
+   | código | nombre | acompañantes_permitidos | tipo_invitacion |
+   |---|---|---|---|
+   | familia-garcia | Familia García | 2 | completa |
+   | carlos-mendoza | Carlos Mendoza | 0 | ceremonia |
 
    **`Respuestas`** (se llena sola — solo pon los encabezados)
    | codigo | nombre | contacto | asistencia | num_acompanantes | menu | acompanante_1_nombre | acompanante_1_menu | acompanante_2_nombre | acompanante_2_menu | alergias | cancion | mensaje | enviado_en | actualizado_en |

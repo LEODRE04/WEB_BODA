@@ -8,7 +8,10 @@
  * Espera un Google Sheet con 2 pestañas:
  *
  *   Invitados   (una fila por invitado, la cargan ustedes a mano)
- *     código | nombre | acompañantes_permitidos
+ *     código | nombre | acompañantes_permitidos | tipo_invitacion
+ *     (tipo_invitacion: "completa" = ceremonia + recepción, o
+ *     "ceremonia" = solo ceremonia — deja la celda vacía y cuenta como
+ *     "completa")
  *
  *   Respuestas  (se llena sola cuando alguien confirma)
  *     codigo | nombre | contacto | asistencia | num_acompanantes | menu |
@@ -50,6 +53,7 @@ function doGet(e) {
     found: true,
     nombre: guest.nombre,
     acompanantes_permitidos: guest.acompanantes_permitidos,
+    tipo_invitacion: guest.tipo_invitacion,
     respuesta: respuesta ? respuesta.data : null,
   });
 }
@@ -91,7 +95,12 @@ function findGuest(codigo) {
   var rows = sheet.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) { // fila 0 = encabezados
     if (String(rows[i][0]).trim() === codigo) {
-      return { codigo: rows[i][0], nombre: rows[i][1], acompanantes_permitidos: Number(rows[i][2] || 0) };
+      return {
+        codigo: rows[i][0],
+        nombre: rows[i][1],
+        acompanantes_permitidos: Number(rows[i][2] || 0),
+        tipo_invitacion: String(rows[i][3] || "completa").trim() || "completa",
+      };
     }
   }
   return null;

@@ -35,8 +35,21 @@
     var codigo = new URLSearchParams(window.location.search).get("codigo");
     var guestPromise = codigo ? fetchGuest(codigo) : Promise.resolve(null);
 
+    applyInvitationType(guestPromise);
     initGuestGreeting(guestPromise);
     initRsvpForm(codigo, guestPromise);
+  }
+
+  // Invitación solo a la ceremonia (tipo_invitacion en la lista de
+  // invitados, ver docs/RSVP-BACKEND.md): agrega una clase al <body> que
+  // oculta por CSS todo lo marcado [data-reception-only] — itinerario,
+  // ubicación de la recepción, y campos del RSVP que no aplican.
+  function applyInvitationType(guestPromise) {
+    guestPromise.then(function (guest) {
+      if (guest && guest.found && guest.tipo_invitacion === "ceremonia") {
+        document.body.classList.add("solo-ceremonia");
+      }
+    });
   }
 
   // — saludo personalizado arriba de la página, para quien entra con un
@@ -48,8 +61,9 @@
       if (!guest || !guest.found) return; // sin código, no reconocido, o API no disponible: no se muestra nada
       var passes = 1 + (Number(guest.acompanantes_permitidos) || 0);
       var passLabel = passes === 1 ? "1 pase reservado" : passes + " pases reservados";
+      var evento = guest.tipo_invitacion === "ceremonia" ? "la ceremonia" : "la ceremonia y la recepción";
       el.querySelector("[data-guest-text]").textContent =
-        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en nuestra boda — tienes " + passLabel + " para ti.";
+        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en " + evento + " — tienes " + passLabel + " para ti.";
       el.hidden = false;
     });
   }
@@ -164,6 +178,13 @@
     }
   }
 
+  // Ceremonia y recepción son dos lugares distintos con su propia config
+  // (W.venue / W.venueReception) — este helper elige cuál según el
+  // atributo data-maps-url="ceremonia"|"recepcion" (etc.) de cada elemento.
+  function venueConfigFor(key) {
+    return key === "recepcion" ? W.venueReception : W.venue;
+  }
+
   // — enlaces que dependen de datos "por confirmar" en config.js —
   function initDynamicLinks() {
     document.querySelectorAll("[aria-disabled='true']").forEach(function (el) {
@@ -172,26 +193,30 @@
       });
     });
     document.querySelectorAll("[data-maps-url]").forEach(function (maps) {
-      if (W.venue && W.venue.mapsUrl) {
-        maps.href = W.venue.mapsUrl;
+      var v = venueConfigFor(maps.getAttribute("data-maps-url"));
+      if (v && v.mapsUrl) {
+        maps.href = v.mapsUrl;
         maps.removeAttribute("aria-disabled");
       }
     });
     document.querySelectorAll("[data-directions-url]").forEach(function (dir) {
-      if (W.venue && (W.venue.directionsUrl || W.venue.mapsUrl)) {
-        dir.href = W.venue.directionsUrl || W.venue.mapsUrl;
+      var v = venueConfigFor(dir.getAttribute("data-directions-url"));
+      if (v && (v.directionsUrl || v.mapsUrl)) {
+        dir.href = v.directionsUrl || v.mapsUrl;
         dir.removeAttribute("aria-disabled");
       }
     });
-    var embed = document.querySelector("[data-maps-embed]");
-    if (embed && W.venue && W.venue.mapEmbedSrc) {
-      var iframe = document.createElement("iframe");
-      iframe.src = W.venue.mapEmbedSrc;
-      iframe.loading = "lazy";
-      iframe.referrerPolicy = "no-referrer-when-downgrade";
-      embed.innerHTML = "";
-      embed.appendChild(iframe);
-    }
+    document.querySelectorAll("[data-maps-embed]").forEach(function (embed) {
+      var v = venueConfigFor(embed.getAttribute("data-maps-embed"));
+      if (v && v.mapEmbedSrc) {
+        var iframe = document.createElement("iframe");
+        iframe.src = v.mapEmbedSrc;
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "no-referrer-when-downgrade";
+        embed.innerHTML = "";
+        embed.appendChild(iframe);
+      }
+    });
     var wa = document.querySelector("[data-whatsapp]");
     if (wa && W.rsvp && W.rsvp.whatsapp) {
       var text = W.rsvp.whatsappMessage ? "?text=" + encodeURIComponent(W.rsvp.whatsappMessage) : "";
@@ -228,6 +253,8 @@
       }
       if (Number(current) <= max) acompanantesSelect.value = current;
       addCompanionBtn.disabled = companionCount >= MAX_COMPANIONS;
+      var maxLabel = form.querySelector("#rsvp-max-label");
+      if (maxLabel) maxLabel.textContent = "máx. " + max;
     }
 
     function addCompanionCard(prefillNombre, prefillMenu) {
@@ -240,7 +267,7 @@
         companionCount +
         '</div><div class="row">' +
         '<input class="input" name="acompanante_' + companionCount + '_nombre" placeholder="Nombre completo">' +
-        '<select class="input" name="acompanante_' + companionCount + '_menu">' +
+        '<select class="input" name="acompanante_' + companionCount + '_menu" data-reception-only>' +
         "<option>Carne</option><option>Pescado</option><option>Vegetariano</option><option>Sin gluten</option>" +
         "</select></div>";
       companionsWrap.appendChild(card);
@@ -296,6 +323,14 @@
       e.preventDefault();
       var data = Object.fromEntries(new FormData(form).entries());
       data.enviado_en = new Date().toISOString();
+
+      // Campos ocultos (menú, alergias, canción) igual viajan en el
+      // FormData con su valor por defecto aunque no se vean — se limpian
+      // para que la respuesta guardada no traiga datos que no aplican.
+      if (document.body.classList.contains("solo-ceremonia")) {
+        ["menu", "alergias", "cancion"].forEach(function (k) { delete data[k]; });
+        [1, 2].forEach(function (i) { delete data["acompanante_" + i + "_menu"]; });
+      }
 
       var errorEl = form.querySelector(".rsvp-error");
       if (!data.nombre || !data.contacto || !data.asistencia) {

@@ -137,7 +137,9 @@ body { background: var(--color-neutral-100); }
 /* — detalles (dónde + regalos) — */
 .details { padding: 56px 44px; background: var(--color-neutral-100); }
 .details-head { text-align: center; margin-bottom: 30px; }
-.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+/* auto-fit: se adapta solo a 2 o 3 columnas según si la recepción está
+   oculta (invitación solo ceremonia) o visible. */
+.details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start; }
 .details-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--color-accent-700); }
 .details-label.sage { color: var(--color-accent-2-700); }
 .details-heading { font-family: var(--font-heading); font-size: 26px; margin: 10px 0 12px; }
@@ -231,6 +233,19 @@ body { background: var(--color-neutral-100); }
 /* Algunos elementos con [hidden] también tienen una clase que fija su propio
    display (p.ej. .btn); sin esto el atributo hidden queda sin efecto. */
 [hidden] { display: none !important; }
+
+/* Botones/links "por confirmar" (mapa, lista de regalos…): se ven
+   apagados mientras aria-disabled quede activo — initDynamicLinks() en
+   site.js lo quita en cuanto config.js tiene el dato real. */
+[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+/* Invitación solo a la ceremonia (según ?codigo=... y tipo_invitacion en
+   la lista de invitados, ver js/site.js): oculta todo lo marcado como
+   propio de la recepción — itinerario, ubicación, y campos del RSVP que
+   no aplican (menú, alergias, canción). */
+body.solo-ceremonia [data-reception-only] { display: none !important; }
+body.solo-ceremonia #rsvp-row-acompanantes-menu { grid-template-columns: 1fr; }
+body.solo-ceremonia .companion-card .row { grid-template-columns: 1fr; }
 
 /* — botón de WhatsApp: mismo tamaño de .btn pero con su color de marca,
    más grande y con sombra para que resalte como acción principal — */
