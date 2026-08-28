@@ -37,6 +37,7 @@
 
     applyInvitationType(guestPromise);
     initGuestGreeting(guestPromise);
+    initEnvelopeGate(guestPromise);
     initRsvpForm(codigo, guestPromise);
   }
 
@@ -52,6 +53,16 @@
     });
   }
 
+  // Arma "1 pase reservado" / "3 pases reservados" + "la ceremonia" /
+  // "la ceremonia y la recepción" — lo usan el saludo de arriba y el sobre.
+  function guestPassInfo(guest) {
+    var passes = 1 + (Number(guest.acompanantes_permitidos) || 0);
+    return {
+      passLabel: passes === 1 ? "1 pase reservado" : passes + " pases reservados",
+      evento: guest.tipo_invitacion === "ceremonia" ? "la ceremonia" : "la ceremonia y la recepción",
+    };
+  }
+
   // — saludo personalizado arriba de la página, para quien entra con un
   // link de invitado (?codigo=...): nombre + cuántos pases tiene. —
   function initGuestGreeting(guestPromise) {
@@ -59,12 +70,34 @@
     if (!el) return;
     guestPromise.then(function (guest) {
       if (!guest || !guest.found) return; // sin código, no reconocido, o API no disponible: no se muestra nada
-      var passes = 1 + (Number(guest.acompanantes_permitidos) || 0);
-      var passLabel = passes === 1 ? "1 pase reservado" : passes + " pases reservados";
-      var evento = guest.tipo_invitacion === "ceremonia" ? "la ceremonia" : "la ceremonia y la recepción";
+      var info = guestPassInfo(guest);
       el.querySelector("[data-guest-text]").textContent =
-        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en " + evento + " — tienes " + passLabel + " para ti.";
+        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en " + info.evento + " — tienes " + info.passLabel + " para ti.";
       el.hidden = false;
+    });
+  }
+
+  // — sobre de apertura (tema "elegante dorado", ver css/theme-elegante.css):
+  // muestra el mismo dato de pases antes de abrir, y anima la apertura. —
+  function initEnvelopeGate(guestPromise) {
+    var gate = document.querySelector("#envelope-gate");
+    if (!gate) return;
+
+    var guestText = gate.querySelector("#envelope-guest-text");
+    guestPromise.then(function (guest) {
+      if (!guest || !guest.found || !guestText) return;
+      var info = guestPassInfo(guest);
+      guestText.textContent = "Con amor hemos reservado para ti (" + guest.nombre + "): " + info.passLabel + ", para " + info.evento + ".";
+      guestText.hidden = false;
+    });
+
+    var btn = gate.querySelector("#envelope-open-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      if (gate.classList.contains("is-opening")) return; // evita doble click
+      gate.classList.add("is-opening");
+      setTimeout(function () { gate.classList.add("is-open"); }, 650);
+      setTimeout(function () { gate.hidden = true; }, 1300);
     });
   }
 

@@ -13,6 +13,31 @@
 </head>
 <body>
 
+<!-- Sobre de apertura (parte del tema "elegante dorado" — ver
+     css/theme-elegante.css y js/site.js). Se puede quitar entero junto
+     con el resto del tema sin afectar nada más de la página. -->
+<div class="envelope-gate" id="envelope-gate">
+  <div class="envelope-gate-inner">
+    <div class="ornament-line"></div>
+    <p class="envelope-eyebrow">Te invitamos a:</p>
+    <h2 class="envelope-title">Nuestra Boda</h2>
+    <p class="envelope-names">André &amp; Krisli</p>
+    <p class="envelope-guest" id="envelope-guest-text" hidden></p>
+    <p class="envelope-date">09 · 01 · 2027</p>
+    <div class="ornament-line"></div>
+
+    <div class="envelope" aria-hidden="true">
+      <span class="envelope-flap"></span>
+      <span class="envelope-seal">A&amp;K</span>
+    </div>
+
+    <button type="button" class="envelope-cta" id="envelope-open-btn">
+      <span>Toca para abrir la invitación</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
 <header class="nav site-nav">
   <span class="nav-brand">A &amp; K</span>
   <button class="btn btn-icon nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
