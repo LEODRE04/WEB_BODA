@@ -28,6 +28,7 @@
     initCountdown();
     initCopyButtons();
     initDynamicLinks();
+    initMusicToggle();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -147,15 +148,21 @@
   }
 
   // — cuenta regresiva —
+  // Actualiza TODAS las apariciones de cada unidad (hay un countdown en la
+  // portada y otro en el pie de página, ambos con los mismos data-countdown).
   function initCountdown() {
     var els = {
-      dias: document.querySelector('[data-countdown="dias"]'),
-      horas: document.querySelector('[data-countdown="horas"]'),
-      mins: document.querySelector('[data-countdown="mins"]'),
-      segs: document.querySelector('[data-countdown="segs"]'),
+      dias: document.querySelectorAll('[data-countdown="dias"]'),
+      horas: document.querySelectorAll('[data-countdown="horas"]'),
+      mins: document.querySelectorAll('[data-countdown="mins"]'),
+      segs: document.querySelectorAll('[data-countdown="segs"]'),
     };
-    if (!els.dias || !W.weddingDateISO) return;
+    if (!els.dias.length || !W.weddingDateISO) return;
     var target = new Date(W.weddingDateISO).getTime();
+
+    function setAll(nodeList, text) {
+      nodeList.forEach(function (el) { el.textContent = text; });
+    }
 
     function tick() {
       var diff = Math.max(0, target - Date.now());
@@ -166,10 +173,10 @@
       s -= h * 3600;
       var m = Math.floor(s / 60);
       s -= m * 60;
-      els.dias.textContent = String(d);
-      els.horas.textContent = pad2(h);
-      els.mins.textContent = pad2(m);
-      els.segs.textContent = pad2(s);
+      setAll(els.dias, String(d));
+      setAll(els.horas, pad2(h));
+      setAll(els.mins, pad2(m));
+      setAll(els.segs, pad2(s));
     }
     tick();
     setInterval(tick, 1000);
@@ -177,6 +184,45 @@
 
   function pad2(n) {
     return n < 10 ? "0" + n : String(n);
+  }
+
+  // — música de fondo (tema "elegante dorado"): arranca al abrir el sobre
+  // (ese clic cuenta como interacción real del usuario, así que el
+  // navegador sí permite reproducir sonido ahí) y queda un botón flotante
+  // para pausar/reanudar. Si no existe #bg-music (tema apagado), no hace
+  // nada. —
+  function initMusicToggle() {
+    var audio = document.querySelector("#bg-music");
+    var btn = document.querySelector("#music-toggle");
+    if (!audio || !btn) return;
+
+    var iconPlaying = btn.querySelector(".icon-playing");
+    var iconPaused = btn.querySelector(".icon-paused");
+
+    function setPlayingUI(isPlaying) {
+      iconPlaying.hidden = !isPlaying;
+      iconPaused.hidden = isPlaying;
+      btn.setAttribute("aria-pressed", String(isPlaying));
+      btn.setAttribute("aria-label", isPlaying ? "Pausar música" : "Reanudar música");
+    }
+
+    btn.addEventListener("click", function () {
+      if (audio.paused) {
+        audio.play().then(function () { setPlayingUI(true); }).catch(function () {});
+      } else {
+        audio.pause();
+        setPlayingUI(false);
+      }
+    });
+
+    var gate = document.querySelector("#envelope-gate");
+    var openBtn = gate && gate.querySelector("#envelope-open-btn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        btn.hidden = false;
+        audio.play().then(function () { setPlayingUI(true); }).catch(function () { setPlayingUI(false); });
+      });
+    }
   }
 
   // — copiar Yape / cuentas bancarias —

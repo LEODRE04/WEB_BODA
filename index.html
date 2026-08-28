@@ -38,6 +38,18 @@
   </div>
 </div>
 
+<!-- Música de fondo: arranca al abrir el sobre (clic = interacción real,
+     los navegadores no bloquean el sonido ahí). Botón flotante para
+     pausar/reanudar. Parte del tema "elegante dorado" — se puede quitar
+     este bloque + el de site.js sin afectar nada más. -->
+<audio id="bg-music" loop preload="none">
+  <source src="audio/musica-fondo.mp3" type="audio/mpeg">
+</audio>
+<button type="button" class="music-toggle" id="music-toggle" aria-label="Pausar música" aria-pressed="false" hidden>
+  <svg class="icon-playing" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Z"/></svg>
+  <svg class="icon-paused" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M3 10v4h4l5 5V5L7 10H3Zm14.5 2 2.5-2.5-1-1L19 10l-2.5-2.5-1 1L18 11l-2.5 2.5 1 1L19 12l2.5 2.5 1-1L20 11Z"/></svg>
+</button>
+
 <header class="nav site-nav">
   <span class="nav-brand">A &amp; K</span>
   <button class="btn btn-icon nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -64,6 +76,12 @@
       <h1>Krisli</h1>
       <div class="hero-date">09 · 01 · 2027</div>
       <p class="hero-venue">A las cuatro de la tarde<br>Iglesia Vida Nueva Rinconada<br>La Rinconada, La Molina — Lima</p>
+      <div class="hero-countdown">
+        <div class="unit"><span class="num" data-countdown="dias">–</span><span class="lbl">días</span></div>
+        <div class="unit"><span class="num" data-countdown="horas">–</span><span class="lbl">horas</span></div>
+        <div class="unit"><span class="num" data-countdown="mins">–</span><span class="lbl">min</span></div>
+        <div class="unit"><span class="num" data-countdown="segs">–</span><span class="lbl">seg</span></div>
+      </div>
       <div class="hero-cta"><a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a></div>
     </div>
     <div class="photo">
@@ -301,6 +319,16 @@
       <div class="faq-item"><div class="q">¿Hay estacionamiento?</div><p class="a">Sí, dentro del recinto y sin costo. Llega con 20 minutos de anticipación.</p></div>
       <div class="faq-item"><div class="q">¿Puedo tomar fotos en la ceremonia?</div><p class="a">Durante la ceremonia te pedimos guardar el celular. En la recepción, todas las que quieras.</p></div>
       <div class="faq-item"><div class="q">Tengo una restricción alimentaria</div><p class="a">Indícala en el formulario de confirmación y la cocina preparará tu plato.</p></div>
+    </div>
+  </section>
+
+  <!-- Pedido especial -->
+  <section class="prayer">
+    <div class="prayer-card">
+      <div class="section-kicker">Un pedido especial</div>
+      <h2 class="section-title" style="font-size:32px;margin:12px 0 14px">Oren con nosotros</h2>
+      <p>Te pedimos, con mucho cariño, que puedas ir orando por este día tan especial y por la nueva etapa que comenzamos juntos.</p>
+      <p class="prayer-signature">Con mucho amor,<br>André &amp; Krisli</p>
     </div>
   </section>
 
