@@ -32,7 +32,8 @@ window.WEDDING = {
     deadlineISO: "2026-11-30",
     deadlineLabel: "30 de noviembre de 2026",
     editUntilLabel: "20 de diciembre",
-    whatsapp: null, // ej. "51987654321" (sin '+' ni espacios) — se arma el link solo
+    whatsapp: "51992770777", // sin '+' ni espacios — se arma el link solo
+    whatsappMessage: "¡Hola! Tengo una consulta sobre la boda de André y Krisli 💍",
   },
 
   gifts: {

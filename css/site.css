@@ -214,3 +214,18 @@ body { background: var(--color-neutral-100); }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
+
+/* Algunos elementos con [hidden] también tienen una clase que fija su propio
+   display (p.ej. .btn); sin esto el atributo hidden queda sin efecto. */
+[hidden] { display: none !important; }
+
+/* — botón de WhatsApp: mismo tamaño de .btn pero con su color de marca,
+   más grande y con sombra para que resalte como acción principal — */
+.btn-whatsapp {
+  background: #25d366; color: #fff; font-weight: 700;
+  font-size: 15px; padding: 13px 24px; gap: 9px;
+  box-shadow: 0 6px 18px color-mix(in srgb, #25d366 45%, transparent);
+}
+.btn-whatsapp:hover { background: #1ebe5b; }
+.btn-whatsapp:active { background: #17a54c; }
+.btn-whatsapp svg { flex: none; }

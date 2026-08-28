@@ -166,7 +166,8 @@
     }
     var wa = document.querySelector("[data-whatsapp]");
     if (wa && W.rsvp && W.rsvp.whatsapp) {
-      wa.href = "https://wa.me/" + W.rsvp.whatsapp;
+      var text = W.rsvp.whatsappMessage ? "?text=" + encodeURIComponent(W.rsvp.whatsappMessage) : "";
+      wa.href = "https://wa.me/" + W.rsvp.whatsapp + text;
       wa.hidden = false;
       var pending = document.querySelector("[data-whatsapp-pending]");
       if (pending) pending.hidden = true;
