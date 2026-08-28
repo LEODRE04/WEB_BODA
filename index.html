@@ -215,6 +215,8 @@
       </div>
 
       <form class="rsvp-form" id="rsvp-form" novalidate>
+        <input type="hidden" name="codigo" id="rsvp-codigo" value="">
+        <p class="rsvp-guest-banner" id="rsvp-guest-banner" hidden></p>
         <div class="row">
           <div class="field"><label for="rsvp-nombre">Nombre y apellido</label><input class="input" id="rsvp-nombre" name="nombre" required></div>
           <div class="field"><label for="rsvp-contacto">Correo o celular</label><input class="input" id="rsvp-contacto" name="contacto" required></div>
@@ -256,7 +258,7 @@
 
         <p class="rsvp-error" role="alert" hidden style="color:#8c491a;font-size:13px;margin-top:10px"></p>
         <div class="rsvp-actions">
-          <button class="btn btn-primary" type="submit">Enviar confirmación</button>
+          <button class="btn btn-primary" type="submit" id="rsvp-submit">Enviar confirmación</button>
           <span class="rsvp-note">Puedes editar tu respuesta hasta el 20 de diciembre.</span>
         </div>
         <p class="rsvp-success" role="status">¡Gracias por confirmar! Guardamos tu respuesta en este dispositivo — cuando esté lista la confirmación en línea definitiva, te la reenviaremos igual por si acaso.</p>

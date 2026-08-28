@@ -1,0 +1,9 @@
+{
+  "_comentario": "Lista de invitados de PRUEBA. Esta es la plantilla que luego va en la pestaña 'Invitados' del Google Sheet real (una fila por código, mismas 3 columnas). No es la lista real todavía.",
+  "invitados": [
+    { "codigo": "lucia-fernandez", "nombre": "Lucía Fernández", "acompanantes_permitidos": 1 },
+    { "codigo": "familia-garcia", "nombre": "Familia García", "acompanantes_permitidos": 2 },
+    { "codigo": "carlos-mendoza", "nombre": "Carlos Mendoza", "acompanantes_permitidos": 0 },
+    { "codigo": "diego-torres", "nombre": "Diego Torres", "acompanantes_permitidos": 1 }
+  ]
+}

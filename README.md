@@ -15,11 +15,14 @@ Diseño original: <https://claude.ai/design/p/55459373-7343-4ae2-afbe-6d9a74702b
 index.html          página completa (una sola página, con anclas por sección)
 css/tokens.css       design system "Organic" (colores, tipografías, componentes)
 css/site.css         maquetación de la invitación + responsive
-js/config.js         TODOS los datos editables: nombres, fecha, cuentas, WhatsApp…
-js/site.js           interactividad: nav móvil, cuenta regresiva, copiar, RSVP
-img/                 fotos de la pareja — ver docs/FOTOS.md (aún son placeholders)
-docs/FOTOS.md        cómo poner las fotos reales
-docs/RSVP-BACKEND.md cómo conectar el formulario a un backend real (fase 3)
+js/config.js         TODOS los datos editables: nombres, fecha, cuentas, WhatsApp, apiUrl…
+js/site.js           interactividad: nav móvil, cuenta regresiva, copiar, RSVP con backend
+img/                 fotos de la pareja
+server/dev_api.py    backend de PRUEBA para desarrollo local (ver docs/RSVP-BACKEND.md)
+server/invitados.json lista de invitados de prueba que usa server/dev_api.py
+docs/FOTOS.md        cómo poner/reemplazar fotos
+docs/RSVP-BACKEND.md cómo funciona el RSVP con backend (fase 3) y cómo desplegar el real
+docs/apps-script/Code.gs  backend real (Google Apps Script), listo para desplegar
 ```
 
 ## Cómo editar el contenido
@@ -35,9 +38,7 @@ y comentadas por bloque.
 
 ## Cómo correrlo en local
 
-No requiere Node ni build. Basta un servidor estático (abrir el
-`index.html` con doble clic también funciona, pero un servidor evita
-problemas de rutas relativas y de `fetch`/`localStorage`):
+Para ver solo el diseño (sin RSVP funcional de verdad):
 
 ```bash
 cd boda-andre-krisli
@@ -45,10 +46,13 @@ python3 -m http.server 5173
 # abre http://localhost:5173
 ```
 
-o, si tienes Node instalado:
+Para probar el RSVP completo (con lista de invitados, límite de
+acompañantes, editar respuesta), usa el servidor con la API de prueba en
+vez del anterior — ver `docs/RSVP-BACKEND.md`:
 
 ```bash
-npx serve .
+python3 server/dev_api.py
+# abre http://localhost:5177/index.html?codigo=familia-garcia
 ```
 
 ## Estado del prototipo (fases)
@@ -59,9 +63,14 @@ npx serve .
 - ⏭️ **Fase 2 — GitHub:** subir este proyecto a un repositorio (ver abajo)
   y, si se quiere, publicarlo gratis con GitHub Pages mientras no haya
   backend.
-- ⏭️ **Fase 3 — RSVP con backend real:** reemplazar el guardado en
-  `localStorage` por una API (ver `docs/RSVP-BACKEND.md` para las opciones
-  y el único punto del código que hay que tocar).
+- 🔧 **Fase 3 — RSVP con backend real (en curso):** el formulario ya habla
+  con una API de verdad (lista de invitados, límite de acompañantes,
+  editar respuesta) — probada en local con datos de prueba
+  (`server/dev_api.py`). Falta cargar la lista real de invitados y
+  desplegar el backend real (Google Apps Script, código ya listo en
+  `docs/apps-script/Code.gs`) — ver `docs/RSVP-BACKEND.md`. Mientras tanto,
+  en el sitio publicado el formulario sigue guardando en `localStorage`
+  automáticamente, sin romperse.
 
 ## Subir a GitHub
 

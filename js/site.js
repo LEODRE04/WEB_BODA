@@ -1,14 +1,19 @@
 // site.js — interactividad del prototipo v3 (sin build step, JS plano).
-// FASE 1 (actual): todo corre en el navegador, el RSVP se guarda en
-// localStorage para poder revisar respuestas desde la consola mientras no
-// hay backend.
-// FASE 3 (próxima): reemplazar submitRSVP() por una llamada fetch() a la API
-// real. El resto del formulario (validación, mensajes, UI) no debería
-// necesitar cambios — ver docs/RSVP-BACKEND.md.
+// FASE 3 (en curso): el RSVP habla con W.rsvp.apiUrl (config.js) — en
+// desarrollo local es server/dev_api.py con una lista de invitados de
+// prueba (server/invitados.json); en producción será el Google Apps
+// Script real (ver docs/RSVP-BACKEND.md). Si la API no responde, cae
+// solo a guardar en localStorage — no se rompe nada mientras tanto.
 
 (function () {
   "use strict";
   var W = window.WEDDING || {};
+
+  // Marca "esto no vino de nuestra API" (p.ej. el 404 HTML de GitHub Pages
+  // antes de desplegar el backend real) para distinguirlo de un error de
+  // validación real que sí hay que mostrarle al usuario.
+  function BackendUnavailable() {}
+  BackendUnavailable.prototype = Object.create(Error.prototype);
 
   ready(init);
 
@@ -179,36 +184,90 @@
     var form = document.querySelector("#rsvp-form");
     if (!form) return;
 
-    // Precarga el nombre si llega por link personalizado: pagina.html?invitado=Lucía%20Fernández
-    var params = new URLSearchParams(window.location.search);
-    var invitado = params.get("invitado");
-    if (invitado) {
-      var nameInput = form.querySelector('[name="nombre"]');
-      if (nameInput) nameInput.value = invitado;
-    }
-
     var addCompanionBtn = form.querySelector("#rsvp-add-companion");
     var companionsWrap = form.querySelector("#rsvp-companions");
+    var acompanantesSelect = form.querySelector("#rsvp-acompanantes");
+    var codigoInput = form.querySelector("#rsvp-codigo");
+    var banner = form.querySelector("#rsvp-guest-banner");
+    var submitBtn = form.querySelector("#rsvp-submit");
     var companionCount = 0;
     var MAX_COMPANIONS = 2;
 
+    function setMaxCompanions(max) {
+      MAX_COMPANIONS = max;
+      var current = acompanantesSelect.value;
+      acompanantesSelect.innerHTML = "";
+      for (var i = 0; i <= max; i++) {
+        var opt = document.createElement("option");
+        opt.value = String(i);
+        opt.textContent = i === 0 ? "Sin acompañantes" : i + (i === 1 ? " acompañante" : " acompañantes");
+        acompanantesSelect.appendChild(opt);
+      }
+      if (Number(current) <= max) acompanantesSelect.value = current;
+      addCompanionBtn.disabled = companionCount >= MAX_COMPANIONS;
+    }
+
+    function addCompanionCard(prefillNombre, prefillMenu) {
+      if (companionCount >= MAX_COMPANIONS) return;
+      companionCount++;
+      var card = document.createElement("div");
+      card.className = "companion-card";
+      card.innerHTML =
+        '<div style="font-size:12px;color:rgba(32,30,29,.7);margin-bottom:8px">Acompañante ' +
+        companionCount +
+        '</div><div class="row">' +
+        '<input class="input" name="acompanante_' + companionCount + '_nombre" placeholder="Nombre completo">' +
+        '<select class="input" name="acompanante_' + companionCount + '_menu">' +
+        "<option>Carne</option><option>Pescado</option><option>Vegetariano</option><option>Sin gluten</option>" +
+        "</select></div>";
+      companionsWrap.appendChild(card);
+      if (prefillNombre) card.querySelector("input").value = prefillNombre;
+      if (prefillMenu) card.querySelector("select").value = prefillMenu;
+      if (companionCount >= MAX_COMPANIONS) addCompanionBtn.disabled = true;
+    }
+
     if (addCompanionBtn) {
       addCompanionBtn.addEventListener("click", function () {
-        if (companionCount >= MAX_COMPANIONS) return;
-        companionCount++;
-        var card = document.createElement("div");
-        card.className = "companion-card";
-        card.innerHTML =
-          '<div style="font-size:12px;color:rgba(32,30,29,.7);margin-bottom:8px">Acompañante ' +
-          companionCount +
-          '</div><div class="row">' +
-          '<input class="input" name="acompanante_' + companionCount + '_nombre" placeholder="Nombre completo">' +
-          '<select class="input" name="acompanante_' + companionCount + '_menu">' +
-          "<option>Carne</option><option>Pescado</option><option>Vegetariano</option><option>Sin gluten</option>" +
-          "</select></div>";
-        companionsWrap.appendChild(card);
-        if (companionCount >= MAX_COMPANIONS) addCompanionBtn.disabled = true;
+        addCompanionCard();
       });
+    }
+
+    function showBanner(text, isWarning) {
+      banner.textContent = text;
+      banner.classList.toggle("is-warning", !!isWarning);
+      banner.hidden = false;
+    }
+
+    // Invitado identificado por link personal: pagina.html?codigo=familia-garcia
+    // Precarga nombre, límite real de acompañantes, y si ya había respondido
+    // antes, toda su respuesta (para editarla). Si el código no existe, o si
+    // la API no responde (todavía no hay backend desplegado), el formulario
+    // sigue funcionando abierto, como hasta ahora.
+    var params = new URLSearchParams(window.location.search);
+    var codigo = params.get("codigo");
+    if (codigo) {
+      codigoInput.value = codigo;
+      fetchGuest(codigo).then(function (guest) {
+        if (!guest) return; // sin respuesta de la API: formulario abierto normal
+        if (!guest.found) {
+          showBanner("No reconocemos este link de invitación, pero puedes confirmar igual.", true);
+          return;
+        }
+        setMaxCompanions(guest.acompanantes_permitidos);
+        form.querySelector('[name="nombre"]').value = guest.nombre;
+
+        if (guest.respuesta) {
+          showBanner("Ya habías confirmado como " + guest.nombre + " — puedes actualizar tu respuesta.");
+          fillForm(form, guest.respuesta, addCompanionCard);
+          submitBtn.textContent = "Actualizar confirmación";
+        } else {
+          showBanner("Confirmando para: " + guest.nombre);
+        }
+      });
+    } else {
+      // Fallback antiguo, sin código: solo escribe el nombre en el campo.
+      var invitado = params.get("invitado");
+      if (invitado) form.querySelector('[name="nombre"]').value = invitado;
     }
 
     form.addEventListener("submit", function (e) {
@@ -218,50 +277,106 @@
 
       var errorEl = form.querySelector(".rsvp-error");
       if (!data.nombre || !data.contacto || !data.asistencia) {
-        if (errorEl) {
-          errorEl.textContent = "Completa nombre, contacto y si podrás asistir.";
-          errorEl.hidden = false;
-        }
+        errorEl.textContent = "Completa nombre, contacto y si podrás asistir.";
+        errorEl.hidden = false;
         return;
       }
-      if (errorEl) errorEl.hidden = true;
+      errorEl.hidden = true;
 
       submitRSVP(data)
         .then(function () {
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
+          var keepCodigo = data.codigo;
           form.reset();
+          codigoInput.value = keepCodigo || "";
           companionsWrap.innerHTML = "";
           companionCount = 0;
-          if (addCompanionBtn) addCompanionBtn.disabled = false;
+          addCompanionBtn.disabled = false;
         })
         .catch(function (err) {
-          if (errorEl) {
-            errorEl.textContent = "No se pudo enviar tu confirmación. Intenta de nuevo.";
-            errorEl.hidden = false;
-          }
+          errorEl.textContent = err.message || "No se pudo enviar tu confirmación. Intenta de nuevo.";
+          errorEl.hidden = false;
           console.error("RSVP error:", err);
         });
     });
   }
 
-  // Punto único de integración con el backend (fase 3).
-  // Hoy: guarda en localStorage para poder inspeccionar respuestas en dev.
-  // Mañana: cambia el cuerpo de esta función por, por ejemplo:
-  //   return fetch("/api/rsvp", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(data),
-  //   }).then(function (r) {
-  //     if (!r.ok) throw new Error("HTTP " + r.status);
-  //   });
+  // Rellena el formulario con una respuesta previa (para editarla).
+  function fillForm(form, r, addCompanionCard) {
+    if (r.contacto) form.querySelector('[name="contacto"]').value = r.contacto;
+    if (r.asistencia) {
+      var radio = form.querySelector('input[name="asistencia"][value="' + r.asistencia + '"]');
+      if (radio) radio.checked = true;
+    }
+    if (r.num_acompanantes != null) form.querySelector('[name="num_acompanantes"]').value = r.num_acompanantes;
+    if (r.menu) form.querySelector('[name="menu"]').value = r.menu;
+    if (r.alergias) form.querySelector('[name="alergias"]').value = r.alergias;
+    if (r.cancion) form.querySelector('[name="cancion"]').value = r.cancion;
+    if (r.mensaje) form.querySelector('[name="mensaje"]').value = r.mensaje;
+    [1, 2].forEach(function (i) {
+      var nombre = r["acompanante_" + i + "_nombre"];
+      if (nombre) addCompanionCard(nombre, r["acompanante_" + i + "_menu"]);
+    });
+  }
+
+  // Busca a un invitado por su código (?codigo=...). Devuelve null si la API
+  // no está disponible todavía (formulario sigue abierto, sin restricciones).
+  function fetchGuest(codigo) {
+    var url = W.rsvp && W.rsvp.apiUrl;
+    if (!url) return Promise.resolve(null);
+    return fetch(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  }
+
+  // Punto único de integración con el backend (fase 3). Intenta mandar la
+  // confirmación a W.rsvp.apiUrl. El éxito/error se decide por el CONTENIDO
+  // del JSON (campo "error"), no por el código HTTP: Google Apps Script
+  // (el backend real, ver docs/RSVP-BACKEND.md) siempre responde 200 así
+  // que el status por sí solo no sirve para distinguir nada.
+  // - Si la API respondió con {"error": "..."} -> es un error de validación
+  //   real (código inválido, supera acompañantes permitidos) y se muestra.
+  // - Si la respuesta no es JSON (p.ej. el 404 HTML de GitHub Pages porque
+  //   el backend real aún no está desplegado) o falla la red -> cae a
+  //   guardar en localStorage, sin romper nada.
   function submitRSVP(data) {
+    var url = W.rsvp && W.rsvp.apiUrl;
+    if (!url) return saveLocal(data);
+
+    return fetch(url, {
+      method: "POST",
+      // "text/plain" a propósito (no "application/json"): así el navegador
+      // no manda un preflight CORS, que Google Apps Script no responde bien.
+      // El cuerpo sigue siendo JSON válido; ambos backends (mock local y
+      // Apps Script) lo leen igual sin mirar este header.
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data),
+    }).then(function (r) {
+      return r.json().then(
+        function (body) {
+          if (body && body.error) throw new Error(body.error);
+        },
+        function () {
+          throw new BackendUnavailable(); // la respuesta no era JSON
+        }
+      );
+    }).catch(function (err) {
+      if (err instanceof TypeError || err instanceof BackendUnavailable) {
+        console.warn("No se pudo contactar al backend (¿aún no desplegado?), guardando localmente:", err);
+        return saveLocal(data);
+      }
+      throw err;
+    });
+  }
+
+  function saveLocal(data) {
     return new Promise(function (resolve) {
       var key = "rsvp_responses";
       var list = JSON.parse(localStorage.getItem(key) || "[]");
       list.push(data);
       localStorage.setItem(key, JSON.stringify(list));
-      console.info("RSVP guardado localmente (sin backend todavía):", data);
+      console.info("RSVP guardado localmente (sin backend):", data);
       resolve();
     });
   }
