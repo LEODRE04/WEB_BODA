@@ -22,14 +22,18 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(__file__).resolve().parent.parent
-GUESTS_FILE = ROOT / "server" / "invitados.json"
+GUESTS_FILE_TEST = ROOT / "server" / "invitados.json"
+GUESTS_FILE_REAL = ROOT / "server" / "invitados.real.json"  # no está en git — ver .gitignore
 RESPONSES_FILE = ROOT / "server" / "respuestas.local.json"
 
 _lock = threading.Lock()
 
 
 def load_guests():
-    data = json.loads(GUESTS_FILE.read_text(encoding="utf-8"))
+    # Si existe invitados.real.json (generado localmente, nunca commiteado)
+    # se usa esa; si no, la lista de prueba de siempre.
+    guests_file = GUESTS_FILE_REAL if GUESTS_FILE_REAL.exists() else GUESTS_FILE_TEST
+    data = json.loads(guests_file.read_text(encoding="utf-8"))
     return {g["codigo"]: g for g in data["invitados"]}
 
 
@@ -139,8 +143,13 @@ def main():
     if not RESPONSES_FILE.exists():
         save_responses([])
     server = ThreadingHTTPServer(("localhost", port), Handler)
+    guests = load_guests()
+    using_real = GUESTS_FILE_REAL.exists()
     print(f"Sirviendo {ROOT} en http://localhost:{port}  (API mock en /api/rsvp)")
-    print(f"Invitados de prueba: {', '.join(load_guests().keys())}")
+    if using_real:
+        print(f"Usando invitados.real.json — {len(guests)} invitados reales (no se sube a git)")
+    else:
+        print(f"Invitados de prueba: {', '.join(guests.keys())}")
     print("Ctrl+C para detener.")
     try:
         server.serve_forever()

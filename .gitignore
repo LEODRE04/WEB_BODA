@@ -6,3 +6,9 @@ __pycache__/
 # Datos de prueba del backend local (server/dev_api.py) — nunca es la
 # lista de invitados real ni respuestas reales, no debe subirse.
 server/respuestas.local.json
+
+# Lista REAL de invitados (nombres reales de personas) — el repo es
+# público, esto se queda solo en tu máquina. Vive en Google Sheets cuando
+# se despliegue el backend real (ver docs/RSVP-BACKEND.md).
+server/invitados.real.json
+server/invitados.real.csv

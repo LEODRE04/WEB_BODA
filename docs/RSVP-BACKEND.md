@@ -37,6 +37,15 @@ confirmado..." con todo precargado para editar. Las respuestas quedan en
 `server/respuestas.local.json` (no se sube a git — son datos de prueba).
 Para ver qué se guardó: `cat server/respuestas.local.json`.
 
+### Probar con la lista real de invitados (en tu máquina, sin subirla a git)
+
+Si existe `server/invitados.real.json`, `dev_api.py` lo usa en vez de la
+lista de prueba — automático, no hay que avisarle nada. Ese archivo (y su
+CSV hermano `server/invitados.real.csv`, listo para pegar en el Google
+Sheet real) están en `.gitignore` **a propósito**: tienen nombres reales
+de personas y este repo es público, así que nunca se suben. Viven solo en
+esta máquina hasta que se despliegue el Sheet real (ver más abajo).
+
 ## Cómo funciona el link personalizado por invitado
 
 Cada invitado entra con `tusitio.com/?codigo=SU-CODIGO`. El frontend
