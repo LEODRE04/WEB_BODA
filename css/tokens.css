@@ -1,5 +1,12 @@
 /* Organic — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
-@import url('https://fonts.googleapis.com/css2?family=Caprasimo:wght@400&family=Figtree:wght@400;600;700&display=swap');
+/* Caprasimo/Figtree only render when no theme file overrides --font-heading/
+   --font-body (i.e. the plain default look, and theme-elegante.css which
+   reuses them on purpose). theme-airbnb.css replaces both with Inter, so
+   loading this import while that theme is linked just double-fetches fonts
+   nothing on the page uses. Commented out because Airbnb is the version
+   currently linked in index.html — uncomment this line again if you revert
+   to the default look or switch to theme-elegante.css. */
+/* @import url('https://fonts.googleapis.com/css2?family=Caprasimo:wght@400&family=Figtree:wght@400;600;700&display=swap'); */
 
 :root {
   --color-bg: #f5ead8;

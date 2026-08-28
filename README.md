@@ -12,18 +12,28 @@ Diseño original: <https://claude.ai/design/p/55459373-7343-4ae2-afbe-6d9a74702b
 ## Estructura
 
 ```
-index.html          página completa (una sola página, con anclas por sección)
-css/tokens.css       design system "Organic" (colores, tipografías, componentes)
-css/site.css         maquetación de la invitación + responsive
-js/config.js         TODOS los datos editables: nombres, fecha, cuentas, WhatsApp, apiUrl…
-js/site.js           interactividad: nav móvil, cuenta regresiva, copiar, RSVP con backend
-img/                 fotos de la pareja
-server/dev_api.py    backend de PRUEBA para desarrollo local (ver docs/RSVP-BACKEND.md)
+index.html            página completa (una sola página, con anclas por sección)
+404.html              página de error para GitHub Pages (fase 2)
+css/tokens.css        design system "Organic" (colores, tipografías, componentes) — tema por defecto
+css/site.css          maquetación de la invitación + responsive, común a los 3 temas
+css/theme-airbnb.css  tema alternativo "Airbnb" (blanco+Rausch, Inter) — el que está enlazado hoy en index.html
+css/theme-elegante.css tema alternativo "dorado" (marfil+dorado, Caprasimo/Figtree, sobre animado) — no enlazado, ver comentario al inicio del archivo para activarlo
+js/config.js          TODOS los datos editables: nombres, fecha, cuentas, WhatsApp, apiUrl…
+js/site.js            interactividad: nav móvil, cuenta regresiva, copiar, RSVP con backend
+img/                  fotos de la pareja + favicon.svg
+server/dev_api.py     backend de PRUEBA para desarrollo local (ver docs/RSVP-BACKEND.md)
 server/invitados.json lista de invitados de prueba que usa server/dev_api.py
-docs/FOTOS.md        cómo poner/reemplazar fotos
-docs/RSVP-BACKEND.md cómo funciona el RSVP con backend (fase 3) y cómo desplegar el real
+docs/FOTOS.md         cómo poner/reemplazar fotos
+docs/RSVP-BACKEND.md  cómo funciona el RSVP con backend (fase 3) y cómo desplegar el real
 docs/apps-script/Code.gs  backend real (Google Apps Script), listo para desplegar
 ```
+
+Solo un tema de `css/theme-*.css` debe estar enlazado en `index.html` a la
+vez — cada uno explica en su propio comentario inicial cómo activarlo o
+revertirlo. `css/tokens.css` importa la tipografía por defecto
+(Caprasimo/Figtree) comentada mientras `theme-airbnb.css` esté activo,
+porque ese tema carga Inter y no la necesita — si vuelves al tema por
+defecto o a `theme-elegante.css`, descomenta ese `@import` de nuevo.
 
 ## Cómo editar el contenido
 

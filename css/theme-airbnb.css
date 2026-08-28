@@ -124,6 +124,13 @@ body { font-size: 16px; }
 .money-row { background: var(--color-surface); border-radius: var(--radius-sm); }
 .dresscode { border: 1px solid var(--color-divider); border-radius: var(--radius-md); }
 
+/* — .attending-toggle seguía en píldora (999px, heredado de site.css);
+   el resto del sistema ya es flat/rectangular (8-14px). .tag también se
+   ajusta aquí para compartir el mismo radio que botones/inputs en vez de
+   los 10.5px que le tocaban por la fórmula de tokens.css. — */
+.rsvp-form .attending-toggle label { border-radius: var(--radius-sm); }
+.tag { border-radius: var(--radius-sm); }
+
 /* — saludo del invitado: banda plana, sin tinte de color — */
 .guest-greeting { background: var(--color-surface); color: var(--color-text); }
 .rsvp-guest-banner {

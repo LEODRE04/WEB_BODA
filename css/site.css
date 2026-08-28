@@ -269,6 +269,43 @@ body { background: var(--color-neutral-100); }
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 
+/* — saltar al contenido: invisible salvo con foco de teclado (Tab) — */
+.skip-link {
+  position: absolute; top: -48px; left: 8px; z-index: 200;
+  background: var(--color-accent); color: #fff;
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  transition: top .2s ease;
+}
+.skip-link:focus { top: 8px; }
+
+/* — utilidades (evitan estilos inline repetidos entre secciones de
+   index.html — ver docs/design-references si se agregan más) — */
+.section-title-38 { font-size: clamp(26px, 4vw, 38px); }
+.section-title-32 { font-size: 32px; }
+.section-title-tight { margin: 12px 0 14px; }
+.flex-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.u-flex-1 { flex: 1; }
+.mb-10 { margin-bottom: 10px; }
+.field-title { font-size: 16px; font-weight: 600; }
+.field-title-lg { font-size: 17px; font-weight: 600; }
+.text-note-75 {
+  margin: 0 0 12px; font-size: 14px; line-height: 1.7;
+  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+}
+.text-note-68 {
+  margin: 3px 0 0; font-size: 13.5px; line-height: 1.6;
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+}
+.text-note-60 {
+  margin: 8px 0 0; font-size: 13px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+.map-embed-pending {
+  display: block; padding: 110px 0; text-align: center;
+  background: var(--color-accent-2-200);
+}
+
 /* Algunos elementos con [hidden] también tienen una clase que fija su propio
    display (p.ej. .btn); sin esto el atributo hidden queda sin efecto. */
 [hidden] { display: none !important; }
