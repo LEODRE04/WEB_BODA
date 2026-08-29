@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probador de fotos (solo local)</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  body { padding: 32px 24px 80px; max-width: 1100px; margin: 0 auto; }
+  .warn {
+    background: var(--color-accent-100); color: var(--color-accent-800);
+    border-radius: 16px; padding: 14px 18px; font-size: 14px; margin-bottom: 32px;
+  }
+  .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
+  .slot { display: flex; flex-direction: column; gap: 10px; }
+  .slot h3 { margin: 0; font-size: 16px; }
+  .slot .hint { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin: -6px 0 2px; }
+  .slot .box { align-self: center; }
+  .slot input[type="file"] { font-size: 12px; }
+  .slot .meta { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); min-height: 16px; }
+  .slot button { align-self: flex-start; }
+  .slot button[disabled] { opacity: .4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<h1 style="font-size:28px;margin:0 0 6px">Probador de fotos</h1>
+<p class="warn">
+  Esta página es solo una herramienta de desarrollo local — no es parte del sitio publicado
+  y nadie más la ve. Elige cualquier foto de tu computadora en cada casilla para ver cómo
+  quedaría recortada ahí (mismo tamaño, borde y filtro de color que usa el sitio real).
+  Cuando encuentres la que te gusta, dale "Descargar optimizada" y mueve ese archivo a
+  <code>img/</code> con el nombre indicado.
+</p>
+
+<div class="slots">
+
+  <div class="slot" data-slot="p3">
+    <h3>Portada (p3.jpg)</h3>
+    <p class="hint">Foto grande de la primera pantalla</p>
+    <div class="box photo" style="width:360px;height:280px">
+      <span class="photo-label">Elige una foto abajo</span>
+    </div>
+    <input type="file" accept="image/*">
+    <p class="meta"></p>
+    <button class="btn btn-secondary" type="button" disabled>Descargar optimizada (p3.jpg)</button>
+  </div>
+
+  <div class="slot" data-slot="p1">
+    <h3>Bienvenida (p1.jpg)</h3>
+    <p class="hint">Foto en arco de la sección "Queremos celebrar contigo"</p>
+    <div class="box photo" style="width:300px;height:340px;border-radius:0 0 150px 150px">
+      <span class="photo-label">Elige una foto abajo</span>
+    </div>
+    <input type="file" accept="image/*">
+    <p class="meta"></p>
+    <button class="btn btn-secondary" type="button" disabled>Descargar optimizada (p1.jpg)</button>
+  </div>
+
+  <div class="slot" data-slot="p2">
+    <h3>RSVP (p2.jpg)</h3>
+    <p class="hint">Foto en arco junto al formulario de confirmación</p>
+    <div class="box photo" style="width:280px;height:260px;border-radius:0 0 130px 130px">
+      <span class="photo-label">Elige una foto abajo</span>
+    </div>
+    <input type="file" accept="image/*">
+    <p class="meta"></p>
+    <button class="btn btn-secondary" type="button" disabled>Descargar optimizada (p2.jpg)</button>
+  </div>
+
+  <div class="slot" data-slot="p4">
+    <h3>Galería (p4.jpg)</h3>
+    <p class="hint">Una de las miniaturas de "Momentos favoritos"</p>
+    <div class="box photo" style="width:300px;height:210px;border-radius:28px">
+      <span class="photo-label">Elige una foto abajo</span>
+    </div>
+    <input type="file" accept="image/*">
+    <p class="meta"></p>
+    <button class="btn btn-secondary" type="button" disabled>Descargar optimizada (p4.jpg)</button>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  document.querySelectorAll(".slot").forEach(function (slot) {
+    var name = slot.getAttribute("data-slot");
+    var box = slot.querySelector(".box");
+    var input = slot.querySelector('input[type="file"]');
+    var meta = slot.querySelector(".meta");
+    var dlBtn = slot.querySelector("button");
+    var currentImg = null;
+
+    input.addEventListener("change", function () {
+      var file = input.files[0];
+      if (!file) return;
+
+      var url = URL.createObjectURL(file);
+      box.innerHTML = "";
+      var img = new Image();
+      img.src = url;
+      img.alt = "";
+      box.appendChild(img);
+      currentImg = img;
+
+      meta.textContent = file.name + " — " + (file.size / 1024 / 1024).toFixed(1) + " MB original";
+      dlBtn.disabled = false;
+
+      img.addEventListener("load", function () {
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    dlBtn.addEventListener("click", function () {
+      if (!currentImg) return;
+      var maxSide = 1280;
+      var w = currentImg.naturalWidth;
+      var h = currentImg.naturalHeight;
+      var scale = Math.min(1, maxSide / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(function (blob) {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = name + ".jpg";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        meta.textContent += " → descargada como " + name + ".jpg (" + (blob.size / 1024).toFixed(0) + " KB)";
+      }, "image/jpeg", 0.6);
+    });
+  });
+})();
+</script>
+</body>
+</html>
