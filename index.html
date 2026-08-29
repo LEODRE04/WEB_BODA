@@ -36,6 +36,7 @@
     <h2 class="envelope-title">Nuestra Boda</h2>
     <p class="envelope-names">André &amp; Krisli</p>
     <p class="envelope-guest" id="envelope-guest-text" hidden></p>
+    <p class="envelope-guest" id="envelope-guest-loading" hidden>Preparando tu invitación<span class="dot-pulse"><span></span><span></span><span></span></span></p>
     <p class="envelope-date">09 · 01 · 2027</p>
     <div class="ornament-line"></div>
 
@@ -75,7 +76,8 @@
 </header>
 
 <div class="guest-greeting" id="guest-greeting" hidden>
-  <p><span data-guest-text></span></p>
+  <p data-guest-loading hidden>Preparando tu invitación<span class="dot-pulse"><span></span><span></span><span></span></span></p>
+  <p data-guest-ready hidden><span data-guest-text></span></p>
 </div>
 
 <main>

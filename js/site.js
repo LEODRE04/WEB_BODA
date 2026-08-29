@@ -44,8 +44,8 @@
     var guestPromise = codigo ? fetchGuest(codigo) : Promise.resolve(null);
 
     applyInvitationType(guestPromise);
-    initGuestGreeting(guestPromise);
-    initEnvelopeGate(guestPromise);
+    initGuestGreeting(codigo, guestPromise);
+    initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
   }
 
@@ -82,27 +82,42 @@
   }
 
   // — saludo personalizado arriba de la página, para quien entra con un
-  // link de invitado (?codigo=...): nombre + cuántos pases tiene. —
-  function initGuestGreeting(guestPromise) {
+  // link de invitado (?codigo=...): nombre + cuántos pases tiene. Mientras
+  // se resuelve el fetch (puede tardar 1-2s contra el backend real) se ve
+  // un loader en vez de un hueco en blanco — pero solo si hay "codigo" en
+  // el link: a un visitante sin código nunca le prometemos algo que no va
+  // a llegar. —
+  function initGuestGreeting(codigo, guestPromise) {
     var el = document.querySelector("#guest-greeting");
     if (!el) return;
+    var loading = el.querySelector("[data-guest-loading]");
+    var ready = el.querySelector("[data-guest-ready]");
+    if (codigo && loading) {
+      el.hidden = false;
+      loading.hidden = false;
+    }
     guestPromise.then(function (guest) {
-      if (!guest || !guest.found) return; // sin código, no reconocido, o API no disponible: no se muestra nada
+      if (loading) loading.hidden = true;
+      if (!guest || !guest.found) { el.hidden = true; return; } // no reconocido o API caída: no se muestra nada
       var info = guestPassInfo(guest);
       el.querySelector("[data-guest-text]").textContent =
         "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en " + info.evento + " — tienes " + info.passLabel + " para ti.";
+      if (ready) ready.hidden = false;
       el.hidden = false;
     });
   }
 
   // — sobre de apertura (tema "elegante dorado", ver css/theme-elegante.css):
   // muestra el mismo dato de pases antes de abrir, y anima la apertura. —
-  function initEnvelopeGate(guestPromise) {
+  function initEnvelopeGate(codigo, guestPromise) {
     var gate = document.querySelector("#envelope-gate");
     if (!gate) return;
 
     var guestText = gate.querySelector("#envelope-guest-text");
+    var guestLoading = gate.querySelector("#envelope-guest-loading");
+    if (codigo && guestLoading) guestLoading.hidden = false;
     guestPromise.then(function (guest) {
+      if (guestLoading) guestLoading.hidden = true;
       if (!guest || !guest.found || !guestText) return;
       var info = guestPassInfo(guest);
       guestText.textContent = "Con amor hemos reservado para ti (" + guest.nombre + "): " + info.passLabel + ", para " + info.evento + ".";

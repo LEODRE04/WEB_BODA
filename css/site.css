@@ -60,6 +60,23 @@ body { background: var(--color-neutral-100); }
 }
 .guest-greeting p { margin: 0; max-width: 60ch; margin-inline: auto; }
 
+/* — puntitos animados: se muestran mientras se resuelve el link de
+   invitado (?codigo=...) — antes de esto, ese hueco quedaba en blanco
+   hasta que llegaba la respuesta del backend, y se sentía como una
+   pausa/glitch en vez de una carga. Usa currentColor: hereda el color
+   del texto donde esté (envelope-guest o guest-greeting). — */
+.dot-pulse { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
+.dot-pulse span {
+  width: 5px; height: 5px; border-radius: 999px; background: currentColor;
+  opacity: .3; animation: dot-pulse 1.2s ease-in-out infinite;
+}
+.dot-pulse span:nth-child(2) { animation-delay: .15s; }
+.dot-pulse span:nth-child(3) { animation-delay: .3s; }
+@keyframes dot-pulse {
+  0%, 60%, 100% { opacity: .3; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1.35); }
+}
+
 /* — hero — */
 .hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; }
 .hero-copy {
