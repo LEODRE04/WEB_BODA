@@ -416,15 +416,27 @@
       }
       errorEl.hidden = true;
 
+      // Estado de envío: con el backend real la respuesta puede tardar
+      // uno o dos segundos — sin esto, nada indica que el clic funcionó y
+      // invita a apretar "Confirmar" de nuevo.
+      var originalLabel = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Enviando…";
+
       submitRSVP(data)
         .then(function () {
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
+          submitBtn.textContent = originalLabel;
         })
         .catch(function (err) {
           errorEl.textContent = err.message || "No se pudo enviar tu confirmación. Intenta de nuevo.";
           errorEl.hidden = false;
           console.error("RSVP error:", err);
+          submitBtn.textContent = originalLabel;
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
         });
     });
   }
