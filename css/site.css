@@ -287,13 +287,29 @@ body { background: var(--color-neutral-100); }
    propio de la recepción: itinerario y su bloque de ubicación. */
 body.solo-ceremonia [data-reception-only] { display: none !important; }
 
-/* — botón de WhatsApp: mismo tamaño de .btn pero con su color de marca,
-   más grande y con sombra para que resalte como acción principal — */
-.btn-whatsapp {
-  background: #25d366; color: #fff; font-weight: 700;
-  font-size: 15px; padding: 13px 24px; gap: 9px;
+/* — botón flotante de WhatsApp: círculo con el ícono que se expande a
+   pastilla al pasar el mouse (o al enfocarlo con teclado), revelando el
+   texto. Reemplaza la pastilla fija anterior — se sentía más genérica/dura
+   con el texto siempre visible a fuerza. */
+.whatsapp-fab {
+  display: inline-flex; align-items: center; width: 46px; height: 46px;
+  border-radius: 999px; overflow: hidden; text-decoration: none;
+  background: #25d366; color: #fff;
   box-shadow: 0 6px 18px color-mix(in srgb, #25d366 45%, transparent);
+  transition: width .3s ease, background-color .15s ease, transform .1s ease;
 }
-.btn-whatsapp:hover { background: #1ebe5b; }
-.btn-whatsapp:active { background: #17a54c; }
-.btn-whatsapp svg { flex: none; }
+.whatsapp-fab-icon {
+  width: 46px; height: 46px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.whatsapp-fab-text {
+  width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+  font-size: 14px; font-weight: 600; transition: width .3s ease, opacity .3s ease;
+}
+.whatsapp-fab:hover, .whatsapp-fab:focus-visible {
+  width: 172px; background: #1ebe5b;
+}
+.whatsapp-fab:hover .whatsapp-fab-text, .whatsapp-fab:focus-visible .whatsapp-fab-text {
+  width: auto; opacity: 1; padding-right: 18px;
+}
+.whatsapp-fab:active { background: #17a54c; transform: scale(.96); }
