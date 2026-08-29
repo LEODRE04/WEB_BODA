@@ -53,15 +53,9 @@ window.WEDDING = {
     whatsapp: "51992770777", // sin '+' ni espacios — se arma el link solo
     whatsappMessage: "¡Hola! Tengo una consulta sobre la boda de André y Krisli 💍",
 
-    // Backend del formulario (fase 3). "/api/rsvp" es la ruta que sirve
-    // server/dev_api.py en desarrollo local. Cuando esté desplegado el
-    // Google Apps Script real (ver docs/RSVP-BACKEND.md), reemplaza esto
-    // por esa URL absoluta (https://script.google.com/macros/s/.../exec)
-    // y funciona igual en local y en producción.
-    // Si la API no responde (por ejemplo en GitHub Pages, antes de
-    // desplegar el backend real), el formulario cae solo a guardar en
-    // localStorage como hacía antes — no se rompe nada mientras tanto.
-    apiUrl: "/api/rsvp",
+    // Backend real (Google Apps Script, ver docs/RSVP-BACKEND.md) ya
+    // desplegado — funciona igual en local y en producción (GitHub Pages).
+    apiUrl: "https://script.google.com/macros/s/AKfycbx_mBldIKxpTDNUtRX-de-pOnkgwlM0YNTIvjzEreXGqPIRiOZcATPO7tjZsT_O5hfh/exec",
   },
 
   gifts: {

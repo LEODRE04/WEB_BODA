@@ -60,17 +60,11 @@ python3 server/dev_api.py
 - ✅ **Fase 1 — local (este entregable):** diseño 3a convertido en página
   real, responsive, con cuenta regresiva, copiar-al-portapapeles y RSVP
   funcional guardando en `localStorage` del navegador.
-- ⏭️ **Fase 2 — GitHub:** subir este proyecto a un repositorio (ver abajo)
-  y, si se quiere, publicarlo gratis con GitHub Pages mientras no haya
-  backend.
-- 🔧 **Fase 3 — RSVP con backend real (en curso):** el formulario ya habla
-  con una API de verdad (lista de invitados, límite de acompañantes,
-  editar respuesta) — probada en local con datos de prueba
-  (`server/dev_api.py`). Falta cargar la lista real de invitados y
-  desplegar el backend real (Google Apps Script, código ya listo en
-  `docs/apps-script/Code.gs`) — ver `docs/RSVP-BACKEND.md`. Mientras tanto,
-  en el sitio publicado el formulario sigue guardando en `localStorage`
-  automáticamente, sin romperse.
+- ✅ **Fase 2 — GitHub:** publicado con GitHub Pages.
+- ✅ **Fase 3 — RSVP con backend real:** el formulario habla con el
+  backend real (Google Apps Script + Google Sheet con la lista real de
+  invitados) — ver `docs/RSVP-BACKEND.md`. Los links personalizados
+  (`?codigo=...`) ya funcionan en el sitio publicado.
 
 ## Subir a GitHub
 
