@@ -35,6 +35,7 @@
     initCopyButtons();
     initDynamicLinks();
     initMusicToggle();
+    var thanksModal = initThanksModal();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -45,7 +46,7 @@
     applyInvitationType(guestPromise);
     initGuestGreeting(guestPromise);
     initEnvelopeGate(guestPromise);
-    initRsvpForm(codigo, guestPromise);
+    initRsvpForm(codigo, guestPromise, thanksModal);
   }
 
   // Invitación solo a la ceremonia (tipo_invitacion en la lista de
@@ -344,18 +345,49 @@
         embed.appendChild(iframe);
       }
     });
-    var wa = document.querySelector("[data-whatsapp]");
-    if (wa && W.rsvp && W.rsvp.whatsapp) {
+    // querySelectorAll (no solo el primero): el botón de WhatsApp aparece
+    // más de una vez — junto al RSVP y de nuevo en el modal de agradecimiento.
+    var waButtons = document.querySelectorAll("[data-whatsapp]");
+    if (waButtons.length && W.rsvp && W.rsvp.whatsapp) {
       var text = W.rsvp.whatsappMessage ? "?text=" + encodeURIComponent(W.rsvp.whatsappMessage) : "";
-      wa.href = "https://wa.me/" + W.rsvp.whatsapp + text;
-      wa.hidden = false;
+      var href = "https://wa.me/" + W.rsvp.whatsapp + text;
+      waButtons.forEach(function (wa) {
+        wa.href = href;
+        wa.hidden = false;
+      });
       var pending = document.querySelector("[data-whatsapp-pending]");
       if (pending) pending.hidden = true;
     }
   }
 
+  // — modal de agradecimiento al confirmar el RSVP (sí / no asiste) —
+  function initThanksModal() {
+    var modal = document.querySelector("#rsvp-thanks");
+    if (!modal) return null;
+    var closeBtn = modal.querySelector("#rsvp-thanks-close");
+
+    function open(attending) {
+      modal.querySelectorAll("[data-thanks-attending]").forEach(function (el) { el.hidden = !attending; });
+      modal.querySelectorAll("[data-thanks-declined]").forEach(function (el) { el.hidden = attending; });
+      modal.hidden = false;
+      requestAnimationFrame(function () { modal.classList.add("is-open"); });
+    }
+    function close() {
+      modal.classList.remove("is-open");
+      setTimeout(function () { modal.hidden = true; }, 200);
+    }
+
+    closeBtn.addEventListener("click", close);
+    modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !modal.hidden) close();
+    });
+
+    return { open: open };
+  }
+
   // — formulario de confirmación —
-  function initRsvpForm(codigo, guestPromise) {
+  function initRsvpForm(codigo, guestPromise, thanksModal) {
     var form = document.querySelector("#rsvp-form");
     if (!form) return;
 
@@ -427,6 +459,7 @@
         .then(function () {
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
+          if (thanksModal) thanksModal.open(data.asistencia === "si");
           submitBtn.textContent = originalLabel;
         })
         .catch(function (err) {

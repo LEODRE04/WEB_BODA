@@ -34,7 +34,7 @@ window.WEDDING = {
   // (el bloque igual se ve, pero como "por confirmar"); en cuanto tengan
   // el local, pon aquí su nombre y dirección tal como harías con `venue`.
   venueReception: {
-    mapSearchQuery: null,
+    mapSearchQuery: "Av. La Molina 1935, La Molina, Lima, Perú",
     get mapEmbedSrc() {
       return this.mapSearchQuery ? "https://www.google.com/maps?q=" + encodeURIComponent(this.mapSearchQuery) + "&output=embed" : null;
     },

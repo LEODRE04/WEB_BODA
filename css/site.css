@@ -204,6 +204,18 @@ body { background: var(--color-neutral-100); }
   .rsvp-form .row { grid-template-columns: 1fr; }
 }
 
+/* — modal de agradecimiento (al confirmar el RSVP) — */
+.rsvp-thanks { opacity: 0; transition: opacity .2s ease; }
+.rsvp-thanks.is-open { opacity: 1; }
+.rsvp-thanks .dialog { position: relative; transform: translateY(10px) scale(.97); transition: transform .2s ease; }
+.rsvp-thanks.is-open .dialog { transform: translateY(0) scale(1); }
+.rsvp-thanks-close {
+  position: absolute; top: 14px; right: 14px; width: 28px; height: 28px;
+  border: none; border-radius: 999px; background: transparent; cursor: pointer;
+  font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.rsvp-thanks-close:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); }
+
 /* — FAQ — */
 .faq { padding: 56px 44px; background: var(--color-neutral-100); }
 .faq-head { text-align: center; margin-bottom: 28px; }
