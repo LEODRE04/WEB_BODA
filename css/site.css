@@ -140,23 +140,27 @@ body { background: var(--color-neutral-100); }
 .venue-card, .money-card { background: var(--color-bg); border-radius: 28px; padding: 20px 22px; }
 .venue-card { margin-top: 14px; }
 .money-card + .money-card { margin-top: 12px; }
+/* flex-wrap + radius moderado (no pastilla completa): con etiqueta +
+   valor monoespaciado largo (CCI, cuenta) + botón "Copiar", una pastilla
+   999px se deforma apenas el contenido no entra en una sola línea. La
+   etiqueta va siempre en su propia línea arriba para que value+botón
+   quepan holgados sin importar cuántas columnas tenga el grid. */
 .money-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-  background: var(--color-neutral-100); border-radius: 999px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 10px 14px;
+  background: var(--color-neutral-100); border-radius: 16px;
 }
-.money-row .value { font: 13.5px ui-monospace, Menlo, monospace; flex: 1; letter-spacing: .02em; }
+.money-row .value { font: 13.5px ui-monospace, Menlo, monospace; flex: 1 1 auto; min-width: 0; word-break: break-all; letter-spacing: .02em; }
 .money-row.copied .value::after { content: ' ✓ copiado'; color: var(--color-accent-2-700); font-family: var(--font-body); }
-.money-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); width: 88px; flex: none; }
+.money-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); flex: 1 0 100%; }
 @media (max-width: 860px) {
   .details-grid { grid-template-columns: 1fr; }
-  .money-label { width: auto; }
 }
 
 /* — mesa de regalos (sección propia, separada de "cuándo y dónde") — */
 .gifts { padding: 56px 44px; background: var(--color-bg); }
 .gifts-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px; max-width: 900px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px; max-width: 900px; margin: 0 auto; align-items: start;
 }
 .gifts-grid .money-card + .money-card { margin-top: 0; }
 
