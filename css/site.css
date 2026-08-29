@@ -103,19 +103,6 @@ body { background: var(--color-neutral-100); }
   .welcome-grid { grid-template-columns: 1fr; }
 }
 
-/* — galería — */
-.gallery { padding: 56px 44px; background: var(--color-neutral-100); }
-.gallery-head { display: flex; align-items: flex-end; gap: 32px; margin-bottom: 24px; flex-wrap: wrap; }
-.gallery-grid {
-  display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 210px 210px; gap: 14px;
-}
-.gallery-grid .photo { border-radius: 28px; }
-.gallery-grid .photo:first-child { grid-row: span 2; }
-@media (max-width: 720px) {
-  .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 160px 160px 160px; }
-  .gallery-grid .photo:first-child { grid-row: span 1; grid-column: span 2; height: 220px; }
-}
-
 /* — itinerario — */
 .itinerary { background: var(--color-surface); padding: 56px 44px; }
 .itinerary-head { text-align: center; margin-bottom: 34px; }
@@ -135,12 +122,16 @@ body { background: var(--color-neutral-100); }
   .timeline-time { font-size: 15px; }
 }
 
-/* — detalles (dónde + regalos) — */
+/* — detalles (cuándo y dónde) — */
 .details { padding: 56px 44px; background: var(--color-neutral-100); }
 .details-head { text-align: center; margin-bottom: 30px; }
-/* auto-fit: se adapta solo a 2 o 3 columnas según si la recepción está
-   oculta (invitación solo ceremonia) o visible. */
-.details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start; }
+/* auto-fit con tope de ancho por columna (no 1fr): con invitación solo
+   ceremonia queda una sola columna centrada en vez de estirarse a todo
+   el ancho de la sección. */
+.details-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+  gap: 24px; align-items: start; justify-content: center;
+}
 .details-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--color-accent-700); }
 .details-label.sage { color: var(--color-accent-2-700); }
 .details-heading { font-family: var(--font-heading); font-size: 26px; margin: 10px 0 12px; }
@@ -160,6 +151,14 @@ body { background: var(--color-neutral-100); }
   .details-grid { grid-template-columns: 1fr; }
   .money-label { width: auto; }
 }
+
+/* — mesa de regalos (sección propia, separada de "cuándo y dónde") — */
+.gifts { padding: 56px 44px; background: var(--color-bg); }
+.gifts-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px; max-width: 900px; margin: 0 auto;
+}
+.gifts-grid .money-card + .money-card { margin-top: 0; }
 
 /* — código de vestimenta — */
 .dresscode {

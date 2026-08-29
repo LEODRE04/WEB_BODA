@@ -240,6 +240,27 @@
         audio.play().then(function () { setPlayingUI(true); }).catch(function () { setPlayingUI(false); });
       });
     }
+
+    // Pausa sola al salir de la pestaña (cambiar de pestaña, minimizar) o del
+    // navegador (cambiar de app con el navegador de fondo), y reanuda al
+    // volver — pero solo si fue ella la que pausó; si el invitado la pausó
+    // a mano con el botón, se queda pausada aunque vuelva a la pestaña.
+    var pausedAutomatically = false;
+    function handleAutoPause(shouldPause) {
+      if (shouldPause) {
+        if (!audio.paused) {
+          audio.pause();
+          pausedAutomatically = true;
+          setPlayingUI(false);
+        }
+      } else if (pausedAutomatically) {
+        pausedAutomatically = false;
+        audio.play().then(function () { setPlayingUI(true); }).catch(function () {});
+      }
+    }
+    document.addEventListener("visibilitychange", function () { handleAutoPause(document.hidden); });
+    window.addEventListener("blur", function () { handleAutoPause(true); });
+    window.addEventListener("focus", function () { handleAutoPause(false); });
   }
 
   // — copiar Yape / cuentas bancarias —
