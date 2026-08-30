@@ -352,7 +352,7 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 .petal {
   position: absolute; top: -8vh; left: 0;
   width: var(--size, 14px); height: var(--size, 14px);
-  background: linear-gradient(135deg, #ffffff, #fdf3f0 65%, #f7d9d2);
+  background: linear-gradient(135deg, #fdf0ee, #f3c9c3 55%, #e29891);
   border-radius: 100% 0 100% 0;
   opacity: var(--opacity, .7);
   box-shadow: 0 1px 3px color-mix(in srgb, #4a3826 12%, transparent);
