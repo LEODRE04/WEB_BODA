@@ -11,7 +11,7 @@
    tipografía y algunos acabados (sombras, viñetas). */
 
 :root {
-  /* — paleta: marfil cálido + dorado + bronce (reemplaza crema/terracota/salvia) — */
+  /* — paleta: marfil cálido + terracota + verde follaje oscuro — */
   --color-bg: #fdfaf3;
   --color-surface: #f6ecd8;
   --color-text: #4a3826;
@@ -27,29 +27,29 @@
   --color-neutral-800: #57492f;
   --color-neutral-900: #372c1d;
 
-  /* dorado — acento principal */
-  --color-accent: #b8873f;
-  --color-accent-100: #fdf6e9;
-  --color-accent-200: #f8e8c8;
-  --color-accent-300: #edd29c;
-  --color-accent-400: #ddb46c;
-  --color-accent-500: #c99a4c;
-  --color-accent-600: #b8873f;
-  --color-accent-700: #966c30;
-  --color-accent-800: #6f4f24;
-  --color-accent-900: #4a3518;
+  /* terracota medio — acento principal (antes dorado) */
+  --color-accent: #bc5a35;
+  --color-accent-100: #fbeae2;
+  --color-accent-200: #f6d2c0;
+  --color-accent-300: #eeb195;
+  --color-accent-400: #de8a66;
+  --color-accent-500: #cc6f49;
+  --color-accent-600: #bc5a35;
+  --color-accent-700: #96472a;
+  --color-accent-800: #6f351f;
+  --color-accent-900: #4a2314;
 
-  /* bronce — acento secundario (recepción, etiquetas) */
-  --color-accent-2: #a5643d;
-  --color-accent-2-100: #f7ece3;
-  --color-accent-2-200: #ecd4c0;
-  --color-accent-2-300: #dcb08c;
-  --color-accent-2-400: #c98c60;
-  --color-accent-2-500: #b5754a;
-  --color-accent-2-600: #a5643d;
-  --color-accent-2-700: #824e30;
-  --color-accent-2-800: #5f3a24;
-  --color-accent-2-900: #3d2517;
+  /* verde follaje oscuro — acento secundario (antes bronce) */
+  --color-accent-2: #4a5c34;
+  --color-accent-2-100: #e8ece0;
+  --color-accent-2-200: #d1dbc2;
+  --color-accent-2-300: #b0c093;
+  --color-accent-2-400: #869c66;
+  --color-accent-2-500: #647848;
+  --color-accent-2-600: #4a5c34;
+  --color-accent-2-700: #3a4828;
+  --color-accent-2-800: #2b361d;
+  --color-accent-2-900: #1c2412;
 
   /* tipografía: se queda la original (Caprasimo/Figtree, ver tokens.css) —
      este tema solo toca color/sombras/forma, no letras */
