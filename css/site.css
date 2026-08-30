@@ -378,3 +378,33 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .petals { display: none; }
 }
+
+/* — marco floral: rosas crema/doradas + hojas salvia (img/floral-corner.png,
+   fondo transparente) en las esquinas superiores de una tarjeta, espejado
+   para el lado derecho. Agregar la clase "floral-frame" a cualquier
+   tarjeta para aplicarlo ahí también — no requiere tocar el CSS. — */
+.floral-frame { position: relative; }
+.floral-frame::before, .floral-frame::after {
+  content: ""; position: absolute; top: -20px; width: 100px; height: 111px;
+  background: url('../img/floral-corner.png') no-repeat center / contain;
+  pointer-events: none; z-index: 1;
+}
+.floral-frame::before { left: -20px; }
+.floral-frame::after { right: -20px; transform: scaleX(-1); }
+@media (max-width: 480px) {
+  .floral-frame::before, .floral-frame::after { width: 64px; height: 71px; top: -10px; }
+  .floral-frame::before { left: -10px; }
+  .floral-frame::after { right: -10px; }
+}
+
+/* — tarjeta "sobre": convierte una sección ancha de fondo corrido en una
+   sola tarjeta flotante centrada (mismo tratamiento que .prayer-card),
+   para poder enmarcarla con .floral-frame. Combinar ambas clases:
+   class="envelope-card floral-frame". — */
+.envelope-card {
+  max-width: 900px; margin: 0 auto; background: var(--color-bg);
+  border-radius: 32px; padding: 48px 44px; box-shadow: var(--shadow-md);
+}
+@media (max-width: 640px) {
+  .envelope-card { padding: 34px 22px; border-radius: 24px; }
+}
