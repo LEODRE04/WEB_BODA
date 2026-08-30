@@ -35,6 +35,7 @@
     initCopyButtons();
     initDynamicLinks();
     initMusicToggle();
+    initPetals();
     var thanksModal = initThanksModal();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
@@ -217,6 +218,37 @@
 
   function pad2(n) {
     return n < 10 ? "0" + n : String(n);
+  }
+
+  // — pétalos cayendo (decorativo): la forma y la caída están en CSS
+  // (.petal, @keyframes petal-fall en site.css) — acá solo se generan N
+  // pétalos con tamaño/velocidad/balanceo al azar (para que no caigan
+  // todos idénticos, se vería mecánico) y se reparten por el ancho de la
+  // pantalla. Respeta "menos movimiento": si el visitante lo prefiere, ni
+  // siquiera se generan (además el CSS los oculta por si acaso). —
+  function initPetals() {
+    var container = document.querySelector(".petals");
+    if (!container) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var count = window.innerWidth < 640 ? 8 : 14;
+    for (var i = 0; i < count; i++) {
+      var petal = document.createElement("span");
+      petal.className = "petal";
+      var size = 8 + Math.random() * 10; // 8-18px
+      var duration = 11 + Math.random() * 9; // 11-20s: caída lenta y pareja
+      var sway = 20 + Math.random() * 45; // 20-65px de balanceo
+      var opacity = 0.5 + Math.random() * 0.35;
+      petal.style.left = (Math.random() * 100).toFixed(1) + "%";
+      petal.style.setProperty("--size", size.toFixed(1) + "px");
+      petal.style.setProperty("--duration", duration.toFixed(1) + "s");
+      // delay negativo: arranca a mitad de camino de su propia animación,
+      // así no caen todos juntos desde arriba al cargar la página.
+      petal.style.setProperty("--delay", (-Math.random() * duration).toFixed(1) + "s");
+      petal.style.setProperty("--sway", sway.toFixed(0) + "px");
+      petal.style.setProperty("--opacity", opacity.toFixed(2));
+      container.appendChild(petal);
+    }
   }
 
   // — música de fondo (tema "elegante dorado"): arranca al abrir el sobre

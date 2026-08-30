@@ -342,3 +342,30 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   width: auto; opacity: 1; padding-right: 18px;
 }
 .whatsapp-fab:active { background: #17a54c; transform: scale(.96); }
+
+/* — pétalos cayendo (decorativo) — forma dibujada con CSS (óvalo con dos
+   esquinas rectas = silueta de pétalo), sin imágenes. Cada pétalo trae sus
+   propios --size/--duration/--delay/--sway/--opacity puestos por JS
+   (initPetals en site.js) para que no caigan todos igual — ver
+   docs/FOTOS.md si algún día se preferiría una imagen real en su lugar. */
+.petals { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+.petal {
+  position: absolute; top: -8vh; left: 0;
+  width: var(--size, 14px); height: var(--size, 14px);
+  background: linear-gradient(135deg, #ffffff, #fdf3f0 65%, #f7d9d2);
+  border-radius: 100% 0 100% 0;
+  opacity: var(--opacity, .7);
+  box-shadow: 0 1px 3px color-mix(in srgb, #4a3826 12%, transparent);
+  animation: petal-fall var(--duration, 13s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes petal-fall {
+  0%   { transform: translate(0, -8vh) rotate(0deg); }
+  25%  { transform: translate(var(--sway, 30px), 21vh) rotate(90deg); }
+  50%  { transform: translate(0, 50vh) rotate(180deg); }
+  75%  { transform: translate(calc(var(--sway, 30px) * -1), 79vh) rotate(270deg); }
+  100% { transform: translate(0, 108vh) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .petals { display: none; }
+}
