@@ -1,0 +1,37 @@
+[
+  {
+    "id": "vajilla-seis",
+    "nombre": "Vajilla para seis",
+    "descripcion": "Para las cenas de los domingos con toda la familia.",
+    "foto_url": "",
+    "precio": 540
+  },
+  {
+    "id": "batidora-pie",
+    "nombre": "Batidora de pie",
+    "descripcion": "Para los postres que André prometió aprender a hacer.",
+    "foto_url": "",
+    "precio": 890
+  },
+  {
+    "id": "juego-ollas",
+    "nombre": "Juego de ollas",
+    "descripcion": "Las de toda la vida, que duran años.",
+    "foto_url": "",
+    "precio": 760
+  },
+  {
+    "id": "sillas-comedor",
+    "nombre": "Sillas para el comedor",
+    "descripcion": "Para que nadie se quede parado cuando hay visita.",
+    "foto_url": "",
+    "precio": 480
+  },
+  {
+    "id": "luna-de-miel",
+    "nombre": "Noche de luna de miel",
+    "descripcion": "Un aporte para la primera noche de casados.",
+    "foto_url": "",
+    "precio": 600
+  }
+]
