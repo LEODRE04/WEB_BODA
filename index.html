@@ -115,24 +115,28 @@
 
   <!-- Bienvenida -->
   <section class="welcome">
-    <div class="photo">
-      <img src="img/p1.jpg" alt="André y Krisli">
-      <span class="photo-label">Foto — coloca img/p1.jpg</span>
-    </div>
-    <div>
-      <div class="section-kicker">Bienvenidos a nuestra boda</div>
-      <h2 class="section-title">Queremos celebrar contigo</h2>
-      <p class="section-lede" style="max-width:48ch">Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.</p>
-      <div class="welcome-grid">
-        <div>
-          <div class="welcome-item"><span class="dot accent"></span><div class="details-label">La ceremonia</div></div>
-          <p class="timeline-desc">Sábado 9 de enero de 2027, 4:00 p.m. Iglesia Vida Nueva Rinconada.</p>
-          <div class="welcome-venue-photo"><img src="img/ceremonia.jpg" alt="Iglesia Vida Nueva Rinconada"></div>
+    <div class="envelope-card floral-frame">
+      <div class="welcome-inner">
+        <div class="photo">
+          <img src="img/p1.jpg" alt="André y Krisli">
+          <span class="photo-label">Foto — coloca img/p1.jpg</span>
         </div>
-        <div data-reception-only>
-          <div class="welcome-item"><span class="dot sage"></span><div class="details-label sage">La recepción</div></div>
-          <p class="timeline-desc">En un local aparte, después de la ceremonia. Av. La Molina 1935, La Molina.</p>
-          <div class="welcome-venue-photo"><img src="img/recepcion.jpg" alt="Local de la recepción"></div>
+        <div>
+          <div class="section-kicker">Bienvenidos a nuestra boda</div>
+          <h2 class="section-title">Queremos celebrar contigo</h2>
+          <p class="section-lede" style="max-width:48ch">Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.</p>
+          <div class="welcome-grid">
+            <div>
+              <div class="welcome-item"><span class="dot accent"></span><div class="details-label">La ceremonia</div></div>
+              <p class="timeline-desc">Sábado 9 de enero de 2027, 4:00 p.m. Iglesia Vida Nueva Rinconada.</p>
+              <div class="welcome-venue-photo"><img src="img/ceremonia.jpg" alt="Iglesia Vida Nueva Rinconada"></div>
+            </div>
+            <div data-reception-only>
+              <div class="welcome-item"><span class="dot sage"></span><div class="details-label sage">La recepción</div></div>
+              <p class="timeline-desc">En un local aparte, después de la ceremonia. Av. La Molina 1935, La Molina.</p>
+              <div class="welcome-venue-photo"><img src="img/recepcion.jpg" alt="Local de la recepción"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -258,24 +262,29 @@
   </section>
 
   <!-- Código de vestimenta -->
-  <section class="dresscode">
-    <div style="flex:1;min-width:280px">
-      <div class="details-label">Código de vestimenta</div>
-      <div class="details-heading" style="font-size:24px;margin:8px 0 6px">Formal elegante</div>
-      <p style="margin:0;font-size:14px;line-height:1.65;color:color-mix(in srgb, var(--color-text) 72%, transparent)">Ellos, terno oscuro y corbata. Ellas, vestido largo o midi. Te pedimos con cariño reservar el blanco para la novia.</p>
-    </div>
-    <div class="dresscode-swatches">
-      <span style="background:#2b2118"></span>
-      <span style="background:#6b4a2c"></span>
-      <span style="background:#b8873f"></span>
-      <span style="background:#7a3b30"></span>
-      <span style="background:#e4d4b0"></span>
+  <section class="dresscode-section">
+    <div class="envelope-card floral-frame">
+      <div class="dresscode">
+        <div style="flex:1;min-width:280px">
+          <div class="details-label">Código de vestimenta</div>
+          <div class="details-heading" style="font-size:24px;margin:8px 0 6px">Formal elegante</div>
+          <p style="margin:0;font-size:14px;line-height:1.65;color:color-mix(in srgb, var(--color-text) 72%, transparent)">Ellos, terno oscuro y corbata. Ellas, vestido largo o midi. Te pedimos con cariño reservar el blanco para la novia.</p>
+        </div>
+        <div class="dresscode-swatches">
+          <span style="background:#2b2118"></span>
+          <span style="background:#6b4a2c"></span>
+          <span style="background:#b8873f"></span>
+          <span style="background:#7a3b30"></span>
+          <span style="background:#e4d4b0"></span>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- RSVP -->
   <section id="rsvp" class="rsvp">
-    <div class="rsvp-grid">
+    <div class="envelope-card floral-frame">
+      <div class="rsvp-grid">
       <div>
         <div class="section-kicker">Confirmación</div>
         <h2 class="section-title" style="margin:12px 0 14px">¿Nos acompañas?</h2>
@@ -294,7 +303,7 @@
         </div>
       </div>
 
-      <form class="rsvp-form floral-frame" id="rsvp-form" novalidate>
+      <form class="rsvp-form" id="rsvp-form" novalidate>
         <input type="hidden" name="codigo" id="rsvp-codigo" value="">
         <p class="rsvp-guest-banner" id="rsvp-guest-banner" hidden></p>
 
@@ -318,6 +327,7 @@
         </div>
         <p class="rsvp-success" role="status">Gracias por confirmar. Guardamos tu respuesta en este dispositivo — cuando esté lista la confirmación en línea definitiva, te la reenviaremos igual por si acaso.</p>
       </form>
+    </div>
     </div>
   </section>
 
@@ -356,18 +366,45 @@
      .dialog-backdrop/.dialog, ya definidos en tokens.css pero sin usar en
      ninguna otra parte del sitio. -->
 <div class="dialog-backdrop rsvp-thanks" id="rsvp-thanks" hidden>
-  <div class="dialog">
+  <div class="dialog rsvp-thanks-dialog">
     <button type="button" class="rsvp-thanks-close" id="rsvp-thanks-close" aria-label="Cerrar">✕</button>
-    <div class="dialog-title" data-thanks-attending>Gracias por acompañarnos</div>
-    <div class="dialog-title" data-thanks-declined hidden>Gracias de todo corazón</div>
-    <p class="dialog-body" data-thanks-attending>Nos hace muy felices que vayas a compartir con nosotros este día tan especial. Nos vemos pronto.</p>
-    <p class="dialog-body" data-thanks-declined hidden>Entendemos que la distancia u otros compromisos a veces lo hacen difícil. Te sentimos cerca igual, y agradecemos mucho que te hayas tomado el tiempo de avisarnos.</p>
-    <div class="dialog-actions" style="justify-content:flex-start;align-items:center">
-      <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">¿Alguna duda?</span>
-      <a class="whatsapp-fab" data-whatsapp hidden href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
-        <span class="whatsapp-fab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.005c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0 0 12.04 2Zm0 1.67c2.24 0 4.35.87 5.94 2.46a8.23 8.23 0 0 1 2.42 5.85c0 4.56-3.71 8.27-8.28 8.27a8.3 8.3 0 0 1-4.22-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.27-4.4c0-4.56 3.72-8.27 8.2-8.27ZM8.9 6.98c-.17 0-.45.06-.68.32-.23.26-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.8 2.9 4.45 3.94 2.2.87 2.65.7 3.13.65.48-.04 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3-.26-.13-1.55-.77-1.79-.85-.24-.09-.41-.13-.59.13-.17.26-.67.85-.82 1.02-.15.17-.3.19-.56.06-.26-.13-1.1-.4-2.1-1.29-.78-.69-1.3-1.55-1.46-1.81-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.59-1.44-.82-1.97-.21-.5-.43-.44-.59-.45-.15-.01-.32-.01-.5-.01Z"/></svg></span>
-        <span class="whatsapp-fab-text">Escríbenos</span>
-      </a>
+
+    <div class="rsvp-thanks-photo">
+      <img src="img/p3.jpg" alt="André y Krisli" data-thanks-attending>
+      <img src="img/p2.jpg" alt="André y Krisli" data-thanks-declined hidden>
+    </div>
+
+    <div class="rsvp-thanks-content">
+      <div class="rsvp-thanks-icon" data-thanks-attending aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="rsvp-thanks-icon sage" data-thanks-declined hidden aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10.2-9.1C.4 9.7 0 8.4 0 7.1 0 3.9 2.5 1.5 5.6 1.5c1.9 0 3.6.9 4.9 2.4C11.8 2.4 13.5 1.5 15.4 1.5c3.1 0 5.6 2.4 5.6 5.6 0 1.3-.4 2.6-1.8 4.8C16.5 16.4 9 21 9 21"/></svg>
+      </div>
+
+      <div class="section-kicker" data-thanks-attending>Confirmación recibida</div>
+      <div class="section-kicker sage" data-thanks-declined hidden>Respuesta recibida</div>
+
+      <div class="dialog-title" data-thanks-attending>¡Nos alegra tenerte aquí!</div>
+      <div class="dialog-title" data-thanks-declined hidden>Lamentamos que no puedas venir</div>
+
+      <p class="dialog-body" id="rsvp-thanks-msg-yes" data-thanks-attending>Gracias por decir que sí. Saber que vas a estar con nosotros ese día nos hace muy felices — ya tienes tu lugar reservado.</p>
+      <p class="dialog-body" id="rsvp-thanks-msg-no" data-thanks-declined hidden>Gracias por avisarnos. Te vamos a extrañar ese día, pero entendemos y agradecemos mucho que te hayas tomado el tiempo de contarnos.</p>
+
+      <div class="rsvp-thanks-recap" data-thanks-attending>
+        <div><span>Asistentes</span><strong id="rsvp-thanks-count">1</strong></div>
+        <div><span>Cuándo</span><strong id="rsvp-thanks-when"></strong></div>
+        <div><span>Dónde</span><strong id="rsvp-thanks-where"></strong></div>
+      </div>
+
+      <div class="dialog-actions" style="justify-content:center;align-items:center;flex-wrap:wrap">
+        <a class="btn btn-secondary" href="#itinerario" id="rsvp-thanks-itinerary" data-thanks-attending style="font-size:13.5px">Ver itinerario</a>
+        <a class="whatsapp-fab" data-whatsapp hidden href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+          <span class="whatsapp-fab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.005c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0 0 12.04 2Zm0 1.67c2.24 0 4.35.87 5.94 2.46a8.23 8.23 0 0 1 2.42 5.85c0 4.56-3.71 8.27-8.28 8.27a8.3 8.3 0 0 1-4.22-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.27-4.4c0-4.56 3.72-8.27 8.2-8.27ZM8.9 6.98c-.17 0-.45.06-.68.32-.23.26-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.8 2.9 4.45 3.94 2.2.87 2.65.7 3.13.65.48-.04 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3-.26-.13-1.55-.77-1.79-.85-.24-.09-.41-.13-.59.13-.17.26-.67.85-.82 1.02-.15.17-.3.19-.56.06-.26-.13-1.1-.4-2.1-1.29-.78-.69-1.3-1.55-1.46-1.81-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.59-1.44-.82-1.97-.21-.5-.43-.44-.59-.45-.15-.01-.32-.01-.5-.01Z"/></svg></span>
+          <span class="whatsapp-fab-text">Escríbenos</span>
+        </a>
+      </div>
+      <p class="rsvp-note" id="rsvp-thanks-note" style="margin-top:14px"></p>
     </div>
   </div>
 </div>

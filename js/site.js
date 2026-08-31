@@ -427,14 +427,45 @@
   }
 
   // — modal de agradecimiento al confirmar el RSVP (sí / no asiste) —
+  // Mensaje personalizado con el nombre y el número de asistentes que
+  // acaba de escribir en el formulario, y un resumen (cuándo/dónde) con
+  // los datos de config.js — así no queda un texto genérico igual para
+  // todos. Basado en un mockup revisado en claude.ai/design.
   function initThanksModal() {
     var modal = document.querySelector("#rsvp-thanks");
     if (!modal) return null;
+    var W = window.WEDDING || {};
     var closeBtn = modal.querySelector("#rsvp-thanks-close");
+    var itineraryLink = modal.querySelector("#rsvp-thanks-itinerary");
+    var msgYes = modal.querySelector("#rsvp-thanks-msg-yes");
+    var msgNo = modal.querySelector("#rsvp-thanks-msg-no");
+    var countEl = modal.querySelector("#rsvp-thanks-count");
+    var whenEl = modal.querySelector("#rsvp-thanks-when");
+    var whereEl = modal.querySelector("#rsvp-thanks-where");
+    var noteEl = modal.querySelector("#rsvp-thanks-note");
+    var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
 
-    function open(attending) {
+    function open(attending, info) {
+      info = info || {};
+      var nombre = (info.nombre || "").trim().split(" ")[0]; // solo el primer nombre, más cercano
+      var asistentes = parseInt(info.num_asistentes, 10) || 1;
+
       modal.querySelectorAll("[data-thanks-attending]").forEach(function (el) { el.hidden = !attending; });
       modal.querySelectorAll("[data-thanks-declined]").forEach(function (el) { el.hidden = attending; });
+
+      if (attending) {
+        msgYes.textContent = (nombre ? "Gracias por decir que sí, " + nombre + ". " : "Gracias por decir que sí. ") +
+          "Saber que vas a estar con nosotros ese día nos hace muy felices — ya tienes tu lugar reservado.";
+        countEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
+        whenEl.textContent = W.weddingDateLabel || "";
+        whereEl.textContent = (W.venue && W.venue.name) || "";
+        noteEl.textContent = "Te esperamos con muchas ganas. Puedes editar tu respuesta hasta el " + editUntil + ".";
+      } else {
+        msgNo.textContent = (nombre ? "Gracias por avisarnos, " + nombre + ". " : "Gracias por avisarnos. ") +
+          "Te vamos a extrañar ese día, pero entendemos y agradecemos mucho que te hayas tomado el tiempo de contarnos.";
+        noteEl.textContent = "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";
+      }
+
       modal.hidden = false;
       requestAnimationFrame(function () { modal.classList.add("is-open"); });
     }
@@ -448,6 +479,10 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !modal.hidden) close();
     });
+    // El link de "Ver itinerario" navega detrás del modal (que es
+    // position:fixed y lo tapa todo) — hay que cerrarlo para que el
+    // scroll a la sección se vea.
+    if (itineraryLink) itineraryLink.addEventListener("click", close);
 
     return { open: open };
   }
@@ -525,7 +560,7 @@
         .then(function () {
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
-          if (thanksModal) thanksModal.open(data.asistencia === "si");
+          if (thanksModal) thanksModal.open(data.asistencia === "si", data);
           submitBtn.textContent = originalLabel;
         })
         .catch(function (err) {

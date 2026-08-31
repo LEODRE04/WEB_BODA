@@ -104,10 +104,8 @@ body { background: var(--color-neutral-100); }
 }
 
 /* — bienvenida — */
-.welcome {
-  display: grid; grid-template-columns: 400px 1fr; gap: 40px;
-  padding: 56px 44px; align-items: center; background: var(--color-neutral-100);
-}
+.welcome { padding: 56px 44px; background: var(--color-neutral-100); }
+.welcome-inner { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: center; }
 .welcome .photo { border-radius: 0 0 200px 200px; height: 420px; box-shadow: var(--shadow-lg); }
 .welcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
 .welcome-item { display: flex; align-items: center; gap: 10px; }
@@ -124,7 +122,7 @@ body { background: var(--color-neutral-100); }
 .welcome-venue-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 480px) { .welcome-venue-photo { height: 110px; } }
 @media (max-width: 860px) {
-  .welcome { grid-template-columns: 1fr; }
+  .welcome-inner { grid-template-columns: 1fr; }
   .welcome .photo { height: 280px; border-radius: 24px; }
   .welcome-grid { grid-template-columns: 1fr; }
 }
@@ -191,16 +189,20 @@ body { background: var(--color-neutral-100); }
 .gifts-grid .money-card + .money-card { margin-top: 0; }
 
 /* — código de vestimenta — */
-.dresscode {
-  margin: 0 44px 56px; background: var(--color-bg); border-radius: 32px; padding: 24px 26px;
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
-}
+.dresscode-section { padding: 56px 44px; background: var(--color-neutral-100); }
+/* el texto acá va pegado a la izquierda (no centrado como los demás
+   "-head"), así que sin este padding extra el ramo de la esquina tapaba
+   el principio de "CÓDIGO DE VESTIMENTA". */
+.dresscode-section .envelope-card { padding-top: 82px; }
+.dresscode { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .dresscode-swatches { display: flex; gap: 9px; }
 .dresscode-swatches span { width: 34px; height: 34px; border-radius: 999px; }
-@media (max-width: 560px) { .dresscode { margin: 0 16px 40px; } }
 
 /* — RSVP — */
 .rsvp { background: var(--color-surface); padding: 56px 44px; }
+/* "Confirmación" va pegado a la izquierda igual que en .dresscode — sin
+   este padding extra el ramo de la esquina tapaba el principio. */
+.rsvp .envelope-card { padding-top: 82px; }
 .rsvp-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: start; }
 .rsvp .photo { border-radius: 0 0 160px 160px; height: 300px; box-shadow: var(--shadow-lg); margin-top: 4px; }
 .rsvp-form { background: var(--color-neutral-100); border-radius: 32px; padding: 28px 30px; box-shadow: var(--shadow-md); }
@@ -241,6 +243,39 @@ body { background: var(--color-neutral-100); }
   font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
 .rsvp-thanks-close:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); }
+
+/* — modal de agradecimiento: foto + ícono + resumen de la respuesta.
+   Basado en un mockup hecho en claude.ai/design, adaptado a lo que el
+   formulario realmente tiene (sin menú/acompañantes por nombre, que ese
+   mockup sí traía) y a los tokens de color/tipografía del sitio en vez
+   de sus valores propios. — */
+.rsvp-thanks-dialog { width: min(460px, 100%); padding: 0; overflow: hidden; text-align: center; gap: 0; }
+.rsvp-thanks-photo { height: 150px; position: relative; overflow: hidden; }
+.rsvp-thanks-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rsvp-thanks-photo::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 35%, var(--color-surface) 94%);
+}
+.rsvp-thanks-content { padding: 0 30px 30px; margin-top: -42px; position: relative; }
+.rsvp-thanks-icon {
+  width: 64px; height: 64px; border-radius: 999px; margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-accent); color: #fff; box-shadow: var(--shadow-md);
+}
+.rsvp-thanks-icon.sage { background: var(--color-accent-2); }
+.rsvp-thanks-content .section-kicker { text-align: center; }
+.rsvp-thanks-content .dialog-title { margin: 10px 0 12px; font-size: 26px; }
+.rsvp-thanks-content .dialog-body { font-size: 14.5px; line-height: 1.65; }
+.rsvp-thanks-recap {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px;
+  background: var(--color-bg); border-radius: 20px; padding: 14px 12px; margin: 16px 0 4px;
+  text-align: left;
+}
+.rsvp-thanks-recap span {
+  display: block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.rsvp-thanks-recap strong { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 600; }
 
 /* — FAQ — */
 .faq { padding: 56px 44px; background: var(--color-neutral-100); }
