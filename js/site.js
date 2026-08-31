@@ -263,12 +263,19 @@
 
     var iconPlaying = btn.querySelector(".icon-playing");
     var iconPaused = btn.querySelector(".icon-paused");
+    var label = btn.querySelector("#music-toggle-text");
 
     function setPlayingUI(isPlaying) {
-      iconPlaying.hidden = !isPlaying;
-      iconPaused.hidden = isPlaying;
+      // .hidden (la propiedad, no el atributo) no existe en elementos SVG,
+      // así que asignarla no hacía nada — el ícono nunca cambiaba. Se
+      // alterna el atributo "hidden" directamente, que sí funciona en
+      // cualquier elemento vía la regla [hidden]{display:none} del navegador.
+      iconPlaying.toggleAttribute("hidden", !isPlaying);
+      iconPaused.toggleAttribute("hidden", isPlaying);
+      var text = isPlaying ? "Pausar música" : "Reanudar música";
       btn.setAttribute("aria-pressed", String(isPlaying));
-      btn.setAttribute("aria-label", isPlaying ? "Pausar música" : "Reanudar música");
+      btn.setAttribute("aria-label", text);
+      if (label) label.textContent = text;
     }
 
     btn.addEventListener("click", function () {

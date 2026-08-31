@@ -297,14 +297,31 @@ body { background: var(--color-neutral-100); }
 .prayer-card p { margin: 0 0 4px; font-size: 15px; line-height: 1.7; color: color-mix(in srgb, var(--color-text) 82%, transparent); }
 .prayer-signature { margin-top: 18px !important; font-family: var(--font-heading); font-size: 17px; color: var(--color-accent-700); }
 
-/* — botón flotante de música — */
+/* — botón flotante de música: círculo con ícono de pausa/play que se
+   expande a pastilla con texto al pasar el mouse (o enfocarlo con
+   teclado), igual que .whatsapp-fab — para que quede claro que ese
+   botón controla la canción de fondo y no un ícono de volumen genérico. */
 .music-toggle {
   position: fixed; right: 20px; bottom: 20px; z-index: 40;
-  width: 46px; height: 46px; border-radius: 999px; border: none; cursor: pointer;
-  background: var(--color-accent); color: #fff; display: flex; align-items: center; justify-content: center;
+  display: inline-flex; align-items: center; width: 46px; height: 46px;
+  border-radius: 999px; border: none; cursor: pointer; overflow: hidden;
+  background: var(--color-accent); color: #fff;
   box-shadow: var(--shadow-md);
+  transition: width .3s ease, background-color .15s ease, transform .1s ease;
 }
-.music-toggle:hover { background: var(--color-accent-600); }
+.music-toggle-icon {
+  width: 46px; height: 46px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.music-toggle-text {
+  width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+  font-size: 14px; font-weight: 600; transition: width .3s ease, opacity .3s ease;
+}
+.music-toggle:hover, .music-toggle:focus-visible { width: 168px; background: var(--color-accent-600); }
+.music-toggle:hover .music-toggle-text, .music-toggle:focus-visible .music-toggle-text {
+  width: auto; opacity: 1; padding-right: 18px;
+}
+.music-toggle:active { transform: scale(.96); }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
