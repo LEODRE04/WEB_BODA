@@ -402,22 +402,42 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .petals { display: none; }
 }
 
-/* — marco floral: rosas crema/doradas + hojas salvia (img/floral-corner.png,
-   fondo transparente) en las esquinas superiores de una tarjeta, espejado
-   para el lado derecho. Agregar la clase "floral-frame" a cualquier
-   tarjeta para aplicarlo ahí también — no requiere tocar el CSS. — */
+/* — marco floral: ramo acuarela terracota/durazno + hojas salvia y doradas
+   (img/floral-corner.png, fondo transparente) en las esquinas superiores
+   de una tarjeta, espejado para el lado derecho. Agregar la clase
+   "floral-frame" a cualquier tarjeta para aplicarlo ahí también — no
+   requiere tocar el CSS. El recuadro es casi cuadrado (relación real del
+   ramo, 240×238) — antes era más alto que ancho, ajustado al asset previo. — */
 .floral-frame { position: relative; }
 .floral-frame::before, .floral-frame::after {
-  content: ""; position: absolute; top: -20px; width: 100px; height: 111px;
+  content: ""; position: absolute; top: -22px; width: 106px; height: 105px;
   background: url('../img/floral-corner.png') no-repeat center / contain;
   pointer-events: none; z-index: 1;
 }
-.floral-frame::before { left: -20px; }
-.floral-frame::after { right: -20px; transform: scaleX(-1); }
+.floral-frame::before { left: -22px; }
+.floral-frame::after { right: -22px; transform: scaleX(-1); }
+
+/* — en la portada (el sobre), el marco cuelga de .envelope-gate-inner,
+   que es angosto (max-width 440px) y queda centrado en toda la pantalla
+   — así que a los -22px de siempre, las dos flores terminaban pegadas
+   una a la otra cerca del centro en vez de ir hacia los bordes reales de
+   la pantalla. Acá se separan usando position:fixed + porcentaje, para
+   que seas la pantalla ancha que sea, el ramo quede cerca del borde real
+   y no del borde del bloque de texto. Solo aplica desde tablet/desktop —
+   en celular la pantalla ya es tan angosta como el bloque de texto, así
+   que se deja el comportamiento normal (pegado al bloque). — */
+@media (min-width: 700px) {
+  .envelope-gate .floral-frame::before,
+  .envelope-gate .floral-frame::after {
+    position: fixed; top: 8%; width: 132px; height: 131px;
+  }
+  .envelope-gate .floral-frame::before { left: 5%; }
+  .envelope-gate .floral-frame::after { right: 5%; }
+}
 @media (max-width: 480px) {
-  .floral-frame::before, .floral-frame::after { width: 64px; height: 71px; top: -10px; }
-  .floral-frame::before { left: -10px; }
-  .floral-frame::after { right: -10px; }
+  .floral-frame::before, .floral-frame::after { width: 68px; height: 67px; top: -11px; }
+  .floral-frame::before { left: -11px; }
+  .floral-frame::after { right: -11px; }
 }
 
 /* — tarjeta "sobre": convierte una sección ancha de fondo corrido en una
