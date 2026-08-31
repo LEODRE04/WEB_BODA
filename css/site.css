@@ -304,8 +304,8 @@ body { background: var(--color-neutral-100); }
 .music-toggle {
   position: fixed; right: 20px; bottom: 20px; z-index: 40;
   display: inline-flex; align-items: center; width: 46px; height: 46px;
-  border-radius: 999px; border: none; cursor: pointer; overflow: hidden;
-  background: var(--color-accent); color: #fff;
+  padding: 0; border-radius: 999px; border: none; cursor: pointer; overflow: hidden;
+  background: var(--color-accent); color: #fff; font-family: inherit;
   box-shadow: var(--shadow-md);
   transition: width .3s ease, background-color .15s ease, transform .1s ease;
 }
@@ -317,8 +317,14 @@ body { background: var(--color-neutral-100); }
   width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
   font-size: 14px; font-weight: 600; transition: width .3s ease, opacity .3s ease;
 }
-.music-toggle:hover, .music-toggle:focus-visible { width: 168px; background: var(--color-accent-600); }
-.music-toggle:hover .music-toggle-text, .music-toggle:focus-visible .music-toggle-text {
+/* "is-revealed" reproduce el mismo estado que :hover pero controlado por
+   JS: se agrega solo (mostrando la pastilla un momento) apenas aparece el
+   botón y cada vez que se toca — en el celular no hay :hover que lo
+   revele, así que sin esto el botón nunca explica qué hace al tacto. El
+   ancho (196px, no 168px) alcanza para "Reanudar música", el texto más
+   largo de los dos — con 168px se cortaban las últimas letras. */
+.music-toggle:hover, .music-toggle:focus-visible, .music-toggle.is-revealed { width: 196px; background: var(--color-accent-600); }
+.music-toggle:hover .music-toggle-text, .music-toggle:focus-visible .music-toggle-text, .music-toggle.is-revealed .music-toggle-text {
   width: auto; opacity: 1; padding-right: 18px;
 }
 .music-toggle:active { transform: scale(.96); }

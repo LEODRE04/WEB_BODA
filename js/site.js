@@ -265,6 +265,17 @@
     var iconPaused = btn.querySelector(".icon-paused");
     var label = btn.querySelector("#music-toggle-text");
 
+    var revealTimer = null;
+    function revealBriefly() {
+      // Muestra la pastilla con el texto un momento sola (sin necesitar
+      // :hover) — en el celular no existe el hover que la revela, así que
+      // sin esto el botón nunca explica qué hace al tocarlo. Se dispara
+      // acá mismo (cada cambio de estado: al aparecer y en cada toque).
+      btn.classList.add("is-revealed");
+      clearTimeout(revealTimer);
+      revealTimer = setTimeout(function () { btn.classList.remove("is-revealed"); }, 1800);
+    }
+
     function setPlayingUI(isPlaying) {
       // .hidden (la propiedad, no el atributo) no existe en elementos SVG,
       // así que asignarla no hacía nada — el ícono nunca cambiaba. Se
@@ -276,6 +287,7 @@
       btn.setAttribute("aria-pressed", String(isPlaying));
       btn.setAttribute("aria-label", text);
       if (label) label.textContent = text;
+      revealBriefly();
     }
 
     btn.addEventListener("click", function () {
