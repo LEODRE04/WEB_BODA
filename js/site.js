@@ -628,7 +628,7 @@
 
   // — estado guardado del RSVP: una vez que el invitado ya respondió, el
   // formulario se reemplaza por este resumen (con botón para editar hasta
-  // el 20 de diciembre) en vez de quedar siempre visible. Basado en un
+  // la fecha de W.rsvp.editUntilLabel) en vez de quedar siempre visible. Basado en un
   // mockup de claude.ai/design, adaptado a los datos reales que guardamos
   // (sin menú/acompañante por nombre/canción, que ese mockup sí traía). —
   function initRsvpSavedState(form) {

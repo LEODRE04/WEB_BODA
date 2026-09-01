@@ -41,7 +41,16 @@
       </div>
       <p class="gift-grid-status" id="gift-grid-empty" hidden>Todavía no hay regalos en la lista — vuelve a intentarlo más tarde, o escríbenos por WhatsApp si tienes dudas.</p>
 
+      <!-- En celular, "Continuar" recién revela el panel de aporte de
+           abajo como una segunda pantalla (con su propio botón fijo);
+           en escritorio esta barra no se usa — el panel ya se ve al
+           lado de la lista. Ver initMobileFlow en regalos.js. -->
+      <div class="gift-mobile-bar" id="gift-mobile-continue" hidden>
+        <button type="button" class="btn btn-primary btn-block" id="gift-continue-btn">Continuar</button>
+      </div>
+
       <div class="gift-contribute" id="gift-contribute" hidden>
+        <button type="button" class="gift-mobile-back" id="gift-mobile-back">← Volver a la lista</button>
         <div class="gift-contribute-grid">
           <div class="gift-contribute-picked">
             <div class="details-label">Tu regalo</div>

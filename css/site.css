@@ -264,8 +264,40 @@ body { background: var(--color-neutral-100); }
 .gift-contribute-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 22px; align-items: start; }
 .gift-contribute-fields { display: grid; gap: 12px; margin-top: 16px; }
 .gift-contribute-howto .money-row { margin-bottom: 8px; }
+.gift-mobile-back { display: none; }
 @media (max-width: 720px) {
   .gift-contribute-grid { grid-template-columns: 1fr; }
+}
+
+/* — flujo de dos pasos en celular (inspirado en un mockup de
+   claude.ai/design): en vez de abrir el panel de aporte debajo de la
+   lista, "Continuar" lo muestra como una pantalla aparte, con su
+   propio botón fijo abajo — en vez de tener que bajar a buscarlo. En
+   escritorio no cambia nada: la lista y el panel ya se ven uno al lado
+   del otro (initGiftRegistry en regalos.js sigue abriendo el panel al
+   toque, sin pasar por este flujo). El estado (qué pantalla toca
+   mostrar) lo maneja la clase .step-aportar en initMobileFlow. — */
+@media (max-width: 720px) {
+  .gift-mobile-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    padding: 14px 20px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent, var(--color-bg) 45%);
+  }
+  .gifts.step-aportar .details-head,
+  .gifts.step-aportar #gift-grid,
+  .gifts.step-aportar #gift-grid-empty,
+  .gifts.step-aportar #gift-mobile-continue { display: none; }
+
+  .gift-mobile-back {
+    display: inline-flex; align-items: center; background: none; border: none;
+    padding: 0; margin-bottom: 16px; font-size: 13.5px; font-weight: 600;
+    color: var(--color-accent-700); cursor: pointer;
+  }
+  .gift-contribute { padding-bottom: 84px; }
+  .gift-contribute-howto #gift-submit {
+    position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 60; margin-top: 0;
+  }
 }
 
 .gift-upload {

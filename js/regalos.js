@@ -116,6 +116,26 @@
   // la misma barra de avance.
   function money(n) { return "S/ " + Number(n || 0).toFixed(0); }
 
+  // — flujo de dos pantallas en celular (inspirado en un mockup de
+  // claude.ai/design): "Continuar" pasa de ver la lista a ver el panel
+  // de aporte como si fuera otra pantalla, con "← Volver a la lista"
+  // para regresar. En escritorio estas clases no hacen nada (las reglas
+  // que las usan viven dentro de un @media en site.css) — ahí la lista
+  // y el panel ya se ven uno al lado del otro, sin pasos. —
+  function isMobileFlow() {
+    return window.matchMedia("(max-width: 720px)").matches;
+  }
+  function showAportarStep() {
+    var section = document.querySelector(".gifts");
+    if (section) section.classList.add("step-aportar");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  function showListStep() {
+    var section = document.querySelector(".gifts");
+    if (section) section.classList.remove("step-aportar");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
   function progressNode(g) {
     var falta = Math.max(0, g.precio - g.recaudado);
     var pct = g.precio > 0 ? Math.min(100, Math.round((g.recaudado / g.precio) * 100)) : 0;
@@ -164,11 +184,45 @@
     var uploadLabel = document.querySelector("#gift-upload-label");
     var submitBtn = document.querySelector("#gift-submit");
     var errorEl = document.querySelector("#gift-error");
-    var thanksModal = initGiftThanks();
+    var mobileContinueBar = document.querySelector("#gift-mobile-continue");
+    var mobileContinueBtn = document.querySelector("#gift-continue-btn");
+    var mobileBackBtn = document.querySelector("#gift-mobile-back");
+    var thanksModal = initGiftThanks(finishAndReturnToList);
 
     var regalos = [];
     var seleccionadoId = null;
     var comprobanteDataUrl = null;
+
+    // "← Volver a la lista" (a medio elegir, sin enviar todavía) — el
+    // regalo sigue elegido, así que la barra de "Continuar" vuelve a
+    // aparecer para retomarlo. No hace nada en escritorio, donde el
+    // panel siempre está junto a la lista.
+    function returnToList() {
+      if (!isMobileFlow()) return;
+      panel.hidden = true;
+      if (mobileContinueBar && seleccionadoId) mobileContinueBar.hidden = false;
+      showListStep();
+    }
+    if (mobileBackBtn) mobileBackBtn.addEventListener("click", returnToList);
+
+    // "Volver a la lista" del modal de agradecimiento (ya se envió el
+    // aporte) — a diferencia del botón de arriba, acá sí deselecciona:
+    // no tendría sentido ofrecer "Continuar" para un regalo al que ya
+    // se le acaba de aportar.
+    function finishAndReturnToList() {
+      if (!isMobileFlow()) return;
+      seleccionadoId = null;
+      renderGrid();
+      panel.hidden = true;
+      if (mobileContinueBar) mobileContinueBar.hidden = true;
+      showListStep();
+    }
+    if (mobileContinueBtn) {
+      mobileContinueBtn.addEventListener("click", function () {
+        panel.hidden = false;
+        showAportarStep();
+      });
+    }
 
     guestPromise.then(function (guest) {
       if (guest && guest.found && guest.nombre && !nombreInput.value) nombreInput.value = guest.nombre;
@@ -262,8 +316,16 @@
       errorEl.hidden = true;
       checkComplete();
 
-      panel.hidden = false;
-      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (isMobileFlow() && mobileContinueBar) {
+        // en celular el panel recién se ve al tocar "Continuar" — acá
+        // solo se actualiza el monto sugerido de la barra fija.
+        panel.hidden = true;
+        mobileContinueBtn.textContent = "Continuar con " + money(falta);
+        mobileContinueBar.hidden = false;
+      } else {
+        panel.hidden = false;
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     }
 
     // Slider del monto a aportar — inspirado en el "discrete slider" de
@@ -455,7 +517,10 @@
   // — modal de agradecimiento tras avisar la transferencia de un regalo —
   // mismo patrón que el modal de RSVP en site.js (initThanksModal), pero
   // con el detalle del aporte en vez del detalle de la asistencia.
-  function initGiftThanks() {
+  // onBackToList: además de cerrar el modal, saca del paso "aportar" en
+  // celular cuando tocan el botón "Volver a la lista" (no con la X ni
+  // con el fondo, por si quieren quedarse revisando el detalle).
+  function initGiftThanks(onBackToList) {
     var modal = document.querySelector("#gift-thanks");
     if (!modal) return null;
     var closeBtn = modal.querySelector("#gift-thanks-close");
@@ -499,7 +564,10 @@
     }
 
     closeBtn.addEventListener("click", close);
-    backBtn.addEventListener("click", close);
+    backBtn.addEventListener("click", function () {
+      close();
+      if (onBackToList) onBackToList();
+    });
     modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !modal.hidden) close();
