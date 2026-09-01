@@ -403,10 +403,8 @@ body { background: var(--color-neutral-100); }
    el principio de "CÓDIGO DE VESTIMENTA". */
 .dresscode-section .envelope-card { padding-top: 82px; }
 .dresscode { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-.dresscode-swatches { display: flex; gap: 9px; }
-.dresscode-swatches span { width: 34px; height: 34px; border-radius: 999px; }
-/* 280px es un piso razonable para que el texto no quede angosto junto
-   a las muestras de color en tablet — pero en celular (envelope-card +
+/* 280px de piso venía de cuando este bloque de texto compartía la fila
+   con las muestras de color (ya quitadas); en celular (envelope-card +
    su padding dejan bastante menos que eso) forzaba a toda la página a
    scrollear horizontal. Iba como estilo inline en el HTML; ver también
    .gifts-grid arriba, mismo problema con el mismo número. */
