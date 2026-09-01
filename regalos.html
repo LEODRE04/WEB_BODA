@@ -55,15 +55,17 @@
                   <input type="range" class="gift-slider-input" id="gift-monto" min="1" max="1" step="1" value="1" aria-label="Monto a aportar, en soles">
                   <div class="gift-slider-marks" id="gift-monto-marks"></div>
                 </div>
+                <!-- Aviso cuando el monto alcanza o supera lo que falta —
+                     pegado al slider (basado en un mockup de
+                     claude.ai/design, pero ahí quedaba lejos, como una
+                     nota al pie en vez de una reacción al slider). -->
+                <div class="gift-complete-hint" id="gift-complete-hint" hidden>
+                  <strong>Con esto completas el regalo</strong>
+                  <p>¡Muchas gracias! Con tu aporte, André y Krisli ya podrán comprarlo.</p>
+                </div>
               </div>
               <div class="field"><label for="gift-nombre">De parte de</label><input class="input" id="gift-nombre"></div>
               <div class="field"><label for="gift-mensaje">Mensaje (opcional)</label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
-            </div>
-            <!-- Aviso cuando el monto ingresado alcanza o supera lo que falta
-                 — basado en un mockup de claude.ai/design. -->
-            <div class="gift-complete-hint" id="gift-complete-hint" hidden>
-              <strong>Con esto completas el regalo</strong>
-              <p>¡Muchas gracias! Con tu aporte, André y Krisli ya podrán comprarlo.</p>
             </div>
             <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
           </div>
