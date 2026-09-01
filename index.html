@@ -228,61 +228,17 @@
     </div>
   </section>
 
-  <!-- Mesa de regalos: lista de regalos elegible (id="gift-grid" +
-       "gift-contribute", ver initGiftRegistry en site.js) — cada regalo
-       se puede aportar completo o en partes; el avance se calcula en el
-       backend sumando la pestaña "Aportes" del Sheet, ver
-       docs/REGALOS-BACKEND.md. Si la API de regalos no responde (todavía
-       no desplegada), esta sección completa se oculta sola y solo queda
-       el link externo de abajo — no se rompe nada mientras tanto. -->
+  <!-- Mesa de regalos: acá solo Yape/transferencia general — la lista de
+       regalos elegible (con avance y subir constancia) vive en su propia
+       página (regalos.html + js/regalos.js), abierta desde la tarjeta
+       "Lista de regalos" de abajo (id="gift-list-link", el link con el
+       ?codigo= se arma en site.js). -->
   <section class="gifts">
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
         <h2 class="section-title" style="font-size:38px">Tu presencia es el regalo</h2>
-        <p class="section-lede" style="margin:10px auto 0;text-align:center">Si además quieres darnos algo, armamos esta lista de cosas que de verdad usaremos. Puedes aportar completo o una parte.</p>
-      </div>
-
-      <div class="gift-grid" id="gift-grid" hidden>
-        <p class="gift-grid-status">Cargando la lista de regalos…</p>
-      </div>
-
-      <div class="gift-contribute" id="gift-contribute" hidden>
-        <div class="gift-contribute-grid">
-          <div class="gift-contribute-picked">
-            <div class="details-label">Tu regalo</div>
-            <div class="details-heading" id="gift-picked-name" style="font-size:24px">—</div>
-            <div class="gift-progress" id="gift-picked-progress"></div>
-            <div class="gift-contribute-fields">
-              <div class="field"><label for="gift-monto">Monto a aportar (S/)</label><input class="input" id="gift-monto" type="number" min="1" step="1"></div>
-              <div class="field"><label for="gift-nombre">De parte de</label><input class="input" id="gift-nombre"></div>
-              <div class="field"><label for="gift-mensaje">Mensaje (opcional)</label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
-            </div>
-            <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
-          </div>
-
-          <div class="gift-contribute-howto">
-            <div class="details-label">Cómo aportar</div>
-            <div class="details-heading" style="font-size:20px;margin:6px 0 14px">Transferencia o Yape</div>
-            <div class="money-row"><span class="money-label">Yape / Plin</span><span class="value">+51 987 654 321</span><button class="btn btn-ghost" type="button" data-copy="+51987654321">Copiar</button></div>
-            <div class="money-row"><span class="money-label">Cuenta soles</span><span class="value">191-0000000-0-00</span><button class="btn btn-ghost" type="button" data-copy="191-0000000-0-00">Copiar</button></div>
-            <div class="money-row"><span class="money-label">CCI</span><span class="value">002-191-000000000000-00</span><button class="btn btn-ghost" type="button" data-copy="002-191-000000000000-00">Copiar</button></div>
-
-            <div class="field" style="margin-top:14px">
-              <label for="gift-comprobante">Constancia de la transferencia</label>
-              <label class="gift-upload" for="gift-comprobante" id="gift-upload-label">Toca para elegir la captura</label>
-              <input type="file" id="gift-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
-            </div>
-
-            <p class="gift-error" id="gift-error" role="alert" hidden></p>
-            <button class="btn btn-primary btn-block" type="button" id="gift-submit" style="margin-top:6px">Ya transferí, avisar a los novios</button>
-            <p class="gift-success" id="gift-success" role="status">¡Gracias! Ya anotamos tu aporte — en un rato vas a ver el avance actualizado.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="gift-alt-head" id="gift-alt-head" hidden>
-        <span>o si prefieres, un aporte libre</span>
+        <p class="section-lede" style="margin:10px auto 0;text-align:center">Si además quieres acompañarnos con un detalle, estos son nuestros datos.</p>
       </div>
       <div class="gifts-grid">
         <div class="money-card">
@@ -301,8 +257,8 @@
         </div>
 
         <div class="money-card" style="display:flex;align-items:center;gap:14px">
-          <div style="flex:1"><div style="font-size:16px;font-weight:600">Lista de regalos</div><p style="margin:3px 0 0;font-size:13.5px;line-height:1.6;color:color-mix(in srgb, var(--color-text) 68%, transparent)">Enlace a la tienda <span class="tag tag-outline">por confirmar</span></p></div>
-          <span class="btn btn-secondary" aria-disabled="true">Abrir</span>
+          <div style="flex:1"><div style="font-size:16px;font-weight:600">Lista de regalos</div><p style="margin:3px 0 0;font-size:13.5px;line-height:1.6;color:color-mix(in srgb, var(--color-text) 68%, transparent)">Elige un regalo puntual y aporta por Yape o transferencia.</p></div>
+          <a class="btn btn-secondary" id="gift-list-link" href="regalos.html">Abrir</a>
         </div>
 
       </div>

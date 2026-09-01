@@ -252,16 +252,6 @@ body { background: var(--color-neutral-100); }
 .gift-success { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 20px; background: var(--color-accent-2-100); color: var(--color-accent-2-800); font-size: 13.5px; line-height: 1.6; }
 .gift-success.show { display: block; }
 
-/* separa la lista de regalos elegible del Yape/transferencia de siempre
-   — este último queda como una opción más, para quien prefiera un
-   aporte libre en vez de elegir un regalo puntual. */
-.gift-alt-head {
-  display: flex; align-items: center; gap: 14px; margin: 8px 0 20px;
-  font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
-}
-.gift-alt-head::before, .gift-alt-head::after { content: ""; flex: 1; height: 1px; background: var(--color-divider); }
-
 /* — código de vestimenta — */
 .dresscode-section { padding: 56px 44px; background: var(--color-neutral-100); }
 /* el texto acá va pegado a la izquierda (no centrado como los demás
