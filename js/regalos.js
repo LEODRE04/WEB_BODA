@@ -246,13 +246,14 @@
         var card = document.createElement("button");
         card.type = "button";
         card.className = "gift-card" + (completo ? " is-funded" : "") + (seleccionadoId === g.id ? " is-selected" : "");
+        card.dataset.giftId = g.id;
 
         if (completo || g.id === destacadoId) {
           var badges = document.createElement("div");
           badges.className = "gift-card-badges";
           var badge = document.createElement("span");
           badge.className = "tag " + (completo ? "tag-accent-2" : "tag-outline");
-          badge.textContent = completo ? "Completo" : "El más elegido";
+          badge.textContent = completo ? "✓ Completo" : "El más elegido";
           badges.appendChild(badge);
           card.appendChild(badges);
         }
@@ -301,9 +302,94 @@
       if (emptyEl) emptyEl.hidden = hayRegalos;
     }
 
+    // Al hacer clic en un regalo ya completo no se abre el panel de
+    // aportar (no tendría sentido pedir un monto para algo que ya está
+    // pagado) — en su lugar se muestra este aviso pegado a la tarjeta,
+    // basado en un mockup de claude.ai/design.
+    function cerrarNoDisponible() {
+      var previo = document.querySelector("#gift-unavailable");
+      if (previo) previo.remove();
+    }
+
+    function irAlSiguienteDisponible() {
+      var disponible = regalos.filter(function (r) {
+        return !(r.precio > 0 && r.recaudado >= r.precio);
+      })[0];
+      if (!disponible) return;
+      var card = grid.querySelector('[data-gift-id="' + disponible.id + '"]');
+      if (!card) return;
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.add("is-flash");
+      setTimeout(function () { card.classList.remove("is-flash"); }, 1000);
+    }
+
+    function mostrarNoDisponible(g) {
+      cerrarNoDisponible();
+
+      var notice = document.createElement("div");
+      notice.className = "gift-unavailable";
+      notice.id = "gift-unavailable";
+
+      var icon = document.createElement("div");
+      icon.className = "gift-unavailable-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+      var body = document.createElement("div");
+      body.className = "gift-unavailable-body";
+
+      var h = document.createElement("h4");
+      h.textContent = "¡Gracias, pero este ya está completo!";
+
+      var p = document.createElement("p");
+      p.textContent = "Otros invitados ya juntaron todo para “" + g.nombre + "”. Si quieres, hay otros regalos esperando por alguien.";
+
+      var actions = document.createElement("div");
+      actions.className = "gift-unavailable-actions";
+
+      var verBtn = document.createElement("button");
+      verBtn.type = "button";
+      verBtn.className = "btn btn-primary";
+      verBtn.textContent = "Ver los que faltan";
+      verBtn.addEventListener("click", function () {
+        cerrarNoDisponible();
+        irAlSiguienteDisponible();
+      });
+
+      var cerrarBtn = document.createElement("button");
+      cerrarBtn.type = "button";
+      cerrarBtn.className = "btn btn-ghost";
+      cerrarBtn.textContent = "Cerrar";
+      cerrarBtn.addEventListener("click", cerrarNoDisponible);
+
+      actions.appendChild(verBtn);
+      actions.appendChild(cerrarBtn);
+
+      body.appendChild(h);
+      body.appendChild(p);
+      body.appendChild(progressNode(g));
+      body.appendChild(actions);
+
+      notice.appendChild(icon);
+      notice.appendChild(body);
+
+      var card = grid.querySelector('[data-gift-id="' + g.id + '"]');
+      if (card) card.insertAdjacentElement("afterend", notice);
+      else grid.appendChild(notice);
+      notice.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
     function seleccionar(id) {
       var g = regalos.filter(function (r) { return r.id === id; })[0];
       if (!g) return;
+
+      var completo = g.precio > 0 && g.recaudado >= g.precio;
+      if (completo) {
+        mostrarNoDisponible(g);
+        return;
+      }
+      cerrarNoDisponible();
+
       seleccionadoId = id;
       renderGrid();
 
