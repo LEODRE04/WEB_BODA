@@ -123,6 +123,42 @@
     var gate = document.querySelector("#envelope-gate");
     if (!gate) return;
 
+    // Si ya abrió el sobre antes en esta misma sesión del navegador —
+    // por ejemplo, volviendo de la lista de regalos (regalos.html) con
+    // "← Volver a la invitación" — no lo vuelve a tapar todo: sigue
+    // directo a la página ya abierta. sessionStorage a propósito (no
+    // localStorage): en una visita nueva de verdad (otro día) sí lo
+    // vuelve a ver, es solo para no repetirlo dentro de la misma visita.
+    var yaAbrio = false;
+    try { yaAbrio = sessionStorage.getItem("envelope_opened") === "1"; } catch (e) {}
+    if (yaAbrio) {
+      gate.hidden = true;
+      // El navegador intenta saltar al #ancla de la URL (p.ej. "#rsvp"
+      // al volver desde el modal de agradecimiento de un regalo) antes
+      // de que este script corra, pero con el sobre todavía tapando
+      // todo ese salto no sirve de nada — hay que repetirlo ya con el
+      // sobre afuera. Se repite varias veces porque el layout todavía
+      // se sigue moviendo un rato (foto grande cargando, banner de
+      // "Hola, {nombre}" que aparece cuando responde la API) — sin esto
+      // el salto puede quedar corto si algo de eso corre después.
+      // behavior:"instant" a propósito: con el "scroll-behavior: smooth"
+      // global (site.css), un scrollIntoView disparado por script (no
+      // por un clic real) puede quedarse pegado en 0 sin completar la
+      // animación — instantáneo evita ese problema y además no tiene
+      // sentido animar un salto que pasa apenas se abre la página.
+      if (window.location.hash) {
+        var target = document.querySelector(window.location.hash);
+        if (target) {
+          var irAlAncla = function () { target.scrollIntoView({ block: "start", behavior: "instant" }); };
+          irAlAncla();
+          setTimeout(irAlAncla, 300);
+          setTimeout(irAlAncla, 900);
+          window.addEventListener("load", irAlAncla);
+        }
+      }
+      return;
+    }
+
     var guestText = gate.querySelector("#envelope-guest-text");
     var guestLoading = gate.querySelector("#envelope-guest-loading");
     if (codigo && guestLoading) guestLoading.hidden = false;
@@ -142,6 +178,7 @@
       // que al abrir el sobre siempre arranque desde arriba.
       window.scrollTo(0, 0);
       gate.classList.add("is-opening");
+      try { sessionStorage.setItem("envelope_opened", "1"); } catch (e) {}
       setTimeout(function () { gate.classList.add("is-open"); }, 650);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 1300);
     });
