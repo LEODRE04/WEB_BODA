@@ -48,9 +48,18 @@
             <div class="details-heading" id="gift-picked-name" style="font-size:24px">—</div>
             <div class="gift-progress" id="gift-picked-progress"></div>
             <div class="gift-contribute-fields">
-              <div class="field"><label for="gift-monto">Monto a aportar (S/)</label><input class="input" id="gift-monto" type="number" min="1" step="1"></div>
+              <div class="field">
+                <label for="gift-monto">Monto a aportar (S/) <span class="tag tag-accent-2" id="gift-monto-tag" hidden style="margin-left:4px;font-size:9.5px;vertical-align:1px">completa</span></label>
+                <input class="input" id="gift-monto" type="number" min="1" step="1">
+              </div>
               <div class="field"><label for="gift-nombre">De parte de</label><input class="input" id="gift-nombre"></div>
               <div class="field"><label for="gift-mensaje">Mensaje (opcional)</label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
+            </div>
+            <!-- Aviso cuando el monto ingresado alcanza o supera lo que falta
+                 — basado en un mockup de claude.ai/design. -->
+            <div class="gift-complete-hint" id="gift-complete-hint" hidden>
+              <strong>Con esto completas el regalo</strong>
+              <p>¡Muchas gracias! Con tu aporte, André y Krisli ya podrán comprarlo.</p>
             </div>
             <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
           </div>
@@ -70,13 +79,69 @@
 
             <p class="gift-error" id="gift-error" role="alert" hidden></p>
             <button class="btn btn-primary btn-block" type="button" id="gift-submit" style="margin-top:6px">Ya transferí, avisar a los novios</button>
-            <p class="gift-success" id="gift-success" role="status">¡Gracias! Ya anotamos tu aporte — en un rato vas a ver el avance actualizado.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 </main>
+
+<!-- Modal "Cómo funciona la lista" — se muestra una vez al entrar (se
+     puede desactivar con "No mostrar de nuevo", guardado en este
+     dispositivo). Basado en un mockup de claude.ai/design. -->
+<div class="dialog-backdrop gift-intro" id="gift-intro" hidden>
+  <div class="dialog gift-intro-dialog">
+    <div class="gift-intro-icon" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+    </div>
+    <div class="section-kicker">Antes de elegir</div>
+    <div class="dialog-title">Cómo funciona la lista</div>
+    <div class="gift-intro-steps">
+      <div class="gift-intro-step"><span class="gift-intro-num">1</span><p>Elige el regalo que más te guste. Todos están disponibles hasta que se completen, y no hay un orden ni un mínimo.</p></div>
+      <div class="gift-intro-step"><span class="gift-intro-num">2</span><p>No tienes que aportar el monto completo. Puedes dar la parte que quieras: entre varios invitados se llega al total.</p></div>
+      <div class="gift-intro-step sage"><span class="gift-intro-num">3</span><p>Todo el dinero se entrega directamente a André y Krisli, quienes se encargan de la compra.</p></div>
+      <div class="gift-intro-step sage"><span class="gift-intro-num">4</span><p>Puedes dejarles un mensaje junto con tu aporte; los novios lo reciben junto con el regalo.</p></div>
+    </div>
+    <div class="gift-intro-note">Tu presencia ya es el regalo. Si prefieres no aportar nada, no pasa nada: nos alegra igual que estés con nosotros.</div>
+    <div class="dialog-actions" style="align-items:center">
+      <button type="button" class="btn btn-primary" id="gift-intro-close" style="font-size:14px">Ver la lista de regalos</button>
+      <label class="radio" style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 60%, transparent);margin-left:auto"><input type="checkbox" id="gift-intro-dontshow"><span class="dot"></span>No mostrar de nuevo</label>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de agradecimiento tras avisar la transferencia — con el detalle
+     del aporte que se acaba de registrar. Basado en un mockup de
+     claude.ai/design, adaptado a lo que el backend realmente guarda (sin
+     "método de pago", que ese mockup sí traía). -->
+<div class="dialog-backdrop gift-thanks" id="gift-thanks" hidden>
+  <div class="dialog gift-thanks-dialog">
+    <button type="button" class="gift-thanks-close" id="gift-thanks-close" aria-label="Cerrar">✕</button>
+    <div class="gift-thanks-photo"><img src="img/p1.jpg" alt="André y Krisli"></div>
+    <div class="gift-thanks-content">
+      <div class="gift-thanks-icon" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+      </div>
+      <div class="section-kicker">Aporte recibido</div>
+      <div class="dialog-title" id="gift-thanks-title">Gracias por este regalo</div>
+      <p class="dialog-body">Ya nos llegó tu aviso. Revisaremos la transferencia y te confirmaremos por WhatsApp.</p>
+      <div class="rsvp-thanks-recap gift-thanks-recap">
+        <div><span>Regalo</span><strong id="gift-thanks-regalo"></strong></div>
+        <div><span>Tu aporte</span><strong id="gift-thanks-monto"></strong></div>
+        <div><span>Estado</span><strong>Por verificar</strong></div>
+      </div>
+      <div class="gift-thanks-progress">
+        <div class="details-label" style="margin-bottom:6px">Avance de este regalo</div>
+        <div id="gift-thanks-progress-bar"></div>
+      </div>
+      <p class="gift-thanks-msg" id="gift-thanks-msg" hidden></p>
+      <div class="dialog-actions" style="justify-content:center;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn btn-primary" id="gift-thanks-back" style="font-size:13.5px">Volver a la lista</button>
+        <a class="btn btn-secondary" id="gift-thanks-rsvp" href="index.html#rsvp" style="font-size:13.5px" hidden>Ver mi confirmación</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="js/config.js"></script>
 <script src="js/regalos.js"></script>

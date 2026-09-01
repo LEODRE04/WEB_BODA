@@ -220,6 +220,19 @@ body { background: var(--color-neutral-100); }
   background: var(--color-accent-2-200);
 }
 .gift-card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* — mientras no hay foto real (foto_url vacío en la hoja de cálculo), un
+   marcador con el nombre del regalo — así todas las tarjetas mantienen
+   la misma altura y queda claro que ahí va a ir una foto. — */
+.gift-card-photo.is-placeholder {
+  display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px;
+  background-color: var(--color-accent-2-200);
+  background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 14%, transparent) 0 8px, transparent 8px 16px);
+}
+.gift-card-photo.is-placeholder span {
+  font: 9.5px ui-monospace, Menlo, monospace; line-height: 1.4;
+  color: var(--color-accent-700);
+}
+.gift-card-badges { display: flex; gap: 6px; min-height: 18px; }
 .gift-card-price { font-family: var(--font-heading); font-size: 19px; margin-top: 2px; }
 .gift-progress { margin: 8px 0; }
 .gift-progress-bar {
@@ -249,8 +262,79 @@ body { background: var(--color-neutral-100); }
 .gift-upload.has-file { border-style: solid; border-color: var(--color-accent-2); color: var(--color-accent-2-700); }
 
 .gift-error { color: #8c491a; font-size: 13px; margin-top: 10px; }
-.gift-success { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 20px; background: var(--color-accent-2-100); color: var(--color-accent-2-800); font-size: 13.5px; line-height: 1.6; }
-.gift-success.show { display: block; }
+
+/* — aviso "con esto completas el regalo" cuando el monto ingresado
+   alcanza o supera lo que falta — basado en un mockup de
+   claude.ai/design. — */
+.gift-complete-hint {
+  margin-top: 14px; background: var(--color-accent-2); color: var(--color-accent-2-100, #f0fae1);
+  border-radius: 20px; padding: 14px 16px;
+}
+.gift-complete-hint strong { display: block; font-size: 14px; }
+.gift-complete-hint p { margin: 4px 0 0; font-size: 13px; line-height: 1.6; opacity: .92; }
+
+/* — modal "Cómo funciona la lista" (al entrar a la página) — */
+.gift-intro { opacity: 0; transition: opacity .2s ease; }
+.gift-intro.is-open { opacity: 1; }
+.gift-intro .dialog { transform: translateY(10px) scale(.97); transition: transform .2s ease; }
+.gift-intro.is-open .dialog { transform: translateY(0) scale(1); }
+.gift-intro-dialog { width: min(480px, 100%); text-align: left; }
+.gift-intro-icon {
+  width: 52px; height: 52px; border-radius: 999px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-accent-100); color: var(--color-accent-700);
+}
+.gift-intro-steps { display: flex; flex-direction: column; gap: 14px; margin: 18px 0; }
+.gift-intro-step { display: flex; gap: 14px; align-items: flex-start; }
+.gift-intro-step p { margin: 0; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.gift-intro-num {
+  width: 30px; height: 30px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-heading); font-size: 15px;
+  background: var(--color-accent); color: #fff;
+}
+.gift-intro-step.sage .gift-intro-num { background: var(--color-accent-2); color: #fff; }
+.gift-intro-note {
+  background: var(--color-accent-2-100); color: var(--color-accent-2-800);
+  border-radius: 20px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6;
+}
+
+/* — modal de agradecimiento tras avisar la transferencia de un regalo —
+   mismo patrón visual que .rsvp-thanks-* en la invitación principal. — */
+.gift-thanks { opacity: 0; transition: opacity .2s ease; }
+.gift-thanks.is-open { opacity: 1; }
+.gift-thanks .dialog { position: relative; transform: translateY(10px) scale(.97); transition: transform .2s ease; }
+.gift-thanks.is-open .dialog { transform: translateY(0) scale(1); }
+.gift-thanks-close {
+  position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; z-index: 1;
+  border: none; border-radius: 999px; background: transparent; cursor: pointer;
+  font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.gift-thanks-close:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); }
+.gift-thanks-dialog { width: min(460px, 100%); padding: 0; overflow: hidden; text-align: center; gap: 0; }
+.gift-thanks-photo { height: 130px; position: relative; overflow: hidden; }
+.gift-thanks-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gift-thanks-photo::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 35%, var(--color-surface) 94%);
+}
+.gift-thanks-content { padding: 0 30px 30px; margin-top: -36px; position: relative; }
+.gift-thanks-icon {
+  width: 64px; height: 64px; border-radius: 999px; margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-accent); color: #fff; box-shadow: var(--shadow-md);
+}
+.gift-thanks-content .section-kicker { text-align: center; }
+.gift-thanks-content .dialog-title { margin: 10px 0 12px; font-size: 26px; }
+.gift-thanks-content .dialog-body { font-size: 14.5px; line-height: 1.65; }
+.gift-thanks-recap { text-align: left; }
+.gift-thanks-progress { text-align: left; background: var(--color-bg); border-radius: 20px; padding: 14px 16px; margin: 4px 0 4px; }
+.gift-thanks-progress .gift-progress { margin: 0; }
+.gift-thanks-msg {
+  margin: 12px 0 0; padding: 14px 16px; border-radius: 20px; text-align: left;
+  background: var(--color-accent-2-100); color: var(--color-accent-2-800);
+  font-size: 13.5px; line-height: 1.6; font-style: italic;
+}
 
 /* — código de vestimenta — */
 .dresscode-section { padding: 56px 44px; background: var(--color-neutral-100); }
@@ -295,6 +379,25 @@ body { background: var(--color-neutral-100); }
   .rsvp-grid { grid-template-columns: 1fr; }
   .rsvp-form .row { grid-template-columns: 1fr; }
 }
+
+/* — estado guardado del RSVP (reemplaza al formulario una vez que ya
+   respondió) — */
+.rsvp-saved { background: var(--color-neutral-100); border-radius: 32px; padding: 28px 30px; box-shadow: var(--shadow-md); }
+.rsvp-saved-head { display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid var(--color-divider); }
+.rsvp-saved-icon {
+  width: 48px; height: 48px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-accent); color: #fff;
+}
+.rsvp-saved-icon.sage { background: var(--color-accent-2); }
+.rsvp-saved-headtext { flex: 1; }
+.rsvp-saved-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 22px; line-height: 1.2; }
+.rsvp-saved-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; padding: 20px 0; }
+.rsvp-saved-grid span {
+  display: block; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.rsvp-saved-grid strong { display: block; margin-top: 4px; font-size: 15px; font-weight: 600; }
 
 /* — modal de agradecimiento (al confirmar el RSVP) — */
 .rsvp-thanks { opacity: 0; transition: opacity .2s ease; }

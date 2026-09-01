@@ -506,6 +506,7 @@
     var codigoInput = form.querySelector("#rsvp-codigo");
     var banner = form.querySelector("#rsvp-guest-banner");
     var submitBtn = form.querySelector("#rsvp-submit");
+    var savedState = initRsvpSavedState(form);
 
     function showBanner(text, isWarning) {
       banner.textContent = text;
@@ -531,12 +532,15 @@
         asistentesInput.value = 1 + (Number(guest.acompanantes_permitidos) || 0);
 
         if (guest.respuesta) {
-          showBanner("Ya habías confirmado como " + guest.nombre + " — puedes actualizar tu respuesta.");
           if (guest.respuesta.asistencia) {
             var radio = form.querySelector('input[name="asistencia"][value="' + guest.respuesta.asistencia + '"]');
             if (radio) radio.checked = true;
           }
           submitBtn.textContent = "Actualizar";
+          // Ya respondió antes: se muestra el resumen guardado en vez del
+          // formulario (basado en un mockup de claude.ai/design) — "Editar
+          // mi respuesta" en ese resumen vuelve a mostrar el formulario.
+          if (savedState) savedState.show(guest.respuesta);
         } else {
           showBanner("Confirmando para: " + guest.nombre);
         }
@@ -570,6 +574,7 @@
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
           if (thanksModal) thanksModal.open(data.asistencia === "si", data);
+          if (savedState) savedState.show(data);
           submitBtn.textContent = originalLabel;
         })
         .catch(function (err) {
@@ -582,6 +587,90 @@
           submitBtn.disabled = false;
         });
     });
+  }
+
+  // — estado guardado del RSVP: una vez que el invitado ya respondió, el
+  // formulario se reemplaza por este resumen (con botón para editar hasta
+  // el 20 de diciembre) en vez de quedar siempre visible. Basado en un
+  // mockup de claude.ai/design, adaptado a los datos reales que guardamos
+  // (sin menú/acompañante por nombre/canción, que ese mockup sí traía). —
+  function initRsvpSavedState(form) {
+    var block = document.querySelector("#rsvp-saved");
+    if (!block) return null;
+    var W = window.WEDDING || {};
+    var titleEl = document.querySelector("#rsvp-title");
+    var ledeEl = document.querySelector("#rsvp-lede");
+    var iconEl = block.querySelector("#rsvp-saved-icon");
+    var cardTitleEl = block.querySelector("#rsvp-saved-title");
+    var dateEl = block.querySelector("#rsvp-saved-date");
+    var tagEl = block.querySelector("#rsvp-saved-tag");
+    var nombreEl = block.querySelector("#rsvp-saved-nombre");
+    var asistentesWrap = block.querySelector("#rsvp-saved-asistentes-wrap");
+    var asistentesEl = block.querySelector("#rsvp-saved-asistentes");
+    var itineraryLink = block.querySelector("#rsvp-saved-itinerary");
+    var editBtn = block.querySelector("#rsvp-saved-edit");
+    var noteEl = block.querySelector("#rsvp-saved-note");
+    var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
+
+    var originalTitle = titleEl ? titleEl.textContent : "";
+    var originalLede = ledeEl ? ledeEl.innerHTML : "";
+
+    var ICON_CHECK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    var ICON_HEART = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10.2-9.1C.4 9.7 0 8.4 0 7.1 0 3.9 2.5 1.5 5.6 1.5c1.9 0 3.6.9 4.9 2.4C11.8 2.4 13.5 1.5 15.4 1.5c3.1 0 5.6 2.4 5.6 5.6 0 1.3-.4 2.6-1.8 4.8C16.5 16.4 9 21 9 21"/></svg>';
+
+    function formatDateEs(iso) {
+      if (!iso) return "";
+      try {
+        return new Date(iso).toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" });
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function show(data) {
+      data = data || {};
+      var attending = data.asistencia === "si";
+      var nombre = (data.nombre || "").trim();
+      var firstName = nombre.split(" ")[0];
+      var asistentes = parseInt(data.num_asistentes, 10) || 1;
+
+      if (titleEl) titleEl.textContent = attending ? "Nos alegra tenerte aquí" : "Te vamos a extrañar";
+      if (ledeEl) {
+        ledeEl.textContent = attending
+          ? (firstName ? "Tu lugar ya está guardado, " + firstName + ". " : "Tu lugar ya está guardado. ") +
+            "Nos vemos el " + (W.weddingDateLabel || "pronto") + ""
+          : (firstName ? "Gracias por avisarnos, " + firstName + ". " : "Gracias por avisarnos. ") +
+            "Te vamos a extrañar ese día, y te agradecemos mucho el cariño de siempre.";
+      }
+
+      iconEl.innerHTML = attending ? ICON_CHECK : ICON_HEART;
+      iconEl.classList.toggle("sage", !attending);
+      cardTitleEl.textContent = attending ? "Asistencia confirmada" : "Respuesta registrada";
+      dateEl.textContent = "Respondiste el " + formatDateEs(data.actualizado_en || data.enviado_en);
+      tagEl.textContent = attending ? "Sí, ahí estaré" : "No podré ir";
+      tagEl.className = "tag " + (attending ? "tag-accent" : "tag-accent-2");
+      nombreEl.textContent = nombre;
+      asistentesWrap.hidden = !attending;
+      if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
+      itineraryLink.hidden = !attending;
+      noteEl.textContent = attending
+        ? "Puedes editar tu respuesta hasta el " + editUntil + "."
+        : "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";
+
+      form.hidden = true;
+      block.hidden = false;
+    }
+
+    function hide() {
+      block.hidden = true;
+      form.hidden = false;
+      if (titleEl) titleEl.textContent = originalTitle;
+      if (ledeEl) ledeEl.innerHTML = originalLede;
+    }
+
+    if (editBtn) editBtn.addEventListener("click", hide);
+
+    return { show: show, hide: hide };
   }
 
   // Busca a un invitado por su código (?codigo=...). Devuelve null si la API

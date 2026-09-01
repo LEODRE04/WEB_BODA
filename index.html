@@ -291,8 +291,8 @@
       <div class="rsvp-grid">
       <div>
         <div class="section-kicker">Confirmación</div>
-        <h2 class="section-title" style="margin:12px 0 14px">¿Nos acompañas?</h2>
-        <p style="margin:0 0 10px;font-size:15.5px;line-height:1.7;color:color-mix(in srgb, var(--color-text) 78%, transparent)">Responde antes del <strong>30 de noviembre de 2026</strong>. Cada invitación es personal.</p>
+        <h2 class="section-title" id="rsvp-title" style="margin:12px 0 14px">¿Nos acompañas?</h2>
+        <p id="rsvp-lede" style="margin:0 0 10px;font-size:15.5px;line-height:1.7;color:color-mix(in srgb, var(--color-text) 78%, transparent)">Responde antes del <strong>30 de noviembre de 2026</strong>. Cada invitación es personal.</p>
         <div style="margin:0 0 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <span style="font-size:13.5px;color:color-mix(in srgb, var(--color-text) 65%, transparent)">¿Dudas?</span>
           <a class="whatsapp-fab" data-whatsapp hidden href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
@@ -331,6 +331,31 @@
         </div>
         <p class="rsvp-success" role="status">Gracias por confirmar. Guardamos tu respuesta en este dispositivo — cuando esté lista la confirmación en línea definitiva, te la reenviaremos igual por si acaso.</p>
       </form>
+
+      <!-- Reemplaza al formulario una vez que ya respondió (initRsvpForm,
+           en js/site.js) — mismo criterio que el modal de agradecimiento:
+           basado en un mockup de claude.ai/design, adaptado a los datos
+           reales que guardamos (sin menú/acompañante/canción, que ese
+           mockup sí traía). -->
+      <div class="rsvp-saved" id="rsvp-saved" hidden>
+        <div class="rsvp-saved-head">
+          <div class="rsvp-saved-icon" id="rsvp-saved-icon" aria-hidden="true"></div>
+          <div class="rsvp-saved-headtext">
+            <div class="rsvp-saved-title" id="rsvp-saved-title"></div>
+            <div class="rsvp-note" id="rsvp-saved-date"></div>
+          </div>
+          <span class="tag" id="rsvp-saved-tag"></span>
+        </div>
+        <div class="rsvp-saved-grid" id="rsvp-saved-grid">
+          <div><span>A nombre de</span><strong id="rsvp-saved-nombre"></strong></div>
+          <div id="rsvp-saved-asistentes-wrap"><span>Asistentes</span><strong id="rsvp-saved-asistentes"></strong></div>
+        </div>
+        <div class="rsvp-actions" style="margin-top:20px">
+          <a class="btn btn-secondary" href="#itinerario" id="rsvp-saved-itinerary" style="font-size:13.5px">Ver itinerario</a>
+          <button type="button" class="btn btn-ghost" id="rsvp-saved-edit" style="font-size:13.5px">Editar mi respuesta</button>
+        </div>
+        <p class="rsvp-note" id="rsvp-saved-note" style="margin-top:14px"></p>
+      </div>
     </div>
     </div>
   </section>
