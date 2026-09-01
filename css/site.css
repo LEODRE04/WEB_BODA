@@ -51,6 +51,15 @@ body { background: var(--color-neutral-100); }
   .site-nav .nav-links a, .site-nav .nav-links .btn { width: 100%; }
   .site-nav.is-open .nav-links { display: flex; }
   .site-nav .nav-toggle { display: inline-flex; margin-left: auto; }
+  /* — regalos.html: un solo link ("Volver a la invitación"), no un menú
+     con varias secciones — no necesita colapsar detrás de un botón
+     hamburguesa (que además esa página no tiene, al no cargar site.js
+     con initNav()) — se queda siempre visible. — */
+  .site-nav.nav-simple .nav-links {
+    position: static; flex-direction: row; display: flex; background: none;
+    border-bottom: none; padding: 0; width: auto;
+  }
+  .site-nav.nav-simple .nav-links a { width: auto; }
 }
 
 /* — saludo personalizado (?codigo=... en el link) — */

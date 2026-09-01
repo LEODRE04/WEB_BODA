@@ -236,9 +236,14 @@ textarea.input { min-height: 90px; resize: vertical; }
 .table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
 
 /* — dialog — */
+/* overflow-y + "safe center": si el diálogo es más alto que la pantalla
+   (p.ej. el modal "Cómo funciona la lista" en celular, con 4 pasos),
+   centrarlo sin más lo deja cortado arriba Y abajo, sin forma de hacer
+   scroll para verlo completo — "safe" hace que caiga al inicio (con
+   scroll) en vez de centrarse cuando no entra. */
 .dialog-backdrop {
-  position: fixed; inset: 0; display: grid; place-items: center;
-  padding: var(--space-4);
+  position: fixed; inset: 0; display: grid; place-items: safe center;
+  padding: var(--space-4); overflow-y: auto; z-index: 150;
   background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
 }
 .dialog {

@@ -280,7 +280,11 @@
 
     function updateSliderVisual() {
       var min = Number(montoInput.min), max = Number(montoInput.max), val = Number(montoInput.value);
-      var pct = max > min ? ((val - min) / (max - min)) * 100 : 100;
+      // Cuando min === max (un regalo ya casi completo, con solo 1 sol de
+      // margen) el thumb queda fijo al inicio del riel — el relleno
+      // también va a 0% para que coincida, en vez de mostrarse lleno con
+      // el thumb en el otro extremo.
+      var pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
       montoInput.style.setProperty("--fill", pct + "%");
       if (montoBubbleEl) {
         montoBubbleEl.textContent = money(val);
