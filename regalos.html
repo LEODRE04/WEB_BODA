@@ -50,7 +50,11 @@
             <div class="gift-contribute-fields">
               <div class="field">
                 <label for="gift-monto">Monto a aportar (S/) <span class="tag tag-accent-2" id="gift-monto-tag" hidden style="margin-left:4px;font-size:9.5px;vertical-align:1px">completa</span></label>
-                <input class="input" id="gift-monto" type="number" min="1" step="1">
+                <div class="gift-slider">
+                  <output class="gift-slider-bubble" id="gift-monto-bubble" for="gift-monto"></output>
+                  <input type="range" class="gift-slider-input" id="gift-monto" min="1" max="1" step="1" value="1" aria-label="Monto a aportar, en soles">
+                  <div class="gift-slider-marks" id="gift-monto-marks"></div>
+                </div>
               </div>
               <div class="field"><label for="gift-nombre">De parte de</label><input class="input" id="gift-nombre"></div>
               <div class="field"><label for="gift-mensaje">Mensaje (opcional)</label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>

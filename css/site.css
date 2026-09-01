@@ -263,6 +263,50 @@ body { background: var(--color-neutral-100); }
 
 .gift-error { color: #8c491a; font-size: 13px; margin-top: 10px; }
 
+/* — slider del monto a aportar: burbuja con el monto siempre visible
+   arriba del thumb + marcas de referencia debajo del riel (inspirado
+   en el "discrete slider" de MUI que pasó el usuario). El riel usa un
+   degradé que se recalcula en JS (--fill) para que la parte ya
+   recorrida quede coloreada, como en ese ejemplo. Estilizar
+   <input type="range"> requiere repetir cada regla para
+   -webkit-/-moz- por separado — no hay una sola propiedad estándar. —*/
+.gift-slider { position: relative; padding-top: 30px; padding-bottom: 22px; }
+.gift-slider-input {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+  border-radius: 999px; outline: none; margin: 0; display: block; cursor: pointer;
+  background: linear-gradient(to right,
+    var(--color-accent) 0%, var(--color-accent) var(--fill, 100%),
+    var(--color-neutral-300) var(--fill, 100%), var(--color-neutral-300) 100%);
+}
+.gift-slider-input::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: transparent; }
+.gift-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 999px;
+  background: var(--color-accent); border: 3px solid var(--color-bg); box-shadow: var(--shadow-sm);
+  margin-top: -7px; cursor: pointer; transition: transform .15s ease;
+}
+.gift-slider-input:active::-webkit-slider-thumb { transform: scale(1.15); }
+.gift-slider-input::-moz-range-track { height: 6px; border-radius: 999px; background: var(--color-neutral-300); }
+.gift-slider-input::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--color-accent); }
+.gift-slider-input::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 999px; border: 3px solid var(--color-bg);
+  background: var(--color-accent); box-shadow: var(--shadow-sm); cursor: pointer;
+}
+.gift-slider-bubble {
+  position: absolute; top: 0; left: 0; transform: translateX(-50%);
+  font-size: 12.5px; font-weight: 600; color: #fff;
+  background: var(--color-accent); padding: 4px 10px; border-radius: 999px;
+  white-space: nowrap; pointer-events: none;
+}
+.gift-slider-bubble::after {
+  content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--color-accent);
+}
+.gift-slider-marks { position: relative; height: 15px; margin-top: 6px; }
+.gift-slider-mark {
+  position: absolute; left: 0; transform: translateX(-50%); font-size: 10.5px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent); white-space: nowrap;
+}
+
 /* — aviso "con esto completas el regalo" cuando el monto ingresado
    alcanza o supera lo que falta — basado en un mockup de
    claude.ai/design. — */

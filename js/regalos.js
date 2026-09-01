@@ -155,6 +155,8 @@
     var pickedProgressEl = document.querySelector("#gift-picked-progress");
     var montoInput = document.querySelector("#gift-monto");
     var montoTagEl = document.querySelector("#gift-monto-tag");
+    var montoBubbleEl = document.querySelector("#gift-monto-bubble");
+    var montoMarksEl = document.querySelector("#gift-monto-marks");
     var completeHintEl = document.querySelector("#gift-complete-hint");
     var nombreInput = document.querySelector("#gift-nombre");
     var mensajeInput = document.querySelector("#gift-mensaje");
@@ -256,12 +258,59 @@
       pickedProgressEl.appendChild(progressNode(g));
 
       var falta = Math.max(1, Math.round(g.precio - g.recaudado));
-      montoInput.value = falta;
+      initSlider(falta);
       errorEl.hidden = true;
       checkComplete();
 
       panel.hidden = false;
       panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    // Slider del monto a aportar — inspirado en el "discrete slider" de
+    // MUI: arranca en el monto final (lo que falta para completar el
+    // regalo) y se puede arrastrar hacia abajo para dar solo una parte.
+    // El paso (step) se ajusta según el monto — de a 1 sol para montos
+    // chicos, de a 10 para los grandes — así no queda ni muy tosco ni
+    // con demasiados pasos para arrastrar.
+    function sliderStepFor(max) {
+      if (max > 200) return 10;
+      if (max > 50) return 5;
+      return 1;
+    }
+
+    function updateSliderVisual() {
+      var min = Number(montoInput.min), max = Number(montoInput.max), val = Number(montoInput.value);
+      var pct = max > min ? ((val - min) / (max - min)) * 100 : 100;
+      montoInput.style.setProperty("--fill", pct + "%");
+      if (montoBubbleEl) {
+        montoBubbleEl.textContent = money(val);
+        montoBubbleEl.style.left = pct + "%";
+      }
+    }
+
+    function renderSliderMarks(min, max) {
+      if (!montoMarksEl) return;
+      montoMarksEl.innerHTML = "";
+      var puntos = min === max ? [min] : [min, Math.round((min + max) / 2), max];
+      puntos.forEach(function (v) {
+        var pct = max > min ? ((v - min) / (max - min)) * 100 : 0;
+        var mark = document.createElement("span");
+        mark.className = "gift-slider-mark";
+        mark.style.left = pct + "%";
+        mark.textContent = money(v);
+        montoMarksEl.appendChild(mark);
+      });
+    }
+
+    function initSlider(falta) {
+      var min = Math.min(10, falta);
+      var max = Math.max(min, falta);
+      montoInput.min = min;
+      montoInput.max = max;
+      montoInput.step = sliderStepFor(max);
+      montoInput.value = max; // arranca en el monto final (lo que falta)
+      renderSliderMarks(min, max);
+      updateSliderVisual();
     }
 
     // Aviso "con esto completas el regalo" cuando el monto ingresado
@@ -277,7 +326,10 @@
       montoTagEl.hidden = !completa;
       completeHintEl.hidden = !completa;
     }
-    montoInput.addEventListener("input", checkComplete);
+    montoInput.addEventListener("input", function () {
+      updateSliderVisual();
+      checkComplete();
+    });
 
     function cargarRegalos() {
       if (!url) { regalos = []; renderGrid(); return; }
