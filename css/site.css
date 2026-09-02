@@ -768,15 +768,20 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
    de una tarjeta, espejado para el lado derecho. Agregar la clase
    "floral-frame" a cualquier tarjeta para aplicarlo ahí también — no
    requiere tocar el CSS. El recuadro es casi cuadrado (relación real del
-   ramo, 240×238) — antes era más alto que ancho, ajustado al asset previo. — */
+   ramo, 240×238) — antes era más alto que ancho, ajustado al asset previo.
+   El ramo en el asset original carga hacia la esquina superior derecha del
+   recuadro, con hojas sueltas hacia la inferior izquierda — por eso el
+   lado izquierdo va espejado (scaleX) para que lo tupido del ramo quede
+   pegado a la esquina real de la tarjeta (como un marco) y las hojas
+   sueltas caigan hacia adentro, no al revés. — */
 .floral-frame { position: relative; }
 .floral-frame::before, .floral-frame::after {
   content: ""; position: absolute; top: -22px; width: 106px; height: 105px;
   background: url('../img/floral-corner.png') no-repeat center / contain;
   pointer-events: none; z-index: 1;
 }
-.floral-frame::before { left: -22px; }
-.floral-frame::after { right: -22px; transform: scaleX(-1); }
+.floral-frame::before { left: -22px; transform: scaleX(-1); }
+.floral-frame::after { right: -22px; }
 
 /* — en la portada (el sobre), el marco cuelga de .envelope-gate-inner,
    que es angosto (max-width 440px) y queda centrado en toda la pantalla
