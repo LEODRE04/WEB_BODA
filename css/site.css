@@ -204,6 +204,33 @@ body { background: var(--color-neutral-100); }
   .gifts-grid { grid-template-columns: 1fr; }
 }
 
+/* — CTA a la lista de regalos elegible (regalos.html): antes era una
+   .money-card más, con el mismo peso visual que las tarjetas de
+   Yape/transferencia — se perdía entre esas. Ahora ocupa todo el ancho
+   del grid, con fondo de acento e ícono, para que se note que es la
+   forma más completa de regalar (con fotos y avance), no un dato de
+   pago más. — */
+.gift-list-cta {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 16px;
+  background: var(--color-accent-100); border-radius: 24px; padding: 22px 24px;
+}
+.gift-list-cta-icon {
+  flex: none; width: 52px; height: 52px; border-radius: 999px;
+  background: var(--color-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.gift-list-cta-text { flex: 1; min-width: 0; }
+.gift-list-cta-text strong {
+  display: block; font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 19px;
+}
+.gift-list-cta-text p {
+  margin: 4px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--color-accent-800);
+}
+@media (max-width: 560px) {
+  .gift-list-cta { flex-wrap: wrap; }
+  .gift-list-cta .btn { flex: 1 0 100%; }
+}
+
 /* — lista de regalos elegible (initGiftRegistry en site.js) —
    grid de regalos, cada uno con nombre/descripción/foto/precio/avance +
    botón para elegirlo; al elegir uno se abre el panel de aporte de abajo
