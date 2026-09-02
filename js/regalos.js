@@ -483,12 +483,19 @@
       checkComplete();
     });
 
+    // De menor a mayor precio — así la lista arranca con lo más
+    // accesible de aportar y no depende del orden en que se cargaron
+    // en la hoja de cálculo.
+    function ordenarPorPrecio(lista) {
+      return lista.slice().sort(function (a, b) { return a.precio - b.precio; });
+    }
+
     function cargarRegalos() {
       if (!url) { regalos = []; renderGrid(); return; }
       fetch(url + "?tipo=regalos", { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (body) {
-          regalos = (body && Array.isArray(body.regalos)) ? body.regalos : [];
+          regalos = ordenarPorPrecio((body && Array.isArray(body.regalos)) ? body.regalos : []);
           renderGrid();
         })
         .catch(function () {
