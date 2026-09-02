@@ -123,18 +123,24 @@ body { background: var(--color-neutral-100); }
 .welcome-item .dot.sage { background: var(--color-accent-2-200); }
 
 /* — foto de referencia del lugar (ceremonia/recepción): tarjeta chica
-   debajo de la descripción — notoria sin ser una foto grande/protagónica. */
+   debajo de la descripción — notoria sin ser una foto grande/protagónica.
+   En celular .welcome-grid pasa a una sola columna (ver el media query de
+   abajo), así que cada foto deja de compartir fila con la otra y se ve a
+   todo el ancho de la tarjeta — por eso ahí va más alta, no más baja
+   (antes bajaba a 110px justo en celular, que es al revés de lo que
+   conviene). — */
 .welcome-venue-photo {
   margin-top: 12px; border-radius: 18px; overflow: hidden; height: 140px;
   box-shadow: var(--shadow-sm);
 }
 .welcome-venue-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (max-width: 480px) { .welcome-venue-photo { height: 110px; } }
 @media (max-width: 860px) {
   .welcome-inner { grid-template-columns: 1fr; }
   .welcome .photo { height: 280px; border-radius: 24px; }
   .welcome-grid { grid-template-columns: 1fr; }
+  .welcome-venue-photo { height: 200px; }
 }
+@media (max-width: 480px) { .welcome-venue-photo { height: 170px; } }
 
 /* — itinerario — */
 .itinerary { background: var(--color-surface); padding: 56px 44px; }
