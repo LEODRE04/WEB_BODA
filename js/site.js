@@ -451,7 +451,13 @@
       if (v && v.mapEmbedSrc) {
         var iframe = document.createElement("iframe");
         iframe.src = v.mapEmbedSrc;
-        iframe.loading = "lazy";
+        // Sin loading="lazy" a propósito: esta página solo tiene 1-2 mapas
+        // (no una lista larga), así que no hay nada que ganar retrasando la
+        // carga — y sí se pierde, porque "lazy" espera a que el mapa esté
+        // cerca de la pantalla para recién pedirlo, entonces se ve cargar
+        // en vivo justo cuando el invitado llega a esa sección. Con carga
+        // eager (default) el mapa ya pidió sus tiles desde que abrió la
+        // página, y para cuando el invitado baja hasta acá ya está listo.
         iframe.referrerPolicy = "no-referrer-when-downgrade";
         embed.innerHTML = "";
         embed.appendChild(iframe);
