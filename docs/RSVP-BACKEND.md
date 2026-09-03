@@ -1,21 +1,41 @@
-# Fase 3 — RSVP con backend
+# RSVP con backend
 
-## Estado: backend de prueba funcionando en local, real aún no desplegado
+## Estado: backend real desplegado y en uso
 
-El formulario de `#rsvp` ya habla con una API real (no solo `localStorage`):
+El formulario de `#rsvp` habla con una API real:
 
-- **En desarrollo local** apunta a `server/dev_api.py` — un servidor Python
-  (sin dependencias) que sirve el sitio y simula el backend con una lista
-  de invitados de prueba en `server/invitados.json`.
-- **En producción (GitHub Pages)** todavía no hay backend real desplegado,
-  así que `/api/rsvp` da 404 — el formulario lo detecta y cae solo a
-  guardar en `localStorage`, exactamente como en la fase 1. Nada se rompe.
-- **El backend real** (cuando decidan desplegarlo) es un Google Apps
-  Script sobre un Google Sheet — código listo en `docs/apps-script/Code.gs`.
+- **En producción (GitHub Pages)** apunta al Google Apps Script desplegado
+  sobre el Google Sheet de la boda — el código vive en
+  `docs/apps-script/Code.gs`.
+- **En desarrollo local** se apunta a `server/dev_api.py` — un servidor
+  Python (sin dependencias) que sirve el sitio y simula el mismo backend
+  con una lista de invitados de prueba en `server/invitados.json`.
 
-Los tres hablan el mismo "idioma" (mismo formato de JSON), así que pasar de
+Los dos hablan el mismo "idioma" (mismo formato de JSON), así que pasar de
 uno a otro es cambiar una sola línea en `js/config.js` (`rsvp.apiUrl`) —
 nada del HTML/CSS ni del formulario cambia.
+
+## Qué pasa si falla la conexión al confirmar
+
+Importante, porque acá se juegan respuestas que los novios no pueden
+perder. `submitRSVP()` en `js/site.js` distingue tres casos:
+
+| Situación | Qué ve el invitado | Qué pasa por detrás |
+|---|---|---|
+| Se guardó en la hoja | Modal "¡Nos alegra tenerte aquí!" y el resumen de su respuesta | listo, nada pendiente |
+| No hubo conexión, o el backend devolvió `reintentable: true` (lock ocupado, cuota, hoja renombrada), o tardó más de 15s | Aviso de que **no** se pudo guardar, con el formulario intacto para reintentar | la respuesta queda en `localStorage` bajo `rsvp_pendiente` y se reenvía sola en la siguiente visita |
+| El backend la rechazó por los datos (código inválido, más asistentes de los permitidos) | El motivo real del rechazo | se descarta el pendiente: reintentar no ayudaría |
+
+La diferencia importa: **antes**, cualquier fallo de red guardaba en
+`localStorage` y mostraba igual el modal de confirmación. El invitado se
+iba convencido de haber confirmado y los novios nunca se enteraban. Ahora
+solo se celebra cuando la respuesta llegó de verdad.
+
+El reenvío automático es seguro porque el `upsert` del backend usa el
+código de invitado como clave: reenviar dos veces actualiza la misma fila,
+no crea duplicados. **Los aportes de regalos NO se reintentan solos** — ahí
+cada envío es un `appendRow` nuevo y un reintento automático duplicaría el
+monto; si falla, el invitado ve el error y decide.
 
 ## Probarlo en tu máquina ahora mismo
 

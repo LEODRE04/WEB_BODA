@@ -53,8 +53,7 @@
       }
     }
 
-    modal.hidden = false;
-    requestAnimationFrame(function () { modal.classList.add("is-open"); });
+    abrirDialogo(modal);
     closeBtn.addEventListener("click", close);
     modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
     document.addEventListener("keydown", function (e) {
@@ -62,10 +61,37 @@
     });
   }
 
+  // Copia local del helper de js/site.js (esta página no carga site.js).
+  // El setTimeout no es redundante con el requestAnimationFrame: rAF se
+  // pausa en pestañas en segundo plano, y sin la clase "is-open" el
+  // backdrop queda invisible (opacity:0) pero igual position:fixed sobre
+  // toda la pantalla, tragándose los clics.
+  function abrirDialogo(modal) {
+    modal.hidden = false;
+    var mostrar = function () { modal.classList.add("is-open"); };
+    requestAnimationFrame(mostrar);
+    setTimeout(mostrar, 50);
+  }
+
+  // Sin timeout, un backend colgado deja "Enviando…" para siempre.
+  var API_TIMEOUT_MS = 15000;
+
+  function fetchConTimeout(url, options, timeoutMs) {
+    options = options || {};
+    if (typeof AbortController === "undefined") return fetch(url, options);
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || API_TIMEOUT_MS);
+    options.signal = ctrl.signal;
+    return fetch(url, options).then(
+      function (r) { clearTimeout(timer); return r; },
+      function (err) { clearTimeout(timer); throw err; }
+    );
+  }
+
   function fetchGuest(codigo) {
     var url = W.rsvp && W.rsvp.apiUrl;
     if (!url) return Promise.resolve(null);
-    return fetch(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+    return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
   }
@@ -192,6 +218,7 @@
     var regalos = [];
     var seleccionadoId = null;
     var comprobanteDataUrl = null;
+    var errorDeCarga = false; // distingue "lista vacía" de "no cargó" — ver renderGrid
 
     // "← Volver a la lista" (a medio elegir, sin enviar todavía) — el
     // regalo sigue elegido, así que la barra de "Continuar" vuelve a
@@ -299,7 +326,30 @@
       });
       var hayRegalos = regalos.length > 0;
       grid.hidden = !hayRegalos;
-      if (emptyEl) emptyEl.hidden = hayRegalos;
+      if (!emptyEl) return;
+      emptyEl.hidden = hayRegalos;
+      if (hayRegalos) return;
+
+      // Sin regalos puede significar dos cosas muy distintas y antes las
+      // dos decían "todavía no hay regalos": si en realidad se cayó la
+      // conexión, eso manda al invitado a irse creyendo que la lista está
+      // vacía. Acá se separan, y en el caso de fallo se ofrece reintentar
+      // sin recargar la página.
+      emptyEl.innerHTML = "";
+      if (errorDeCarga) {
+        emptyEl.appendChild(document.createTextNode(
+          "No pudimos cargar la lista de regalos — puede ser la conexión. "
+        ));
+        var reintentar = document.createElement("button");
+        reintentar.type = "button";
+        reintentar.className = "btn btn-ghost";
+        reintentar.textContent = "Reintentar";
+        reintentar.addEventListener("click", cargarRegalos);
+        emptyEl.appendChild(reintentar);
+      } else {
+        emptyEl.textContent = "Todavía no hay regalos en la lista — vuelve a intentarlo más tarde, " +
+          "o escríbenos por WhatsApp si tienes dudas.";
+      }
     }
 
     // Al hacer clic en un regalo ya completo no se abre el panel de
@@ -495,14 +545,17 @@
     }
 
     function cargarRegalos() {
-      if (!url) { regalos = []; renderGrid(); return; }
-      fetch(url + "?tipo=regalos", { cache: "no-store" })
+      if (!url) { errorDeCarga = true; regalos = []; renderGrid(); return; }
+      return fetchConTimeout(url + "?tipo=regalos", { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (body) {
+          errorDeCarga = false;
           regalos = ordenarPorPrecio((body && Array.isArray(body.regalos)) ? body.regalos : []);
           renderGrid();
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.warn("No se pudo cargar la lista de regalos:", err);
+          errorDeCarga = true;
           regalos = [];
           renderGrid();
         });
@@ -576,7 +629,9 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Enviando…";
 
-      fetch(url, {
+      // Subir la captura puede tardar bastante más que un POST normal, así
+      // que este pide más margen que el timeout por defecto.
+      fetchConTimeout(url, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" }, // ver docs/RSVP-BACKEND.md: evita el preflight CORS
         body: JSON.stringify({
@@ -588,8 +643,16 @@
           comprobante_base64: comprobanteDataUrl || "",
           comprobante_nombre: nombre.replace(/\s+/g, "-").toLowerCase(),
         }),
-      })
-        .then(function (r) { return r.json(); })
+      }, 45000)
+        .then(function (r) {
+          // Si el backend devolvió HTML (una página de error de Apps
+          // Script, o el 404 de GitHub Pages), r.json() rompe con un
+          // "Unexpected token <" que no le dice nada a nadie. Se traduce
+          // acá a algo accionable.
+          return r.json().catch(function () {
+            throw new Error("El servidor no respondió como esperábamos. Intenta de nuevo en un momento.");
+          });
+        })
         .then(function (body) {
           if (body && body.error) throw new Error(body.error);
           // Avance optimista (recaudado + este aporte) para el modal de
@@ -599,7 +662,9 @@
           cargarRegalos(); // refresca el avance para todos los regalos
         })
         .catch(function (err) {
-          errorEl.textContent = err.message || "No se pudo enviar tu aporte. Intenta de nuevo.";
+          errorEl.textContent = (err && err.name === "AbortError")
+            ? "Se demoró demasiado en responder. Revisa tu conexión y vuelve a intentar."
+            : (err && err.message) || "No se pudo enviar tu aporte. Intenta de nuevo.";
           errorEl.hidden = false;
         })
         .finally(function () {
@@ -652,8 +717,7 @@
         msgEl.hidden = true;
       }
 
-      modal.hidden = false;
-      requestAnimationFrame(function () { modal.classList.add("is-open"); });
+      abrirDialogo(modal);
     }
     function close() {
       modal.classList.remove("is-open");

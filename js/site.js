@@ -21,6 +21,26 @@
   function BackendUnavailable() {}
   BackendUnavailable.prototype = Object.create(Error.prototype);
 
+  // Abre un .dialog-backdrop en dos pasos (hidden=false, y en el frame
+  // siguiente la clase que lo hace visible) para que corra la transición
+  // de opacidad.
+  //
+  // El setTimeout no es redundante: requestAnimationFrame se PAUSA en
+  // pestañas en segundo plano, y sin la clase "is-open" el backdrop queda
+  // con opacity:0 pero sigue siendo position:fixed/inset:0/z-index:150 —
+  // o sea, un panel invisible que se traga todos los clics de la página.
+  // Pasaba de verdad: confirmar asistencia y cambiar de pestaña mientras
+  // se enviaba dejaba la página "congelada" al volver. Agregar la clase
+  // dos veces es inofensivo.
+  // (js/regalos.js tiene su propia copia de esto: esa página no carga
+  // site.js, así que no hay dónde compartirlo sin acoplarlas.)
+  function abrirDialogo(modal) {
+    modal.hidden = false;
+    var mostrar = function () { modal.classList.add("is-open"); };
+    requestAnimationFrame(mostrar);
+    setTimeout(mostrar, 50);
+  }
+
   ready(init);
 
   function ready(fn) {
@@ -593,8 +613,7 @@
         noteEl.textContent = "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";
       }
 
-      modal.hidden = false;
-      requestAnimationFrame(function () { modal.classList.add("is-open"); });
+      abrirDialogo(modal);
     }
     function close() {
       modal.classList.remove("is-open");
@@ -621,6 +640,14 @@
     var banner = form.querySelector("#rsvp-guest-banner");
     var submitBtn = form.querySelector("#rsvp-submit");
     var savedState = initRsvpSavedState(form, codigo, guestPromise);
+
+    // Si en una visita anterior se cortó la conexión justo al confirmar,
+    // la respuesta quedó pendiente en este dispositivo: se reenvía sola
+    // acá y, si llega, se muestra el resumen "ya respondiste" como si
+    // hubiera funcionado a la primera.
+    reintentarRSVPPendiente(function (data) {
+      if (savedState) savedState.show(data);
+    });
 
     function showBanner(text, isWarning) {
       banner.textContent = text;
@@ -684,7 +711,21 @@
       submitBtn.textContent = "Enviando…";
 
       submitRSVP(data)
-        .then(function () {
+        .then(function (res) {
+          if (!res || !res.synced) {
+            // No llegó al backend. Se guardó en este dispositivo y se
+            // reintenta solo en la próxima visita, pero NO se muestra el
+            // modal de "¡confirmado!" ni el resumen guardado: sería
+            // decirle al invitado que ya está cuando los novios todavía
+            // no tienen su respuesta. Se deja el formulario tal cual para
+            // que pueda reintentar cuando le vuelva la señal.
+            errorEl.innerHTML = "No pudimos guardar tu confirmación — parece un problema de conexión. " +
+              "La dejamos anotada en este dispositivo y lo reintentamos solos, pero si puedes, " +
+              "vuelve a tocar <strong>Confirmar</strong> en un momento.";
+            errorEl.hidden = false;
+            submitBtn.textContent = originalLabel;
+            return;
+          }
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
           if (thanksModal) thanksModal.open(data.asistencia === "si", data);
@@ -806,31 +847,82 @@
     return { show: show, hide: hide };
   }
 
+  // — capa de red —
+  //
+  // Sin timeout, un backend colgado (Apps Script a veces tarda en
+  // despertar) deja el botón en "Enviando…" para siempre, sin error ni
+  // forma de reintentar. AbortController corta a los 15s y el fallo se
+  // trata igual que cualquier otro problema de conexión.
+  var API_TIMEOUT_MS = 15000;
+  var PENDIENTE_KEY = "rsvp_pendiente";
+
+  function fetchConTimeout(url, options, timeoutMs) {
+    options = options || {};
+    if (typeof AbortController === "undefined") return fetch(url, options);
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || API_TIMEOUT_MS);
+    options.signal = ctrl.signal;
+    return fetch(url, options).then(
+      function (r) { clearTimeout(timer); return r; },
+      function (err) { clearTimeout(timer); throw err; }
+    );
+  }
+
+  // localStorage tira excepción en modo privado de algunos navegadores y
+  // cuando la cuota está llena. En el resto del archivo ya se accedía
+  // siempre dentro de try/catch; estos helpers son para no olvidarlo.
+  function storageGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function storageSet(key, value) {
+    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+  }
+  function storageRemove(key) {
+    try { localStorage.removeItem(key); } catch (e) {}
+  }
+
+  // ¿El fallo fue de conexión (vale la pena reintentar) o el backend
+  // respondió algo que no entendemos? En ambos casos la confirmación NO
+  // llegó, que es lo que importa para no mentirle al invitado.
+  function esFalloDeConexion(err) {
+    return !!err && (
+      err.name === "AbortError" ||          // timeout nuestro
+      err instanceof TypeError ||           // red caída / CORS
+      err instanceof BackendUnavailable     // respondió algo que no es JSON
+    );
+  }
+
   // Busca a un invitado por su código (?codigo=...). Devuelve null si la API
-  // no está disponible todavía (formulario sigue abierto, sin restricciones).
+  // no responde: el formulario sigue abierto, sin restricciones.
   function fetchGuest(codigo) {
     var url = W.rsvp && W.rsvp.apiUrl;
     if (!url) return Promise.resolve(null);
-    return fetch(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+    return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
   }
 
-  // Punto único de integración con el backend (fase 3). Intenta mandar la
-  // confirmación a W.rsvp.apiUrl. El éxito/error se decide por el CONTENIDO
-  // del JSON (campo "error"), no por el código HTTP: Google Apps Script
-  // (el backend real, ver docs/RSVP-BACKEND.md) siempre responde 200 así
-  // que el status por sí solo no sirve para distinguir nada.
-  // - Si la API respondió con {"error": "..."} -> es un error de validación
-  //   real (código inválido, supera acompañantes permitidos) y se muestra.
-  // - Si la respuesta no es JSON (p.ej. el 404 HTML de GitHub Pages porque
-  //   el backend real aún no está desplegado) o falla la red -> cae a
-  //   guardar en localStorage, sin romper nada.
+  // Punto único de integración con el backend. El éxito/error se decide
+  // por el CONTENIDO del JSON (campo "error"), no por el código HTTP:
+  // Google Apps Script (ver docs/RSVP-BACKEND.md) siempre responde 200,
+  // así que el status por sí solo no distingue nada.
+  //
+  // Devuelve { synced: true } si la respuesta quedó guardada en la hoja, o
+  // { synced: false } si solo se pudo dejar pendiente en este dispositivo.
+  // Esa diferencia es la clave: ANTES, un fallo de red guardaba en
+  // localStorage y resolvía como si todo hubiera salido bien — el invitado
+  // veía "¡Asistencia confirmada!" y los novios no se enteraban nunca.
+  // Ahora quien llama decide qué mostrar, y reintentarRSVPPendiente()
+  // vuelve a mandarlo solo en la siguiente visita.
+  //
+  // Si el backend respondió con {"error": "..."} es un rechazo real
+  // (código inválido, supera acompañantes) — eso se propaga como
+  // excepción y no se reintenta, porque reintentarlo daría igual.
   function submitRSVP(data) {
     var url = W.rsvp && W.rsvp.apiUrl;
-    if (!url) return saveLocal(data);
+    if (!url) return Promise.resolve(guardarPendiente(data));
 
-    return fetch(url, {
+    return fetchConTimeout(url, {
       method: "POST",
       // "text/plain" a propósito (no "application/json"): así el navegador
       // no manda un preflight CORS, que Google Apps Script no responde bien.
@@ -841,35 +933,85 @@
     }).then(function (r) {
       return r.json().then(
         function (body) {
-          if (body && body.error) throw new Error(body.error);
+          if (body && body.error) {
+            // reintentable:true = el backend tuvo un problema pasajero
+            // (lock ocupado, cuota, hoja renombrada), no un rechazo de
+            // estos datos. Se guarda pendiente y se reenvía solo, igual
+            // que si se hubiera caído la conexión.
+            if (body.reintentable) return guardarPendiente(data);
+            storageRemove(PENDIENTE_KEY); // rechazo definitivo: reintentar no ayuda
+            throw new Error(body.error);
+          }
+          storageRemove(PENDIENTE_KEY);
+          registrarEnHistorial(data);
+          return { synced: true };
         },
         function () {
           throw new BackendUnavailable(); // la respuesta no era JSON
         }
       );
     }).catch(function (err) {
-      if (err instanceof TypeError || err instanceof BackendUnavailable) {
-        console.warn("No se pudo contactar al backend (¿aún no desplegado?), guardando localmente:", err);
-        return saveLocal(data);
+      if (esFalloDeConexion(err)) {
+        console.warn("No se pudo contactar al backend, queda pendiente de reenvío:", err);
+        return guardarPendiente(data);
       }
       throw err;
     });
   }
 
-  function saveLocal(data) {
-    return new Promise(function (resolve) {
-      var key = "rsvp_responses";
-      var list = JSON.parse(localStorage.getItem(key) || "[]");
-      list.push(data);
-      localStorage.setItem(key, JSON.stringify(list));
-      console.info("RSVP guardado localmente (sin backend):", data);
-      resolve();
-    });
+  function guardarPendiente(data) {
+    storageSet(PENDIENTE_KEY, JSON.stringify(data));
+    registrarEnHistorial(data);
+    return { synced: false };
   }
 
-  // Expuesto para poder inspeccionar/objetar respuestas guardadas desde la consola:
-  // window.__rsvpResponses() mientras no hay panel de administración.
+  // Historial local de todo lo enviado desde este dispositivo — no es la
+  // fuente de verdad (esa es la hoja de cálculo), solo un respaldo para
+  // poder recuperar a mano una respuesta si algo saliera muy mal.
+  // Se recorta a las últimas HISTORIAL_MAX: un pendiente que falla en
+  // cada visita agregaría una entrada por carga y, sin tope, terminaría
+  // llenando la cuota de localStorage del invitado.
+  var HISTORIAL_MAX = 20;
+  function registrarEnHistorial(data) {
+    var list;
+    try { list = JSON.parse(storageGet("rsvp_responses") || "[]"); } catch (e) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    list.push(data);
+    if (list.length > HISTORIAL_MAX) list = list.slice(-HISTORIAL_MAX);
+    storageSet("rsvp_responses", JSON.stringify(list));
+  }
+
+  // Al cargar la página: si quedó una confirmación sin llegar al backend
+  // (se cortó la señal, el invitado estaba en el ascensor…), se reintenta
+  // en silencio. Si funciona, la hoja queda al día sin que nadie tenga que
+  // volver a llenar nada.
+  function reintentarRSVPPendiente(onSynced) {
+    var raw = storageGet(PENDIENTE_KEY);
+    if (!raw) return;
+    var data;
+    try {
+      data = JSON.parse(raw);
+    } catch (e) {
+      storageRemove(PENDIENTE_KEY);
+      return;
+    }
+    if (!data || !data.nombre || !data.asistencia) {
+      storageRemove(PENDIENTE_KEY);
+      return;
+    }
+    submitRSVP(data)
+      .then(function (res) {
+        if (res && res.synced) {
+          console.info("Confirmación pendiente reenviada correctamente.");
+          if (onSynced) onSynced(data);
+        }
+      })
+      .catch(function () { /* el backend la rechazó; submitRSVP ya limpió el pendiente */ });
+  }
+
+  // Expuesto para poder inspeccionar las respuestas guardadas desde la
+  // consola: window.__rsvpResponses() mientras no hay panel de admin.
   window.__rsvpResponses = function () {
-    return JSON.parse(localStorage.getItem("rsvp_responses") || "[]");
+    try { return JSON.parse(storageGet("rsvp_responses") || "[]"); } catch (e) { return []; }
   };
 })();
