@@ -69,10 +69,9 @@ La columna `tipo_invitacion` de cada invitado (`"ceremonia"` o
 
 - **`"completa"`** (o la celda vacía — es el valor por defecto en la lista
   de invitados): ve todo.
-- **`"ceremonia"`**: no ve el itinerario de la recepción (cóctel, cena,
-  baile, cierre), ni el bloque de ubicación de la recepción en "Cuándo y
-  dónde". El saludo de arriba también dice "...en la ceremonia" en vez de
-  "...en la ceremonia y la recepción".
+- **`"ceremonia"`**: no ve el bloque de ubicación de la recepción en
+  "Cuándo y dónde". El saludo de arriba también dice "...en la ceremonia"
+  en vez de "...en la ceremonia y la recepción".
 
 **Por defecto (medida de seguridad):** la página parte SIEMPRE asumiendo
 "solo ceremonia" — `applyInvitationType()` en `js/site.js` agrega la clase

@@ -142,24 +142,10 @@ body { background: var(--color-neutral-100); }
 }
 @media (max-width: 480px) { .welcome-venue-photo { height: 170px; } }
 
-/* — itinerario — */
-.itinerary { background: var(--color-surface); padding: 56px 44px; }
-.itinerary-head { text-align: center; margin-bottom: 34px; }
-.timeline { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; }
-.timeline-row { display: grid; grid-template-columns: 110px 24px 1fr; gap: 16px; }
-.timeline-time { font-family: var(--font-heading); font-size: 19px; text-align: right; padding-top: 2px; }
-.timeline-rail { display: flex; flex-direction: column; align-items: center; }
-.timeline-dot { width: 14px; height: 14px; border-radius: 999px; background: var(--color-accent); margin-top: 6px; }
-.timeline-dot.sage { background: var(--color-accent-2-600); }
-.timeline-dot.end { background: color-mix(in srgb, var(--color-text) 30%, transparent); }
-.timeline-bar { flex: 1; width: 2px; background: var(--color-divider); }
-.timeline-body { padding-bottom: 24px; }
-.timeline-title { font-size: 17px; font-weight: 600; }
+/* — .timeline-desc: se quedó del itinerario (ya no existe como sección),
+   pero sigue en uso en "Bienvenida" para la descripción bajo la foto de
+   ceremonia/recepción (.welcome-venue-photo). — */
 .timeline-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
-@media (max-width: 560px) {
-  .timeline-row { grid-template-columns: 78px 20px 1fr; gap: 10px; }
-  .timeline-time { font-size: 15px; }
-}
 
 /* — detalles (cuándo y dónde) — */
 .details { padding: 56px 44px; background: var(--color-neutral-100); }
@@ -739,7 +725,7 @@ body { background: var(--color-neutral-100); }
 /* Invitación solo a la ceremonia — por defecto SIEMPRE (ver
    applyInvitationType en js/site.js: se asume lo más restrictivo hasta
    que el backend confirme lo contrario). Oculta todo lo marcado como
-   propio de la recepción: itinerario y su bloque de ubicación. */
+   propio de la recepción: su bloque de ubicación y demás detalles. */
 body.solo-ceremonia [data-reception-only] { display: none !important; }
 
 /* — botón flotante de WhatsApp: círculo con el ícono que se expande a

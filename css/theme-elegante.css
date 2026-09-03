@@ -63,14 +63,12 @@
    encabezado ya está centrado (si se agregara donde el texto es a la
    izquierda quedaría descentrada) — */
 .hero-eyebrow,
-.itinerary-head .section-kicker,
 .details-head .section-kicker,
 .faq-head .section-kicker {
   position: relative;
   padding-top: 20px;
 }
 .hero-eyebrow::before,
-.itinerary-head .section-kicker::before,
 .details-head .section-kicker::before,
 .faq-head .section-kicker::before {
   content: "";
@@ -94,7 +92,7 @@
 
 /* — textura de puntitos dorados dispersos, muy sutil, en un par de
    secciones de fondo plano (no sobre fotos) — */
-.hero-copy, .itinerary, .rsvp, .faq {
+.hero-copy, .rsvp, .faq {
   background-image:
     radial-gradient(circle at 12% 22%, color-mix(in srgb, var(--color-accent) 30%, transparent) 0 2px, transparent 2.6px),
     radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--color-accent) 22%, transparent) 0 1.6px, transparent 2.2px),

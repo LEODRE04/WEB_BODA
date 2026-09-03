@@ -32,9 +32,9 @@ Casi todo lo que cambia entre invitación e invitación está en
 Yape/Plin, cuenta bancaria, WhatsApp de contacto, link a lista de regalos.
 Edítalo ahí — no hace falta tocar el HTML para esos datos.
 
-Para textos más largos (bienvenida, itinerario, preguntas frecuentes,
-código de vestimenta) edita directamente `index.html`; son secciones claras
-y comentadas por bloque.
+Para textos más largos (bienvenida, preguntas frecuentes, código de
+vestimenta) edita directamente `index.html`; son secciones claras y
+comentadas por bloque.
 
 ## Cómo correrlo en local
 

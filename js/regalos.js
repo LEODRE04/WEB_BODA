@@ -404,9 +404,13 @@
 
       if (isMobileFlow() && mobileContinueBar) {
         // en celular el panel recién se ve al tocar "Continuar" — acá
-        // solo se actualiza el monto sugerido de la barra fija.
+        // solo se actualiza la barra fija. Antes decía el monto
+        // ("Continuar con S/ X"), pero eso se leía como si ese fuera
+        // el monto a pagar sí o sí, en vez de solo una sugerencia
+        // (el monto real se ajusta en el slider del panel) — ahora
+        // solo dice el nombre del regalo elegido.
         panel.hidden = true;
-        mobileContinueBtn.textContent = "Continuar con " + money(falta);
+        mobileContinueBtn.textContent = "Continuar con " + g.nombre;
         mobileContinueBar.hidden = false;
       } else {
         panel.hidden = false;

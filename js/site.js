@@ -61,8 +61,8 @@
 
   // Invitación solo a la ceremonia (tipo_invitacion en la lista de
   // invitados, ver docs/RSVP-BACKEND.md): agrega una clase al <body> que
-  // oculta por CSS todo lo marcado [data-reception-only] — itinerario,
-  // ubicación de la recepción, y campos del RSVP que no aplican.
+  // oculta por CSS todo lo marcado [data-reception-only] — ubicación de
+  // la recepción y campos del RSVP que no aplican.
   function applyInvitationType(guestPromise) {
     // Por defecto se asume lo más restrictivo (solo ceremonia): si alguien
     // borra el "?codigo=" del link, escribe uno inventado, o el backend no
@@ -482,7 +482,6 @@
     if (!modal) return null;
     var W = window.WEDDING || {};
     var closeBtn = modal.querySelector("#rsvp-thanks-close");
-    var itineraryLink = modal.querySelector("#rsvp-thanks-itinerary");
     var msgYes = modal.querySelector("#rsvp-thanks-msg-yes");
     var msgNo = modal.querySelector("#rsvp-thanks-msg-no");
     var countEl = modal.querySelector("#rsvp-thanks-count");
@@ -525,10 +524,6 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !modal.hidden) close();
     });
-    // El link de "Ver itinerario" navega detrás del modal (que es
-    // position:fixed y lo tapa todo) — hay que cerrarlo para que el
-    // scroll a la sección se vea.
-    if (itineraryLink) itineraryLink.addEventListener("click", close);
 
     return { open: open };
   }
@@ -644,7 +639,6 @@
     var nombreEl = block.querySelector("#rsvp-saved-nombre");
     var asistentesWrap = block.querySelector("#rsvp-saved-asistentes-wrap");
     var asistentesEl = block.querySelector("#rsvp-saved-asistentes");
-    var itineraryLink = block.querySelector("#rsvp-saved-itinerary");
     var editBtn = block.querySelector("#rsvp-saved-edit");
     var noteEl = block.querySelector("#rsvp-saved-note");
     var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
@@ -689,7 +683,6 @@
       nombreEl.textContent = nombre;
       asistentesWrap.hidden = !attending;
       if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
-      itineraryLink.hidden = !attending;
       noteEl.textContent = attending
         ? "Puedes editar tu respuesta hasta el " + editUntil + "."
         : "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";
