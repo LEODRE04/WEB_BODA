@@ -112,6 +112,39 @@ body { background: var(--color-neutral-100); }
   .hero .photo { min-height: 260px; order: -1; }
 }
 
+/* — reserva la fecha: franja notoria justo debajo de la portada, ver el
+   comentario en index.html para más contexto. */
+.save-date { padding: 56px 44px; background: var(--color-bg); }
+.save-date .section-kicker { text-align: center; margin-bottom: 22px; }
+.save-date-row {
+  display: flex; align-items: center; justify-content: center; gap: 28px;
+  margin-bottom: 22px;
+}
+.save-date-side { text-align: center; }
+.save-date-label {
+  display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: 4px;
+}
+.save-date-value { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 20px; }
+.save-date-badge {
+  flex: none; width: 108px; height: 108px; border-radius: 999px;
+  background: var(--color-accent); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-md);
+}
+.save-date-day { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 34px; line-height: 1; }
+.save-date-month { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
+.save-date-note {
+  max-width: 46ch; margin: 0 auto 22px; text-align: center; font-size: 14px; line-height: 1.65;
+  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+}
+.save-date-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 480px) {
+  .save-date-row { gap: 16px; }
+  .save-date-badge { width: 88px; height: 88px; }
+  .save-date-day { font-size: 28px; }
+}
+
 /* — bienvenida — */
 .welcome { padding: 56px 44px; background: var(--color-neutral-100); }
 .welcome-inner { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: center; }
@@ -836,3 +869,84 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 @media (max-width: 640px) {
   .envelope-card { padding: 34px 22px; border-radius: 24px; }
 }
+
+/* — pase de invitación (PDF descargable al confirmar asistencia) — esta
+   tarjeta nunca se ve en pantalla: js/pase.js la arma oculta
+   (position:fixed; left:-10000px), la convierte a imagen con
+   html2canvas-pro y la mete en un PDF de una sola página con jsPDF.
+   Basado en un mockup de claude.ai/design ("Pase de invitación"),
+   reescrito acá con los tokens de color/tipografía del sitio
+   (Fraunces/Figtree, --color-accent, --color-accent-2) en vez de
+   valores propios del mockup.
+   OJO: los textos secundarios usan rgba(74,56,38,.NN) fijo en vez del
+   patrón habitual color-mix(in srgb, var(--color-text) NN%, transparent)
+   — el html2canvas normal (no el fork "-pro" que se vendorizó, ver
+   js/pase.js) no entiende color-mix() y tira "unsupported color
+   function" al capturar. Aunque acá ya se usa el fork que sí lo
+   soporta, se deja este rgba fijo como margen de seguridad (afecta
+   también a var(--color-divider) y var(--shadow-*), definidos con
+   color-mix en theme-elegante.css — por eso tampoco se usan acá).
+   74,56,38 es el --color-text actual del tema; si cambia el tema, hay
+   que actualizar esto a mano. — */
+.pase-card {
+  width: 460px; box-sizing: border-box; padding: 32px 30px;
+  background: var(--color-bg); font-family: var(--font-body); color: var(--color-text);
+}
+.pase-kicker {
+  font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; text-align: center;
+  color: var(--color-accent-700); margin: 0 0 6px;
+}
+.pase-heading {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 27px;
+  text-align: center; margin: 0 0 18px;
+}
+.pase-heading .pase-amp { color: var(--color-accent); }
+.pase-divider { height: 1px; background: rgba(74, 56, 38, .16); margin: 0 0 18px; }
+.pase-nombre {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 26px;
+  text-align: center; margin: 0 0 14px;
+}
+.pase-pases {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--color-accent-2-100); color: var(--color-accent-2-800);
+  border-radius: 999px; padding: 6px 18px; width: fit-content; margin: 0 auto 22px;
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+}
+.pase-pases strong { font-family: var(--font-heading); font-size: 18px; text-transform: none; letter-spacing: 0; }
+.pase-date-block {
+  background: var(--color-accent); color: #fff; border-radius: 20px; padding: 22px 20px;
+  text-align: center; margin: 0 0 20px;
+}
+.pase-date-kicker { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .85; margin-bottom: 6px; }
+.pase-date-row { display: flex; align-items: baseline; justify-content: center; gap: 12px; }
+.pase-date-day { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 46px; line-height: 1; }
+.pase-date-month { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 19px; }
+.pase-date-time { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 19px; margin-top: 8px; }
+.pase-date-venue { font-size: 12.5px; opacity: .9; margin-top: 10px; line-height: 1.5; }
+.pase-info-row { display: flex; gap: 14px; margin: 0 0 18px; }
+.pase-info-col { flex: 1; min-width: 0; background: var(--color-surface); border-radius: 14px; padding: 12px 14px; }
+.pase-info-label { display: block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(74, 56, 38, .55); margin-bottom: 4px; }
+.pase-info-col strong { display: block; font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 15px; }
+.pase-info-col p { margin: 3px 0 0; font-size: 10.5px; line-height: 1.4; color: rgba(74, 56, 38, .65); }
+.pase-bottom { display: flex; gap: 18px; }
+.pase-recs { flex: 1; min-width: 0; }
+.pase-rec-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; counter-reset: pase-rec; }
+.pase-rec-list li {
+  position: relative; padding-left: 22px; font-size: 10.5px; line-height: 1.5;
+  color: rgba(74, 56, 38, .75);
+  counter-increment: pase-rec;
+}
+.pase-rec-list li::before {
+  content: counter(pase-rec); position: absolute; left: 0; top: 0;
+  width: 15px; height: 15px; border-radius: 999px; background: var(--color-accent-100); color: var(--color-accent-700);
+  font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.pase-qr { flex: none; width: 128px; text-align: center; }
+.pase-qr-img { width: 100px; height: 100px; background: var(--color-accent-2-100); border-radius: 10px; padding: 6px; box-sizing: border-box; }
+.pase-qr p { margin: 6px 0 0; font-size: 9px; line-height: 1.4; color: rgba(74, 56, 38, .6); }
+.pase-footer {
+  border-top: 1px solid rgba(74, 56, 38, .16); margin-top: 20px; padding-top: 14px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+  font-size: 10px; color: rgba(74, 56, 38, .55);
+}
+.pase-footer strong { font-family: var(--font-heading); font-weight: var(--font-heading-weight); color: var(--color-text); font-size: 11px; }

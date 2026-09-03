@@ -36,7 +36,7 @@
     initDynamicLinks();
     initMusicToggle();
     initPetals();
-    var thanksModal = initThanksModal();
+    initSaveDateCalendar();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -44,11 +44,64 @@
     var codigo = new URLSearchParams(window.location.search).get("codigo");
     var guestPromise = codigo ? fetchGuest(codigo) : Promise.resolve(null);
 
+    // thanksModal necesita codigo/guestPromise (tipo_invitacion, nombre del
+    // invitado) para armar el pase descargable — por eso se crea recién
+    // acá, después de tenerlos, y no arriba junto a los demás init*().
+    var thanksModal = initThanksModal(codigo, guestPromise);
+
     applyInvitationType(guestPromise);
     initGuestGreeting(codigo, guestPromise);
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
     initGiftListLink(codigo);
+  }
+
+  // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
+  // (funciona con Apple/Google/Outlook Calendar) en vez de depender de un
+  // link a un solo proveedor — no requiere backend ni conexión.
+  function initSaveDateCalendar() {
+    var btn = document.querySelector("#save-date-calendar");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var start = new Date(W.weddingDateISO);
+      if (isNaN(start.getTime())) return;
+      var end = new Date(start.getTime() + 5 * 60 * 60 * 1000); // 5h: ceremonia + recepción, aprox.
+
+      function toICSDate(d) {
+        return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      }
+      function icsEscape(s) {
+        return String(s || "").replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;");
+      }
+
+      var nombres = W.couple ? W.couple.a + " & " + W.couple.b : "André & Krisli";
+      var lugar = W.venue ? W.venue.name + ", " + W.venue.area : "";
+      var ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Boda " + nombres + "//ES",
+        "BEGIN:VEVENT",
+        "UID:boda-" + start.getTime() + "@leodre04.github.io",
+        "DTSTAMP:" + toICSDate(new Date()),
+        "DTSTART:" + toICSDate(start),
+        "DTEND:" + toICSDate(end),
+        "SUMMARY:" + icsEscape("Boda de " + nombres),
+        "LOCATION:" + icsEscape(lugar),
+        "DESCRIPTION:" + icsEscape("Nos encantaría contar contigo ese día."),
+        "END:VEVENT",
+        "END:VCALENDAR",
+      ].join("\r\n");
+
+      var blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "Boda-Andre-y-Krisli.ics";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
   }
 
   // La lista de regalos elegible vive en su propia página (regalos.html)
@@ -483,7 +536,7 @@
   // acaba de escribir en el formulario, y un resumen (cuándo/dónde) con
   // los datos de config.js — así no queda un texto genérico igual para
   // todos. Basado en un mockup revisado en claude.ai/design.
-  function initThanksModal() {
+  function initThanksModal(codigo, guestPromise) {
     var modal = document.querySelector("#rsvp-thanks");
     if (!modal) return null;
     var W = window.WEDDING || {};
@@ -494,10 +547,33 @@
     var whenEl = modal.querySelector("#rsvp-thanks-when");
     var whereEl = modal.querySelector("#rsvp-thanks-where");
     var noteEl = modal.querySelector("#rsvp-thanks-note");
+    var paseBtn = modal.querySelector("#rsvp-thanks-pase");
     var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
+
+    // tipo_invitacion no viene en el POST del formulario (solo nombre,
+    // num_asistentes, asistencia) — se saca del mismo guestPromise que ya
+    // usa el resto de la página, resuelto una sola vez.
+    var tipoInvitacion = "completa";
+    guestPromise.then(function (guest) {
+      if (guest && guest.found) tipoInvitacion = guest.tipo_invitacion || "completa";
+    });
+
+    var lastInfo = null;
+    if (paseBtn) {
+      paseBtn.addEventListener("click", function () {
+        if (!lastInfo || !window.WeddingPase) return;
+        window.WeddingPase.descargar({
+          nombre: lastInfo.nombre,
+          numAsistentes: parseInt(lastInfo.num_asistentes, 10) || 1,
+          tipoInvitacion: tipoInvitacion,
+          codigo: codigo,
+        }, paseBtn);
+      });
+    }
 
     function open(attending, info) {
       info = info || {};
+      lastInfo = info;
       var nombre = (info.nombre || "").trim().split(" ")[0]; // solo el primer nombre, más cercano
       var asistentes = parseInt(info.num_asistentes, 10) || 1;
 
@@ -544,7 +620,7 @@
     var codigoInput = form.querySelector("#rsvp-codigo");
     var banner = form.querySelector("#rsvp-guest-banner");
     var submitBtn = form.querySelector("#rsvp-submit");
-    var savedState = initRsvpSavedState(form);
+    var savedState = initRsvpSavedState(form, codigo, guestPromise);
 
     function showBanner(text, isWarning) {
       banner.textContent = text;
@@ -632,7 +708,7 @@
   // la fecha de W.rsvp.editUntilLabel) en vez de quedar siempre visible. Basado en un
   // mockup de claude.ai/design, adaptado a los datos reales que guardamos
   // (sin menú/acompañante por nombre/canción, que ese mockup sí traía). —
-  function initRsvpSavedState(form) {
+  function initRsvpSavedState(form, codigo, guestPromise) {
     var block = document.querySelector("#rsvp-saved");
     if (!block) return null;
     var W = window.WEDDING || {};
@@ -645,9 +721,28 @@
     var nombreEl = block.querySelector("#rsvp-saved-nombre");
     var asistentesWrap = block.querySelector("#rsvp-saved-asistentes-wrap");
     var asistentesEl = block.querySelector("#rsvp-saved-asistentes");
+    var paseBtn = block.querySelector("#rsvp-saved-pase");
     var editBtn = block.querySelector("#rsvp-saved-edit");
     var noteEl = block.querySelector("#rsvp-saved-note");
     var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
+
+    var tipoInvitacion = "completa";
+    guestPromise.then(function (guest) {
+      if (guest && guest.found) tipoInvitacion = guest.tipo_invitacion || "completa";
+    });
+
+    var lastData = null;
+    if (paseBtn) {
+      paseBtn.addEventListener("click", function () {
+        if (!lastData || !window.WeddingPase) return;
+        window.WeddingPase.descargar({
+          nombre: lastData.nombre,
+          numAsistentes: parseInt(lastData.num_asistentes, 10) || 1,
+          tipoInvitacion: tipoInvitacion,
+          codigo: codigo,
+        }, paseBtn);
+      });
+    }
 
     var originalTitle = titleEl ? titleEl.textContent : "";
     var originalLede = ledeEl ? ledeEl.innerHTML : "";
@@ -666,6 +761,7 @@
 
     function show(data) {
       data = data || {};
+      lastData = data;
       var attending = data.asistencia === "si";
       var nombre = (data.nombre || "").trim();
       var firstName = nombre.split(" ")[0];
@@ -689,6 +785,7 @@
       nombreEl.textContent = nombre;
       asistentesWrap.hidden = !attending;
       if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
+      if (paseBtn) paseBtn.hidden = !attending;
       noteEl.textContent = attending
         ? "Puedes editar tu respuesta hasta el " + editUntil + "."
         : "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";

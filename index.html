@@ -97,7 +97,7 @@
       <div class="hero-amp"><span class="line"></span><span class="amp">&amp;</span><span class="line"></span></div>
       <h1>Krisli</h1>
       <div class="hero-date">09 · 01 · 2027</div>
-      <p class="hero-venue">2:30 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
+      <p class="hero-venue">4:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
       <div class="countdown-grid">
         <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
         <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
@@ -109,6 +109,39 @@
     <div class="photo">
       <img src="img/p3.jpg" alt="André y Krisli">
       <span class="photo-label">Foto de portada — coloca img/p3.jpg</span>
+    </div>
+  </section>
+
+  <!-- Reserva la fecha: franja notoria justo debajo de la portada con el
+       día y la hora en grande — antes ese dato (cuándo) solo vivía,
+       chico, en "Cuándo y dónde" más abajo. Basado en un mockup de
+       claude.ai/design, adaptado a los tokens de color/tipografía del
+       sitio en vez del fondo oscuro de página completa que traía ese
+       mockup. El botón "Agregar al calendario" arma un .ics al vuelo
+       (ver initSaveDateCalendar en site.js); "Cómo llegar" reutiliza el
+       mismo data-directions-url que ya arma initDynamicLinks. -->
+  <section class="save-date">
+    <div class="envelope-card floral-frame">
+      <div class="section-kicker">Reserva la fecha</div>
+      <div class="save-date-row">
+        <div class="save-date-side">
+          <span class="save-date-label">Día</span>
+          <strong class="save-date-value">Sábado</strong>
+        </div>
+        <div class="save-date-badge">
+          <span class="save-date-day">09</span>
+          <span class="save-date-month">Enero 2027</span>
+        </div>
+        <div class="save-date-side">
+          <span class="save-date-label">Hora</span>
+          <strong class="save-date-value">4:00 p.m.</strong>
+        </div>
+      </div>
+      <p class="save-date-note">La ceremonia empieza puntual a las <strong>4:00 p.m.</strong> en la Iglesia Vida Nueva Rinconada, La Molina. Te esperamos desde las <strong>2:30 p.m.</strong> para acomodarnos con calma.</p>
+      <div class="save-date-actions">
+        <button type="button" class="btn btn-primary" id="save-date-calendar">Agregar al calendario</button>
+        <a class="btn btn-secondary" data-directions-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Cómo llegar</a>
+      </div>
     </div>
   </section>
 
@@ -307,6 +340,7 @@
           <div id="rsvp-saved-asistentes-wrap"><span>Asistentes</span><strong id="rsvp-saved-asistentes"></strong></div>
         </div>
         <div class="rsvp-actions" style="margin-top:20px">
+          <button type="button" class="btn btn-secondary" id="rsvp-saved-pase" style="font-size:13.5px" hidden>Descargar mi pase</button>
           <button type="button" class="btn btn-ghost" id="rsvp-saved-edit" style="font-size:13.5px">Editar mi respuesta</button>
         </div>
         <p class="rsvp-note" id="rsvp-saved-note" style="margin-top:14px"></p>
@@ -380,6 +414,7 @@
       </div>
 
       <div class="dialog-actions" style="justify-content:center;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn btn-secondary" id="rsvp-thanks-pase" data-thanks-attending style="font-size:13.5px">Descargar mi pase</button>
         <a class="whatsapp-fab" data-whatsapp hidden href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
           <span class="whatsapp-fab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.005c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0 0 12.04 2Zm0 1.67c2.24 0 4.35.87 5.94 2.46a8.23 8.23 0 0 1 2.42 5.85c0 4.56-3.71 8.27-8.28 8.27a8.3 8.3 0 0 1-4.22-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.27-4.4c0-4.56 3.72-8.27 8.2-8.27ZM8.9 6.98c-.17 0-.45.06-.68.32-.23.26-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.8 2.9 4.45 3.94 2.2.87 2.65.7 3.13.65.48-.04 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3-.26-.13-1.55-.77-1.79-.85-.24-.09-.41-.13-.59.13-.17.26-.67.85-.82 1.02-.15.17-.3.19-.56.06-.26-.13-1.1-.4-2.1-1.29-.78-.69-1.3-1.55-1.46-1.81-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.59-1.44-.82-1.97-.21-.5-.43-.44-.59-.45-.15-.01-.32-.01-.5-.01Z"/></svg></span>
           <span class="whatsapp-fab-text">Escríbenos</span>
@@ -403,6 +438,7 @@
 </footer>
 
 <script src="js/config.js"></script>
+<script src="js/pase.js"></script>
 <script src="js/site.js"></script>
 </body>
 </html>
