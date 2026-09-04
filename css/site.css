@@ -63,17 +63,15 @@ body { background: var(--color-neutral-100); }
 }
 
 /* — saludo personalizado (?codigo=... en el link) — */
-.guest-greeting {
-  background: var(--color-accent-100); color: var(--color-accent-800);
-  text-align: center; padding: 12px 20px; font-size: 14px; line-height: 1.5;
-}
-.guest-greeting p { margin: 0; max-width: 60ch; margin-inline: auto; }
+/* (La franja .guest-greeting de ancho completo que iba encima de la
+   portada se reemplazó por .hero-greeting, ya dentro de la portada —
+   ver más abajo.) */
 
 /* — puntitos animados: se muestran mientras se resuelve el link de
    invitado (?codigo=...) — antes de esto, ese hueco quedaba en blanco
    hasta que llegaba la respuesta del backend, y se sentía como una
    pausa/glitch en vez de una carga. Usa currentColor: hereda el color
-   del texto donde esté (envelope-guest o guest-greeting). — */
+   del texto donde esté (envelope-guest o hero-greeting). — */
 .dot-pulse { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
 .dot-pulse span {
   width: 5px; height: 5px; border-radius: 999px; background: currentColor;
@@ -92,6 +90,35 @@ body { background: var(--color-neutral-100); }
   padding: 26px 44px 44px; display: flex; flex-direction: column; text-align: center;
   align-items: center; background: var(--color-bg);
 }
+/* — saludo al invitado, integrado arriba de la portada (mockup 9a de
+   claude.ai/design). Deliberadamente discreto: una línea con "Hola,
+   {nombre}" y una pastilla verde salvia con los pases. Antes esto era
+   una franja rosada de ancho completo por encima de toda la portada,
+   que le robaba el protagonismo a los novios. — */
+.hero-greeting { margin-bottom: 18px; }
+.hero-greeting p { margin: 0; }
+.hero-greeting-row {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 6px 10px; font-size: 16px;
+}
+.hero-greeting-hola {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--color-accent-700);
+}
+.hero-greeting-pases {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--color-accent-2-100); color: var(--color-accent-2-800);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+}
+.hero-greeting-pases b { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0; }
+/* Frase de bienvenida bajo la fecha/lugar — el detalle cálido que antes
+   iba apretado dentro de la franja del saludo. */
+.hero-welcome {
+  margin: 18px 0 0; max-width: 40ch; font-size: 14.5px; line-height: 1.65;
+  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+}
+
 .hero-eyebrow {
   font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: var(--color-accent-700);
 }

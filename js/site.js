@@ -179,14 +179,27 @@
       el.hidden = false;
       loading.hidden = false;
     }
+    var welcome = document.querySelector("[data-guest-welcome]");
     guestPromise.then(function (guest) {
       if (loading) loading.hidden = true;
       if (!guest || !guest.found) { el.hidden = true; return; } // no reconocido o API caída: no se muestra nada
+      var pases = 1 + (Number(guest.acompanantes_permitidos) || 0);
       var info = guestPassInfo(guest);
-      el.querySelector("[data-guest-text]").textContent =
-        "¡Hola, " + guest.nombre + "! Nos encantaría que nos acompañes en " + info.evento + " — tienes " + info.passLabel + " para ti.";
+
+      // La línea de arriba se queda solo con "Hola, {nombre}" + los pases;
+      // el "nos encantaría que nos acompañes en…" pasa a la frase de
+      // bienvenida de abajo, ya con la portada de por medio.
+      el.querySelector("[data-guest-text]").textContent = guest.nombre;
+      el.querySelector("[data-guest-pases]").textContent = pases;
       if (ready) ready.hidden = false;
       el.hidden = false;
+
+      if (welcome) {
+        welcome.textContent = "Estamos muy felices de poder invitarte. " +
+          (pases === 1 ? "Guardamos un lugar pensando en ti, para " : "Guardamos " + pases + " lugares pensando en ti, para ") +
+          info.evento + ".";
+        welcome.hidden = false;
+      }
     });
   }
 

@@ -92,22 +92,31 @@
   </nav>
 </header>
 
-<div class="guest-greeting" id="guest-greeting" hidden>
-  <p data-guest-loading hidden>Preparando tu invitación<span class="dot-pulse"><span></span><span></span><span></span></span></p>
-  <p data-guest-ready hidden><span data-guest-text></span></p>
-</div>
-
 <main>
 
   <!-- Portada -->
   <section id="inicio" class="hero">
     <div class="hero-copy">
+      <!-- Saludo al invitado: antes era una franja rosada de ancho completo
+           encima de la portada (.guest-greeting), separada de todo. Acá va
+           integrado como una línea discreta arriba del nombre de los novios
+           — el protagonismo se queda en la boda, no en el saludo. Mockup 9a
+           de claude.ai/design. -->
+      <div class="hero-greeting" id="guest-greeting" hidden>
+        <p data-guest-loading hidden>Preparando tu invitación<span class="dot-pulse"><span></span><span></span><span></span></span></p>
+        <p class="hero-greeting-row" data-guest-ready hidden>
+          <span class="hero-greeting-hola">Hola,</span>
+          <strong data-guest-text></strong>
+          <span class="hero-greeting-pases">Pases <b data-guest-pases></b></span>
+        </p>
+      </div>
       <div class="hero-eyebrow">Acompáñanos en nuestra boda</div>
       <h1>André</h1>
       <div class="hero-amp"><span class="line"></span><span class="amp">&amp;</span><span class="line"></span></div>
       <h1>Krisli</h1>
       <div class="hero-date">09 · 01 · 2027</div>
       <p class="hero-venue">4:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
+      <p class="hero-welcome" data-guest-welcome hidden></p>
       <div class="countdown-grid">
         <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
         <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
