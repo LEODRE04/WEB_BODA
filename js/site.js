@@ -234,13 +234,27 @@
 
     var guestText = gate.querySelector("#envelope-guest-text");
     var guestLoading = gate.querySelector("#envelope-guest-loading");
+    var toBlock = gate.querySelector("#envelope-to");
+    var toName = gate.querySelector("#envelope-to-name");
+    var toCount = gate.querySelector("#envelope-to-count");
     if (codigo && guestLoading) guestLoading.hidden = false;
     guestPromise.then(function (guest) {
       if (guestLoading) guestLoading.hidden = true;
-      if (!guest || !guest.found || !guestText) return;
+      if (!guest || !guest.found) return;
       var info = guestPassInfo(guest);
-      guestText.textContent = "Con amor hemos reservado para ti (" + guest.nombre + "): " + info.passLabel + ", para " + info.evento + ".";
-      guestText.hidden = false;
+
+      // El nombre y los pases van dentro del sobre, en grande. La frase
+      // de abajo se queda solo con lo que no cabe ahí (a qué está
+      // invitado) — antes repetía las tres cosas en un párrafo gris.
+      if (toBlock && toName && toCount) {
+        toName.textContent = guest.nombre;
+        toCount.textContent = 1 + (Number(guest.acompanantes_permitidos) || 0);
+        toBlock.hidden = false;
+      }
+      if (guestText) {
+        guestText.textContent = "Te esperamos en " + info.evento + ".";
+        guestText.hidden = false;
+      }
     });
 
     var btn = gate.querySelector("#envelope-open-btn");

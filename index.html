@@ -45,14 +45,24 @@
     <p class="envelope-date">09 · 01 · 2027</p>
     <div class="ornament-line"></div>
 
-    <div class="envelope" aria-hidden="true">
-      <span class="envelope-flap"></span>
-      <span class="envelope-seal">A&amp;K</span>
+    <!-- El sobre en sí es decorativo (aria-hidden en solapa y sello), pero
+         el destinatario NO: es el dato que el invitado viene a ver. Va
+         dentro del sobre y en grande, como en el mockup de claude.ai/design
+         — antes el nombre y los pases iban en una frase gris pequeña
+         debajo y se perdían entre el resto del texto. Lo rellena
+         initEnvelopeGate en site.js cuando responde la API. -->
+    <div class="envelope">
+      <span class="envelope-flap" aria-hidden="true"></span>
+      <span class="envelope-seal" aria-hidden="true">A&amp;K</span>
+      <div class="envelope-to" id="envelope-to" hidden>
+        <span class="envelope-to-label">Para</span>
+        <strong class="envelope-to-name" id="envelope-to-name"></strong>
+        <span class="envelope-to-pases">Pases <b id="envelope-to-count"></b></span>
+      </div>
     </div>
 
-    <button type="button" class="envelope-cta" id="envelope-open-btn">
-      <span>Toca para abrir la invitación</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    <button type="button" class="btn btn-primary envelope-cta" id="envelope-open-btn">
+      Abrir mi invitación
     </button>
   </div>
 </div>
