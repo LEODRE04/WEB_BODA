@@ -6,7 +6,7 @@ window.WEDDING = {
 
   // ISO 8601 con offset de Lima (UTC-5, sin horario de verano).
   weddingDateISO: "2027-01-09T16:00:00-05:00",
-  weddingDateLabel: "Sábado 9 de enero de 2027, 4:00 p. m.",
+  weddingDateLabel: "Sábado 9 de enero de 2027, 4:00 p.m.",
 
   venue: {
     name: "Iglesia Vida Nueva Rinconada",
@@ -74,6 +74,6 @@ window.WEDDING = {
   dressCode: {
     title: "Semi elegante",
     description:
-      "Queremos que disfrutes de este día sintiéndote cómodo y especial. Te pedimos elegir un atuendo semi elegante o elegante, acorde con la ocasión. Y, con mucho cariño, dejemos el blanco para la novia.",
+      "Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante. Y con cariño, reservemos el blanco para la novia.",
   },
 };

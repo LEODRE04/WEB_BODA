@@ -144,18 +144,6 @@ body { background: var(--color-neutral-100); }
   margin: 22px 0 0; font-size: 13px; line-height: 1.9; letter-spacing: .06em;
   text-transform: uppercase; color: var(--color-accent-700);
 }
-/* Párrafo de presentación y frase de cierre de la portada. El
-   .hero-welcome personalizado (los pases del invitado) va entre los dos,
-   y solo aparece cuando la invitación trae ?codigo=. */
-.hero-intro {
-  margin: 18px 0 0; max-width: 44ch; font-size: 14.5px; line-height: 1.7;
-  color: color-mix(in srgb, var(--color-text) 78%, transparent);
-}
-.hero-highlight {
-  margin: 16px 0 0; max-width: 40ch; font-size: 15px; line-height: 1.6;
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  color: var(--color-accent-700);
-}
 .hero-copy .countdown-grid { margin: 18px 0 0; }
 .hero-cta { margin-top: auto; padding-top: 26px; }
 .hero .photo { min-height: 320px; }
@@ -268,11 +256,7 @@ body { background: var(--color-neutral-100); }
 /* — .timeline-desc: se quedó del itinerario (ya no existe como sección),
    pero sigue en uso en "Bienvenida" para la descripción bajo la foto de
    ceremonia/recepción (.welcome-venue-photo). — */
-.timeline-desc { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
-.timeline-desc strong { color: var(--color-text); }
-/* Atajo al mapa desde la propia tarjeta, sin bajar hasta "Cuándo y
-   dónde". Usa el mismo data-maps-url que arma initDynamicLinks. */
-.welcome-venue-btn { margin-top: 12px; font-size: 13px; }
+.timeline-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
 
 /* — detalles (cuándo y dónde) — */
 .details { padding: 56px 44px; background: var(--color-neutral-100); }
@@ -671,10 +655,6 @@ body { background: var(--color-neutral-100); }
 }
 /* Las dos rayitas a los lados del cierre: flex: 0 1 120px para que se
    encojan solas en pantallas angostas en vez de forzar scroll. */
-.dresscode-body {
-  max-width: 52ch; margin: 22px auto 0; font-size: 14.5px; line-height: 1.7;
-  color: color-mix(in srgb, var(--color-text) 78%, transparent);
-}
 .dresscode-note {
   display: flex; align-items: center; justify-content: center; gap: 16px;
   margin: 30px auto 0; font-size: 14px;
@@ -867,14 +847,6 @@ body { background: var(--color-neutral-100); }
   .countdown-num { font-size: 22px; }
 }
 
-.footer-title {
-  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 26px; margin-bottom: 18px;
-}
-.footer-note {
-  max-width: 44ch; margin: 0 auto 20px; font-size: 14px; line-height: 1.65;
-  color: color-mix(in srgb, var(--color-bg) 72%, transparent);
-}
 .site-footer .names { font-family: var(--font-heading); font-size: 24px; }
 .site-footer .when { font-size: 12px; letter-spacing: .2em; color: color-mix(in srgb, var(--color-bg) 55%, transparent); margin-top: 8px; }
 
@@ -957,13 +929,11 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
   font-size: 14px; font-weight: 600; transition: width .3s ease, opacity .3s ease;
 }
-/* 236px = 46 del ícono + 167 del texto ("Escribirnos por WhatsApp",
-   14px/600) + 18 de aire a la derecha, con un par de píxeles de margen.
-   Era 172px, medida para el "Escríbenos" anterior: con el texto nuevo
-   la etiqueta quedaba cortada. Si el texto cambia, hay que recalcular
-   —el ancho no puede ser auto porque entonces no habría transición. */
+/* El ancho va a medida del texto ("Escríbenos", 14px/600) porque no
+   puede ser auto: sin un valor concreto no habría transición. Si la
+   etiqueta cambia, hay que recalcular este número. */
 .whatsapp-fab:hover, .whatsapp-fab:focus-visible {
-  width: 236px; background: #1ebe5b;
+  width: 172px; background: #1ebe5b;
 }
 .whatsapp-fab:hover .whatsapp-fab-text, .whatsapp-fab:focus-visible .whatsapp-fab-text {
   width: auto; opacity: 1; padding-right: 18px;
