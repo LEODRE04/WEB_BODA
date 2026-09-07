@@ -167,6 +167,20 @@ window.WeddingPase = (function () {
     var originalLabel = triggerBtn ? triggerBtn.textContent : "";
     if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "Generando…"; }
 
+    // La pestaña se reserva ACÁ, sincrónicamente dentro del clic: armar el
+    // PDF tarda unos segundos y para entonces el navegador ya no considera
+    // que haya un gesto del usuario, así que un window.open() posterior lo
+    // bloquearía el filtro de pop-ups. Se abre vacía y se le pone el PDF
+    // cuando está listo. Si el invitado tiene los pop-ups bloqueados,
+    // ventanaPase queda en null y más abajo se cae a la descarga normal.
+    var ventanaPase = null;
+    try {
+      ventanaPase = window.open("", "_blank");
+      if (ventanaPase) ventanaPase.document.write("<title>Preparando tu pase…</title>");
+    } catch (e) {
+      ventanaPase = null;
+    }
+
     var host = null;
     loadVendor()
       .then(function () {
@@ -198,12 +212,28 @@ window.WeddingPase = (function () {
         var jsPDF = window.jspdf.jsPDF;
         var doc = new jsPDF({ unit: "px", format: [canvas.width, canvas.height], hotfixes: ["px_scaling"] });
         doc.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, canvas.width, canvas.height);
-        doc.save("Pase-Boda-" + sanitizeFilename(opts.nombre) + ".pdf");
+
+        // doc.save() dispara una descarga que en celular (y en Safari) se
+        // abre encima de la invitación y el invitado la pierde. Se abre en
+        // la pestaña reservada; desde el visor puede guardarlo o
+        // compartirlo, y la invitación se queda intacta detrás.
+        var nombreArchivo = "Pase-Boda-" + sanitizeFilename(opts.nombre) + ".pdf";
+        if (ventanaPase && !ventanaPase.closed) {
+          var url = URL.createObjectURL(doc.output("blob"));
+          ventanaPase.location.href = url;
+          // Revocar después: hacerlo de una cancelaría la carga. Una vez
+          // que el visor tiene el documento, revocar ya no le afecta.
+          setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        } else {
+          doc.save(nombreArchivo); // pop-ups bloqueados: descarga de siempre
+        }
         if (triggerBtn) triggerBtn.textContent = originalLabel;
       })
       .catch(function (err) {
         console.error("No se pudo generar el pase:", err);
         if (host && host.parentNode) host.parentNode.removeChild(host);
+        // Sin esto quedaría una pestaña en blanco abierta al fallar.
+        if (ventanaPase && !ventanaPase.closed) ventanaPase.close();
         if (triggerBtn) {
           triggerBtn.textContent = "No se pudo, intenta de nuevo";
           setTimeout(function () { triggerBtn.textContent = originalLabel; }, 2500);

@@ -147,12 +147,21 @@ body { background: var(--color-neutral-100); }
   display: flex; align-items: center; justify-content: center; gap: 28px;
   margin-bottom: 22px;
 }
-.save-date-side { text-align: center; }
+/* Las dos columnas laterales van con el mismo ancho a propósito: sin
+   esto, "Sábado" (~70px) y "4:00 p.m." (~88px) miden distinto y el
+   círculo de la fecha, que debería ser el eje del bloque, queda corrido
+   unos píxeles a la izquierda. */
+.save-date-side { text-align: center; flex: 0 0 auto; min-width: 118px; }
 .save-date-label {
   display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
   color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: 4px;
 }
-.save-date-value { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 20px; }
+/* nowrap: "4:00 p.m." partido en dos líneas deja los dos lados con
+   distinta altura y todo el bloque parece torcido. */
+.save-date-value {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 20px; white-space: nowrap;
+}
 .save-date-badge {
   flex: none; width: 108px; height: 108px; border-radius: 999px;
   background: var(--color-accent); color: #fff;
@@ -166,10 +175,31 @@ body { background: var(--color-neutral-100); }
   color: color-mix(in srgb, var(--color-text) 75%, transparent);
 }
 .save-date-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+/* — en celular los tres bloques no entran en una fila: la tarjeta deja
+   ~258px útiles en una pantalla de 390px y Día + círculo + Hora piden
+   cerca de 280px. Al apretarse, el flex encogía los laterales, "4:00
+   p.m." se partía en dos líneas y el círculo quedaba descentrado — el
+   bloque entero se veía movido. Acá pasa a grilla: el círculo arriba,
+   ocupando el ancho completo, y Día/Hora debajo en dos columnas
+   exactamente iguales, así que todo queda simétrico sin importar cuánto
+   mida cada texto. — */
 @media (max-width: 480px) {
-  .save-date-row { gap: 16px; }
-  .save-date-badge { width: 88px; height: 88px; }
-  .save-date-day { font-size: 28px; }
+  .save-date-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px 10px; justify-items: center; align-items: start;
+  }
+  /* Colocación explícita: con auto-placement el círculo (que ocupa las
+     dos columnas) no cabría en la primera fila junto a "Día" y se
+     iría abajo. */
+  .save-date-badge { grid-column: 1 / -1; grid-row: 1; width: 96px; height: 96px; }
+  .save-date-side { min-width: 0; grid-row: 2; }
+  .save-date-side:first-child { grid-column: 1; }
+  .save-date-side:last-child { grid-column: 2; }
+  .save-date-day { font-size: 30px; }
+  /* Los dos botones sueltos y de distinto ancho quedaban escalonados al
+     envolverse; a ancho completo forman una columna limpia. */
+  .save-date-actions { flex-direction: column; align-items: stretch; }
+  .save-date-actions .btn { width: 100%; }
 }
 
 /* — bienvenida — */
@@ -655,13 +685,9 @@ body { background: var(--color-neutral-100); }
    mockup sí traía) y a los tokens de color/tipografía del sitio en vez
    de sus valores propios. — */
 .rsvp-thanks-dialog { width: min(460px, 100%); padding: 0; overflow: hidden; text-align: center; gap: 0; }
-.rsvp-thanks-photo { height: 150px; position: relative; overflow: hidden; }
-.rsvp-thanks-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.rsvp-thanks-photo::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 35%, var(--color-surface) 94%);
-}
-.rsvp-thanks-content { padding: 0 30px 30px; margin-top: -42px; position: relative; }
+/* Sin foto de cabecera: el margen negativo de .rsvp-thanks-content
+   existía solo para montar el ícono encima de esa foto. */
+.rsvp-thanks-content { padding: 34px 30px 30px; position: relative; }
 .rsvp-thanks-icon {
   width: 64px; height: 64px; border-radius: 999px; margin: 0 auto 14px;
   display: flex; align-items: center; justify-content: center;

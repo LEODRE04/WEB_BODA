@@ -389,10 +389,10 @@
       body.className = "gift-unavailable-body";
 
       var h = document.createElement("h4");
-      h.textContent = "¡Gracias, pero este ya está completo!";
+      h.textContent = "Este regalo ya está completo";
 
       var p = document.createElement("p");
-      p.textContent = "Otros invitados ya juntaron todo para “" + g.nombre + "”. Si quieres, hay otros regalos esperando por alguien.";
+      p.textContent = "¡Gracias por pensarlo! Todavía quedan otros esperando.";
 
       var actions = document.createElement("div");
       actions.className = "gift-unavailable-actions";
@@ -417,7 +417,6 @@
 
       body.appendChild(h);
       body.appendChild(p);
-      body.appendChild(progressNode(g));
       body.appendChild(actions);
 
       notice.appendChild(icon);
