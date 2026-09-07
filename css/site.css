@@ -317,11 +317,26 @@ body { background: var(--color-neutral-100); }
 
 /* — mesa de regalos (sección propia, separada de "cuándo y dónde") — */
 .gifts { padding: 56px 44px; background: var(--color-bg); }
+/* 236px de piso (era 280): con las tres formas de pago —Yape, BCP e
+   Interbank— tres columnas de 280 no entraban en el ancho útil de la
+   tarjeta (~812px), así que Interbank caía sola a una segunda fila. Con
+   236 las tres van en una línea; el número de cuenta y su botón se
+   reparten en dos líneas dentro de la tarjeta, que .money-row ya
+   contempla con flex-wrap. */
 .gifts-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr));
   gap: 20px; max-width: 900px; margin: 0 auto; align-items: start;
 }
 .gifts-grid .money-card + .money-card { margin-top: 0; }
+/* Aviso que cruza las tres tarjetas de pago: los aportes por Yape o
+   transferencia no llegan identificados, así que hay que pedir el aviso
+   explícitamente o los novios no saben de quién vino. */
+.gifts-aviso {
+  grid-column: 1 / -1; margin: 0; text-align: center;
+  font-size: 13.5px; line-height: 1.65;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.gifts-aviso strong { color: var(--color-accent-700); }
 /* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
    disponible en celular (envelope-card + su padding le dejan bastante
    menos que eso) — sin este límite, .money-card se salía del borde y
