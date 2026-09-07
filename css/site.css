@@ -1,7 +1,10 @@
 /* site.css — maqueta "3a" (editorial) llevada a página real, con responsive.
    Usa los tokens de tokens.css. Paleta: crema / terracota / salvia. */
 
-html { scroll-behavior: smooth; }
+/* scroll-padding-top: la barra es sticky y tapa ~63px, así que sin esto
+   cada salto del menú deja el antetítulo de la sección escondido detrás
+   de ella. Antes casi no se notaba porque solo había dos enlaces. */
+html { scroll-behavior: smooth; scroll-padding-top: 78px; }
 body { background: var(--color-neutral-100); }
 
 .section-kicker {
@@ -41,7 +44,17 @@ body { background: var(--color-neutral-100); }
 }
 .site-nav .nav-links { display: flex; gap: var(--space-4); align-items: center; }
 .site-nav .nav-toggle { display: none; }
-@media (max-width: 720px) {
+/* El botón del menú es un <a>, así que ".nav a { color: inherit }"
+   (tokens.css) le ganaba por especificidad a .btn-primary y le dejaba la
+   letra marrón oscura sobre el terracota: casi no se leía. Y con el
+   :hover quedaba terracota sobre terracota, invisible. Blanco fijo en
+   los dos estados. */
+.site-nav .nav-links a.btn-primary,
+.site-nav .nav-links a.btn-primary:hover { color: #fff; }
+/* Con nueve enlaces la barra ya no entra en una pantalla mediana, así
+   que el menú colapsa detrás de la hamburguesa antes que antes (era a
+   720px, cuando solo había dos enlaces). */
+@media (max-width: 900px) {
   .site-nav .nav-links {
     position: absolute; top: 100%; left: 0; right: 0; flex-direction: column;
     align-items: flex-start; gap: 2px; background: var(--color-bg);

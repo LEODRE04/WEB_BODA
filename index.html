@@ -85,9 +85,18 @@
 <header class="nav site-nav">
   <span class="nav-brand">A &amp; K</span>
   <button class="btn btn-icon nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+  <!-- Un link por sección, en el mismo orden en que aparecen en la
+       página. El botón lleva a #rsvp, así que la confirmación no repite
+       link. Al agregar o quitar una sección, actualizar también acá. -->
   <nav class="nav-links">
-    <a href="#inicio">Boda</a>
+    <a href="#inicio">Inicio</a>
+    <a href="#fecha">Fecha</a>
+    <a href="#boda">La boda</a>
+    <a href="#lugar">Lugar</a>
+    <a href="#regalos">Regalos</a>
+    <a href="#vestimenta">Vestimenta</a>
     <a href="#preguntas">P&amp;R</a>
+    <a href="#oracion">Oración</a>
     <a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a>
   </nav>
 </header>
@@ -139,7 +148,7 @@
        mockup. El botón "Agregar al calendario" arma un .ics al vuelo
        (ver initSaveDateCalendar en site.js); "Cómo llegar" reutiliza el
        mismo data-directions-url que ya arma initDynamicLinks. -->
-  <section class="save-date">
+  <section id="fecha" class="save-date">
     <div class="envelope-card floral-frame">
       <div class="section-kicker">Reserva la fecha</div>
       <div class="save-date-row">
@@ -165,7 +174,7 @@
   </section>
 
   <!-- Bienvenida -->
-  <section class="welcome">
+  <section id="boda" class="welcome">
     <div class="envelope-card floral-frame">
       <div class="welcome-inner">
         <div class="photo">
@@ -194,7 +203,7 @@
   </section>
 
   <!-- Cuándo y dónde -->
-  <section class="details">
+  <section id="lugar" class="details">
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker">Cuándo y dónde</div>
@@ -242,7 +251,7 @@
        página (regalos.html + js/regalos.js), abierta desde la tarjeta
        "Lista de regalos" de abajo (id="gift-list-link", el link con el
        ?codigo= se arma en site.js). -->
-  <section class="gifts">
+  <section id="regalos" class="gifts">
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
@@ -287,7 +296,7 @@
        heredan el color del tema con currentColor.
        OJO: este texto está duplicado en js/config.js (dressCode) porque
        el pase en PDF lo reutiliza — si cambia acá, cambiarlo allá. -->
-  <section class="dresscode-section">
+  <section id="vestimenta" class="dresscode-section">
     <div class="envelope-card floral-frame">
       <div class="section-kicker dresscode-kicker">Código de vestimenta</div>
       <div class="dresscode">
@@ -394,7 +403,7 @@
   </section>
 
   <!-- Pedido especial -->
-  <section class="prayer">
+  <section id="oracion" class="prayer">
     <div class="prayer-card floral-frame">
       <div class="section-kicker">Un pedido especial</div>
       <h2 class="section-title" style="font-size:32px;margin:12px 0 14px">Oren por nosotros</h2>
