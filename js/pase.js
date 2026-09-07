@@ -79,12 +79,12 @@ window.WeddingPase = (function () {
     // terminar con dos puntos seguidos ("p. m..").
     var horaSinPunto = hora.replace(/\.+$/, "");
     return [
-      "Llega 30 minutos antes; la ceremonia empieza puntual a las " + horaSinPunto + ".",
-      "Hay estacionamiento alrededor del recinto, con personal de seguridad.",
+      "La ceremonia comienza puntualmente a las " + horaSinPunto + "; te recomendamos llegar con anticipación.",
+      "Contaremos con estacionamiento en los alrededores del lugar.",
       soloCeremonia
         ? "Durante la ceremonia te pedimos guardar el celular."
         : "Durante la ceremonia te pedimos guardar el celular. En la recepción, todas las fotos que quieras.",
-      "La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.",
+      "Nuestra celebración está pensada para adultos, salvo los niños que forman parte de la ceremonia.",
       soloCeremonia
         ? "Este pase es personal y es válido para la ceremonia."
         : "Este pase es personal y cubre los dos momentos: ceremonia y recepción.",
@@ -125,7 +125,7 @@ window.WeddingPase = (function () {
         '<div class="pase-date-venue">' + escapeHtml(W.venue.name) + '<br>' + escapeHtml(W.venue.area) + '</div>' +
       '</div>' +
       '<div class="pase-info-row">' +
-        '<div class="pase-info-col"><span class="pase-info-label">Llegada</span><strong>2:30 p.m.</strong><p>La ceremonia empieza puntual.</p></div>' +
+        '<div class="pase-info-col"><span class="pase-info-label">Llegada</span><strong>2:30 p. m.</strong><p>La ceremonia empieza puntual.</p></div>' +
         '<div class="pase-info-col"><span class="pase-info-label">Vestimenta</span><strong>' + escapeHtml(W.dressCode.title) + '</strong><p>Blanco reservado para la novia.</p></div>' +
         '<div class="pase-info-col"><span class="pase-info-label">Código de pase</span><strong>' + codigoPase(opts.codigo, year) + '</strong><p>Solo de referencia.</p></div>' +
       '</div>' +
