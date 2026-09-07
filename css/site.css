@@ -719,8 +719,14 @@ body { background: var(--color-neutral-100); }
 .rsvp-thanks.is-open { opacity: 1; }
 .rsvp-thanks .dialog { position: relative; transform: translateY(10px) scale(.97); transition: transform .2s ease; }
 .rsvp-thanks.is-open .dialog { transform: translateY(0) scale(1); }
+/* z-index obligatorio: .rsvp-thanks-content va después en el HTML y
+   también es position:relative, así que sin esto se pinta encima de la
+   X y se come el clic (el botón quedaba visible pero muerto). Antes no
+   hacía falta porque la foto de cabecera empujaba el contenido hacia
+   abajo y la X caía sobre la foto; al quitar la foto, el contenido
+   pasó a cubrir toda la tarjeta. Mismo patrón que .gift-thanks-close. */
 .rsvp-thanks-close {
-  position: absolute; top: 14px; right: 14px; width: 28px; height: 28px;
+  position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; z-index: 1;
   border: none; border-radius: 999px; background: transparent; cursor: pointer;
   font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }

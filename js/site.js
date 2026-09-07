@@ -785,7 +785,6 @@
     var iconEl = block.querySelector("#rsvp-saved-icon");
     var cardTitleEl = block.querySelector("#rsvp-saved-title");
     var dateEl = block.querySelector("#rsvp-saved-date");
-    var tagEl = block.querySelector("#rsvp-saved-tag");
     var nombreEl = block.querySelector("#rsvp-saved-nombre");
     var asistentesWrap = block.querySelector("#rsvp-saved-asistentes-wrap");
     var asistentesEl = block.querySelector("#rsvp-saved-asistentes");
@@ -848,8 +847,6 @@
       iconEl.classList.toggle("sage", !attending);
       cardTitleEl.textContent = attending ? "Asistencia confirmada" : "Respuesta registrada";
       dateEl.textContent = "Respondiste el " + formatDateEs(data.actualizado_en || data.enviado_en);
-      tagEl.textContent = attending ? "Sí, ahí estaré" : "No podré ir";
-      tagEl.className = "tag " + (attending ? "tag-accent" : "tag-accent-2");
       nombreEl.textContent = nombre;
       asistentesWrap.hidden = !attending;
       if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";

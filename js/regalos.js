@@ -200,7 +200,6 @@
     var pickedNameEl = document.querySelector("#gift-picked-name");
     var pickedProgressEl = document.querySelector("#gift-picked-progress");
     var montoInput = document.querySelector("#gift-monto");
-    var montoTagEl = document.querySelector("#gift-monto-tag");
     var montoBubbleEl = document.querySelector("#gift-monto-bubble");
     var montoMarksEl = document.querySelector("#gift-monto-marks");
     var completeHintEl = document.querySelector("#gift-complete-hint");
@@ -522,13 +521,12 @@
     // alcanza o supera lo que falta — basado en un mockup de
     // claude.ai/design.
     function checkComplete() {
-      if (!montoTagEl || !completeHintEl) return;
+      if (!completeHintEl) return;
       var g = regalos.filter(function (r) { return r.id === seleccionadoId; })[0];
-      if (!g) { montoTagEl.hidden = true; completeHintEl.hidden = true; return; }
+      if (!g) { completeHintEl.hidden = true; return; }
       var monto = Number(montoInput.value) || 0;
       var falta = Math.max(0, g.precio - g.recaudado);
       var completa = falta > 0 && monto >= falta;
-      montoTagEl.hidden = !completa;
       completeHintEl.hidden = !completa;
     }
     montoInput.addEventListener("input", function () {
