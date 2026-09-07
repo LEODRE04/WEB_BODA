@@ -582,20 +582,62 @@ body { background: var(--color-neutral-100); }
 }
 
 /* — código de vestimenta — */
+/* — código de vestimenta: el mensaje en grande al centro, flanqueado por
+   una silueta de vestido y una de saco, según el diseño de
+   claude.ai/design. Reemplaza al bloque de texto chico alineado a la
+   izquierda que había antes. — */
 .dresscode-section { padding: 56px 44px; background: var(--color-neutral-100); }
-/* el texto acá va pegado a la izquierda (no centrado como los demás
-   "-head"), así que sin este padding extra el ramo de la esquina tapaba
-   el principio de "CÓDIGO DE VESTIMENTA". */
-.dresscode-section .envelope-card { padding-top: 82px; }
-.dresscode { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-/* 280px de piso venía de cuando este bloque de texto compartía la fila
-   con las muestras de color (ya quitadas); en celular (envelope-card +
-   su padding dejan bastante menos que eso) forzaba a toda la página a
-   scrollear horizontal. Iba como estilo inline en el HTML; ver también
-   .gifts-grid arriba, mismo problema con el mismo número. */
-.dresscode-text { flex: 1; min-width: 280px; }
-@media (max-width: 480px) {
-  .dresscode-text { min-width: 0; }
+/* Fondo más cálido que el resto de tarjetas para que la sección se lea
+   como una pausa dentro de la página, igual que en el diseño. */
+.dresscode-section .envelope-card {
+  background: var(--color-surface);
+  padding: 64px 44px 52px; text-align: center;
+}
+.dresscode-kicker { margin-bottom: 26px; }
+/* El max-width mantiene las siluetas lejos de las esquinas, donde el
+   .floral-frame pone los ramos. */
+.dresscode {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(18px, 4vw, 52px);
+  max-width: 780px; margin: 0 auto;
+}
+.dresscode-figure { flex: none; width: 116px; height: auto; }
+.dresscode-figure-dress { color: var(--color-accent-300); }
+.dresscode-figure-suit { color: var(--color-accent-2-300); }
+.dresscode-message {
+  margin: 0; max-width: 24ch;
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: clamp(25px, 3.2vw, 38px); line-height: 1.24;
+  color: var(--color-text); text-wrap: balance;
+}
+/* Las dos rayitas a los lados del cierre: flex: 0 1 120px para que se
+   encojan solas en pantallas angostas en vez de forzar scroll. */
+.dresscode-note {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  margin: 30px auto 0; font-size: 14px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.dresscode-note::before, .dresscode-note::after {
+  content: ""; height: 1px; flex: 0 1 120px; background: var(--color-divider);
+}
+/* En pantalla angosta las dos siluetas + el texto no entran en una fila
+   (la tarjeta deja ~258px útiles en un celular de 390px), así que pasan
+   arriba, en pareja y más chicas, con el mensaje debajo a todo el ancho. */
+@media (max-width: 700px) {
+  .dresscode-section .envelope-card { padding: 48px 22px 40px; }
+  .dresscode {
+    display: grid; grid-template-columns: auto auto;
+    justify-content: center; gap: 14px 30px; align-items: end;
+  }
+  .dresscode-figure { width: 72px; grid-row: 1; }
+  .dresscode-figure-dress { grid-column: 1; }
+  .dresscode-figure-suit { grid-column: 2; }
+  .dresscode-message { grid-column: 1 / -1; grid-row: 2; max-width: none; }
+  /* El cierre pasa a dos líneas en celular y las rayitas quedaban
+     flotando a media altura, a los costados del párrafo. Se ocultan y
+     el texto cierra solo. */
+  .dresscode-note::before, .dresscode-note::after { display: none; }
+  .dresscode-note { max-width: 30ch; }
 }
 
 /* — RSVP — */

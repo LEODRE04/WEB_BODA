@@ -280,16 +280,30 @@
     </div>
   </section>
 
-  <!-- Código de vestimenta -->
+  <!-- Código de vestimenta — el mensaje al centro, en grande, con una
+       silueta a cada lado (vestido en terracota, saco en verde follaje).
+       Las siluetas son SVG dibujados a mano acá mismo: son cuatro trazos,
+       no vale la pena un archivo aparte ni una fuente de íconos, y así
+       heredan el color del tema con currentColor.
+       OJO: este texto está duplicado en js/config.js (dressCode) porque
+       el pase en PDF lo reutiliza — si cambia acá, cambiarlo allá. -->
   <section class="dresscode-section">
     <div class="envelope-card floral-frame">
+      <div class="section-kicker dresscode-kicker">Código de vestimenta</div>
       <div class="dresscode">
-        <div class="dresscode-text">
-          <div class="details-label">Código de vestimenta</div>
-          <div class="details-heading" style="font-size:24px;margin:8px 0 6px">Formal elegante</div>
-          <p style="margin:0;font-size:14px;line-height:1.65;color:color-mix(in srgb, var(--color-text) 72%, transparent)">Ellos, terno oscuro y corbata. Ellas, vestido largo o midi. Te pedimos con cariño reservar el blanco para la novia.</p>
-        </div>
+        <svg class="dresscode-figure dresscode-figure-dress" viewBox="0 0 96 168" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
+          <path d="M38 14 L58 14 L60 66 C68 92 78 122 84 150 C72 158 24 158 12 150 C18 122 28 92 36 66 Z"/>
+          <path d="M36 66 C44 69 52 69 60 66"/>
+        </svg>
+        <h2 class="dresscode-message">Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante.</h2>
+        <svg class="dresscode-figure dresscode-figure-suit" viewBox="0 0 96 168" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
+          <path d="M32 16 L48 24 L64 16 C74 21 80 31 80 44 L80 152 L16 152 L16 44 C16 31 22 21 32 16 Z"/>
+          <path d="M32 16 L48 92"/>
+          <path d="M64 16 L48 92"/>
+          <path d="M48 92 L48 152"/>
+        </svg>
       </div>
+      <p class="dresscode-note">Y con cariño, reservemos el blanco para la novia.</p>
     </div>
   </section>
 

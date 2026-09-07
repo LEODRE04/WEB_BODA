@@ -68,9 +68,12 @@ window.WEDDING = {
     giftListUrl: null,
   },
 
+  // Lo mismo que dice la sección "Código de vestimenta" de index.html —
+  // acá vive aparte porque el pase en PDF (js/pase.js) usa el title como
+  // etiqueta corta. Si cambia uno, cambiar el otro.
   dressCode: {
-    title: "Formal elegante",
+    title: "Semi elegante",
     description:
-      "Ellos, terno oscuro y corbata. Ellas, vestido largo o midi. Te pedimos con cariño reservar el blanco para la novia.",
+      "Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante. Y con cariño, reservemos el blanco para la novia.",
   },
 };
