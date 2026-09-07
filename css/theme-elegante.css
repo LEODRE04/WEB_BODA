@@ -146,12 +146,17 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
    antes porque tiene que alojar al destinatario bajo el pico de la
    solapa. — */
 .envelope {
-  position: relative; width: 290px; height: 262px; margin: 0 auto 26px; perspective: 700px;
+  position: relative; width: 290px; margin: 0 auto 26px; perspective: 700px;
+  /* min-height y no height: con un nombre de tres líneas ("Familia
+     Rodríguez Menéndez de la Torre") el sobre crece en vez de dejar que
+     el destinatario se desborde. Columna flex para que .envelope-to
+     ocupe el alto restante y centre su contenido igual que antes. */
+  display: flex; flex-direction: column; min-height: 262px;
 }
 /* Sin destinatario (invitado sin ?codigo=, o API caída) no hay nada que
    alojar ahí abajo, así que el sobre vuelve a su altura compacta en vez
    de dejar un vacío raro. */
-.envelope:not(:has(.envelope-to:not([hidden]))) { height: 172px; }
+.envelope:not(:has(.envelope-to:not([hidden]))) { min-height: 172px; }
 .envelope::before {
   content: ""; position: absolute; inset: 0; top: 24px;
   background: var(--color-neutral-200); border: 1px solid var(--color-divider);
@@ -181,9 +186,13 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
    Rodríguez Menéndez") crece hacia los dos lados y no termina pegado al
    sello. */
 .envelope-to {
-  position: absolute; left: 0; right: 0; top: 122px; bottom: 14px; z-index: 1;
+  /* En flujo normal (antes iba absolute con top/bottom fijos): así un
+     nombre largo empuja el alto del sobre en lugar de desbordarse hacia
+     arriba y quedar tapado por el sello. El padding-top es el que
+     reserva el espacio de la solapa y el sello. */
+  position: relative; z-index: 1; flex: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
-  padding: 0 18px;
+  padding: 122px 18px 16px;
 }
 .envelope-to-label {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
@@ -212,9 +221,9 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 
 @media (max-width: 480px) {
   .envelope-title { font-size: 36px; }
-  .envelope { width: 240px; height: 238px; }
-  .envelope-to { top: 108px; }
-  .envelope:not(:has(.envelope-to:not([hidden]))) { height: 142px; }
+  .envelope { width: 240px; min-height: 238px; }
+  .envelope-to { padding-top: 108px; }
+  .envelope:not(:has(.envelope-to:not([hidden]))) { min-height: 142px; }
   .envelope-to-name { font-size: 21px; }
   /* En celular el botón ocupa todo el ancho, como en el mockup: es la
      única acción de la pantalla y así queda cómodo para el pulgar. */

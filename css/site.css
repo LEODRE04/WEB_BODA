@@ -625,14 +625,17 @@ body { background: var(--color-neutral-100); }
    arriba, en pareja y más chicas, con el mensaje debajo a todo el ancho. */
 @media (max-width: 700px) {
   .dresscode-section .envelope-card { padding: 48px 22px 40px; }
-  .dresscode {
-    display: grid; grid-template-columns: auto auto;
-    justify-content: center; gap: 14px 30px; align-items: end;
-  }
-  .dresscode-figure { width: 72px; grid-row: 1; }
-  .dresscode-figure-dress { grid-column: 1; }
-  .dresscode-figure-suit { grid-column: 2; }
-  .dresscode-message { grid-column: 1 / -1; grid-row: 2; max-width: none; }
+  /* Se queda en flex (no grilla) y solo se le permite envolver: las dos
+     siluetas caben juntas en la primera línea y el mensaje, con
+     flex-basis 100%, se va entero a la segunda. El order lo pone después
+     de las siluetas aunque en el HTML esté en medio de las dos.
+     Con grilla de dos columnas "auto" el mensaje —que las cruzaba— las
+     estiraba, las siluetas se pegaban al inicio de su columna y la
+     pareja quedaba unos 20px corrida a la izquierda; así queda centrada
+     de verdad. */
+  .dresscode { flex-wrap: wrap; gap: 16px 30px; align-items: end; }
+  .dresscode-figure { width: 72px; }
+  .dresscode-message { order: 1; flex: 0 0 100%; max-width: none; }
   /* El cierre pasa a dos líneas en celular y las rayitas quedaban
      flotando a media altura, a los costados del párrafo. Se ocultan y
      el texto cierra solo. */
