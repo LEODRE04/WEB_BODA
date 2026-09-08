@@ -31,6 +31,8 @@ GUESTS_FILE_REAL = ROOT / "server" / "invitados.real.json"  # no está en git �
 RESPONSES_FILE = ROOT / "server" / "respuestas.local.json"
 GIFTS_FILE = ROOT / "server" / "regalos.json"
 CONTRIBUTIONS_FILE = ROOT / "server" / "aportes.local.json"
+# Igual que APORTES_DIRECTOS en docs/apps-script/Code.gs.
+APORTES_DIRECTOS = {"yape", "bcp", "interbank"}
 COMPROBANTES_DIR = ROOT / "server" / "comprobantes.local"  # no está en git — ver .gitignore
 
 _lock = threading.Lock()
@@ -194,8 +196,11 @@ class Handler(SimpleHTTPRequestHandler):
         if monto <= 0:
             return self._json(400, {"error": "el monto tiene que ser mayor a 0"})
 
+        # Mismos ids reservados que APORTES_DIRECTOS en Code.gs: los
+        # depósitos directos por Yape o transferencia no van contra un
+        # regalo de la lista, así que se saltan esta validación.
         gift_ids = {g["id"] for g in load_gifts()}
-        if regalo_id not in gift_ids:
+        if regalo_id not in APORTES_DIRECTOS and regalo_id not in gift_ids:
             return self._json(400, {"error": "ese regalo ya no existe"})
 
         comprobante_url = ""

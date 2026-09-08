@@ -283,7 +283,10 @@
           <p style="margin:10px 0 0;font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">A nombre de André Leon</p>
         </div>
 
-        <p class="gifts-aviso">Si nos envías un Yape o una transferencia, <strong>por favor avísanos</strong> para que podamos verlo y agradecértelo como se debe.</p>
+        <div class="gifts-aviso">
+          <p>Un Yape o una transferencia nos llega sin nombre. Si ya nos enviaste algo, <strong>avísanos con este botón</strong> y sabremos que fue tuyo.</p>
+          <button type="button" class="btn btn-primary" id="deposito-btn">Ya hice mi depósito</button>
+        </div>
 
         <div class="gift-list-cta">
           <div class="gift-list-cta-icon" aria-hidden="true">
@@ -424,6 +427,67 @@
   </section>
 
 </main>
+
+<!-- Confirmación de depósito — el botón "Ya hice mi depósito" de la mesa
+     de regalos. Un Yape o una transferencia llegan sin identificar, así
+     que esto es lo único que le dice a la pareja de quién vino cada
+     aporte. Se guarda en la misma hoja de Aportes que la lista de
+     regalos, con el medio de pago en la columna regalo_id (ver
+     APORTES_DIRECTOS en docs/apps-script/Code.gs). -->
+<div class="dialog-backdrop deposito" id="deposito-modal" hidden>
+  <div class="dialog deposito-dialog">
+    <button type="button" class="rsvp-thanks-close" id="deposito-close" aria-label="Cerrar">✕</button>
+
+    <form class="deposito-form" id="deposito-form" novalidate>
+      <div class="section-kicker">Confirmar depósito</div>
+      <h3 class="dialog-title">Gracias por tu detalle</h3>
+      <p class="dialog-body">Cuéntanos qué enviaste para que podamos reconocerlo. Solo toma un momento.</p>
+
+      <div class="field">
+        <label for="deposito-nombre">Tu nombre</label>
+        <input class="input" id="deposito-nombre" name="nombre" autocomplete="name" required>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="deposito-monto">Monto (S/)</label>
+          <input class="input" id="deposito-monto" name="monto" type="number" min="1" step="1" inputmode="numeric" required>
+        </div>
+        <div class="field">
+          <label for="deposito-medio">¿Por dónde?</label>
+          <select class="input" id="deposito-medio" name="medio">
+            <option value="yape">Yape</option>
+            <option value="bcp">BCP</option>
+            <option value="interbank">Interbank</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="deposito-mensaje">Mensaje para los novios <span class="deposito-opcional">(opcional)</span></label>
+        <textarea class="input" id="deposito-mensaje" name="mensaje" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label for="deposito-comprobante">Captura del depósito <span class="deposito-opcional">(opcional)</span></label>
+        <input class="input" id="deposito-comprobante" name="comprobante" type="file" accept="image/*">
+      </div>
+
+      <p class="rsvp-error" id="deposito-error" role="alert" hidden></p>
+      <div class="deposito-actions">
+        <button type="submit" class="btn btn-primary" id="deposito-submit">Confirmar depósito</button>
+        <span class="rsvp-note">No te pedimos ningún dato bancario.</span>
+      </div>
+    </form>
+
+    <div class="deposito-ok" id="deposito-ok" hidden>
+      <div class="rsvp-thanks-icon" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="section-kicker">Depósito registrado</div>
+      <h3 class="dialog-title">¡Muchas gracias!</h3>
+      <p class="dialog-body" id="deposito-ok-msg"></p>
+      <button type="button" class="btn btn-secondary" id="deposito-cerrar-ok">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal de agradecimiento al confirmar el RSVP — site.js elige el texto
      según si la respuesta fue "sí" o "no" (initThanksModal). Reutiliza

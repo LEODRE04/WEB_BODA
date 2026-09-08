@@ -57,6 +57,7 @@
     initMusicToggle();
     initPetals();
     initSaveDateCalendar();
+    initDeposito();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -879,6 +880,121 @@
   // trata igual que cualquier otro problema de conexión.
   var API_TIMEOUT_MS = 15000;
   var PENDIENTE_KEY = "rsvp_pendiente";
+
+  // — confirmación de depósito (botón "Ya hice mi depósito" de la mesa de
+  // regalos) — Un Yape o una transferencia llegan sin identificar; esto
+  // es lo único que le dice a la pareja de quién vino cada aporte. Se
+  // guarda en la misma hoja de Aportes que la lista de regalos, con el
+  // medio de pago en la columna regalo_id (ver APORTES_DIRECTOS en
+  // docs/apps-script/Code.gs). —
+  function initDeposito() {
+    var btn = document.querySelector("#deposito-btn");
+    var modal = document.querySelector("#deposito-modal");
+    if (!btn || !modal) return;
+
+    var form = modal.querySelector("#deposito-form");
+    var okBlock = modal.querySelector("#deposito-ok");
+    var okMsg = modal.querySelector("#deposito-ok-msg");
+    var errorEl = modal.querySelector("#deposito-error");
+    var submitBtn = modal.querySelector("#deposito-submit");
+    var fileInput = modal.querySelector("#deposito-comprobante");
+    var etiquetaEnvio = submitBtn.textContent;
+
+    function cerrar() {
+      modal.classList.remove("is-open");
+      setTimeout(function () { modal.hidden = true; }, 200);
+    }
+    btn.addEventListener("click", function () {
+      // Al reabrir, siempre desde el formulario: si quedó en la pantalla
+      // de "gracias" de un aporte anterior, no tendría cómo registrar
+      // uno nuevo.
+      form.hidden = false;
+      okBlock.hidden = true;
+      errorEl.hidden = true;
+      abrirDialogo(modal);
+    });
+    modal.querySelector("#deposito-close").addEventListener("click", cerrar);
+    modal.querySelector("#deposito-cerrar-ok").addEventListener("click", cerrar);
+    modal.addEventListener("click", function (e) { if (e.target === modal) cerrar(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !modal.hidden) cerrar();
+    });
+
+    // La captura viaja como data URL en el JSON, igual que en la lista de
+    // regalos. Se lee al elegirla y no al enviar, para que el envío no
+    // tenga que esperar al FileReader.
+    var comprobanteDataUrl = "";
+    fileInput.addEventListener("change", function () {
+      comprobanteDataUrl = "";
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      // 6 MB: una foto de celular pasa de eso y el request se cae por
+      // tamaño sin decir por qué.
+      if (file.size > 6 * 1024 * 1024) {
+        errorEl.textContent = "Esa imagen pesa demasiado. Prueba con una captura de pantalla.";
+        errorEl.hidden = false;
+        fileInput.value = "";
+        return;
+      }
+      errorEl.hidden = true;
+      var reader = new FileReader();
+      reader.onload = function () { comprobanteDataUrl = String(reader.result || ""); };
+      reader.readAsDataURL(file);
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var nombre = form.querySelector("#deposito-nombre").value.trim();
+      var monto = Number(form.querySelector("#deposito-monto").value);
+      var medio = form.querySelector("#deposito-medio").value;
+      var mensaje = form.querySelector("#deposito-mensaje").value.trim();
+
+      if (!nombre || !monto || monto <= 0) {
+        errorEl.textContent = "Completa tu nombre y el monto que enviaste.";
+        errorEl.hidden = false;
+        return;
+      }
+      errorEl.hidden = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Enviando…";
+
+      var url = (W.rsvp && W.rsvp.apiUrl) || "";
+      fetchConTimeout(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // ver docs/RSVP-BACKEND.md: evita el preflight CORS
+        body: JSON.stringify({
+          tipo: "aporte",
+          regalo_id: medio,
+          nombre: nombre,
+          monto: monto,
+          mensaje: mensaje,
+          comprobante_base64: comprobanteDataUrl || "",
+          comprobante_nombre: nombre.replace(/\s+/g, "-").toLowerCase(),
+        }),
+      }, 45000)
+        .then(function (r) { return r.json().catch(function () { throw new Error("respuesta inesperada"); }); })
+        .then(function (data) {
+          if (data && data.error) throw new Error(data.error);
+          // weddingDateLabel ya termina en punto ("…4:00 p.m."), así que
+          // sin quitárselo la frase cierra con dos puntos seguidos.
+          var cuando = String(W.weddingDateLabel || "día de la boda").replace(/\.+$/, "");
+          okMsg.textContent = "Anotamos tu aporte de S/ " + monto + ", " + nombre.split(" ")[0] +
+            ". Nos hace muy felices — nos vemos el " + cuando + ".";
+          form.hidden = true;
+          okBlock.hidden = false;
+        })
+        .catch(function (err) {
+          console.error("No se pudo registrar el depósito:", err);
+          errorEl.textContent = "No pudimos registrarlo — parece un problema de conexión. " +
+            "Intenta de nuevo en un momento; tu depósito ya llegó igual, esto es solo el aviso.";
+          errorEl.hidden = false;
+        })
+        .then(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = etiquetaEnvio;
+        });
+    });
+  }
 
   function fetchConTimeout(url, options, timeoutMs) {
     options = options || {};

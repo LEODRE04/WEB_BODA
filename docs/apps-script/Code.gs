@@ -43,6 +43,10 @@ var SHEET_APORTES = "Aportes";
 
 var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "enviado_en", "actualizado_en"];
 var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
+// Ids reservados para los depósitos directos por Yape o transferencia,
+// que no corresponden a ningún regalo de la lista. Si se agrega otro
+// medio de pago en index.html, hay que agregarlo también acá.
+var APORTES_DIRECTOS = ["yape", "bcp", "interbank"];
 
 // Carpeta de Drive donde se guardan las capturas de las transferencias.
 // Se crea sola la primera vez (no hay que crearla a mano) y queda
@@ -335,7 +339,16 @@ function handleAporte(data) {
   if (!regaloId) return jsonOut({ error: "falta el regalo" });
   if (!nombre) return jsonOut({ error: "falta el nombre" });
   if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
-  if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
+  // Los depósitos directos (el botón "Ya hice mi depósito" de la mesa de
+  // regalos en index.html) no van contra un regalo de la lista: se
+  // guardan en la misma hoja de Aportes con el medio de pago como
+  // regalo_id, para que la pareja los vea todos juntos y sepa de dónde
+  // vino cada uno. Como no existen en la hoja de Regalos, se saltan la
+  // validación — y como ningún regalo tiene esos ids, tampoco alteran el
+  // "recaudado" de nadie.
+  if (APORTES_DIRECTOS.indexOf(regaloId) === -1 && !existeRegalo(regaloId)) {
+    return jsonOut({ error: "ese regalo ya no existe" });
+  }
 
   // Subir la captura a Drive es lo más lento de todo el request (varios
   // segundos con una foto de celular), así que se hace FUERA del lock —
