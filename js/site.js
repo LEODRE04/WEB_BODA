@@ -280,8 +280,35 @@
       window.scrollTo(0, 0);
       gate.classList.add("is-opening");
       try { sessionStorage.setItem("envelope_opened", "1"); } catch (e) {}
-      setTimeout(function () { gate.classList.add("is-open"); }, 650);
-      setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 1300);
+
+      // Tres tiempos, encadenados con los de css/theme-elegante.css:
+      //   0ms    se levanta la solapa y la hoja empieza a salir
+      //   900ms  la hoja ya asomó: pasa al frente y crece hasta cubrir
+      //          la pantalla, mientras el resto del sobre se apaga
+      //   1750ms el sobre termina de desvanecerse, con la hoja todavía
+      //          tapando, así que el cambio no se ve
+      //   2150ms fuera del todo
+      // setTimeout y no requestAnimationFrame a propósito: rAF se
+      // congela si la pestaña pasa a segundo plano y el sobre se
+      // quedaría trabado tapando la invitación.
+      setTimeout(function () {
+        // Cuánto tiene que crecer la hoja para tapar la pantalla desde
+        // donde quedó: se mide en el momento, porque depende del tamaño
+        // de la ventana y de si el sobre mostraba destinatario o no.
+        var hoja = gate.querySelector(".envelope-letter");
+        if (hoja) {
+          var r = hoja.getBoundingClientRect();
+          var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          var escala = Math.max(
+            Math.max(cx, window.innerWidth - cx) / (r.width / 2),
+            Math.max(cy, window.innerHeight - cy) / (r.height / 2)
+          );
+          gate.style.setProperty("--letter-scale", Math.ceil(escala * 1.15));
+        }
+        gate.classList.add("is-unfolding");
+      }, 900);
+      setTimeout(function () { gate.classList.add("is-open"); }, 1750);
+      setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);
     });
   }
 

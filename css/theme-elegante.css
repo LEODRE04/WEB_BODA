@@ -117,7 +117,18 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
     radial-gradient(circle at 12% 78%, color-mix(in srgb, var(--color-accent) 18%, transparent) 0 1.6px, transparent 2.2px);
   opacity: 1; transition: opacity .6s ease, transform .6s ease;
 }
-.envelope-gate.is-open { opacity: 0; transform: translateY(-16px); pointer-events: none; }
+/* Ya no se desplaza al cerrarse: el movimiento lo lleva la hoja que
+   crece, y las dos animaciones juntas se peleaban. */
+.envelope-gate.is-open { opacity: 0; pointer-events: none; }
+/* Mientras la hoja crece, todo lo demás del sobre se apaga para que no
+   se vea el papel pasando por encima del sello o del botón. */
+.envelope-gate.is-unfolding .envelope-gate-inner > *:not(.envelope),
+.envelope-gate.is-unfolding .envelope::before,
+.envelope-gate.is-unfolding .envelope-flap,
+.envelope-gate.is-unfolding .envelope-seal,
+.envelope-gate.is-unfolding .envelope-to {
+  opacity: 0; transition: opacity .35s ease;
+}
 
 .envelope-gate-inner { text-align: center; padding: 24px; max-width: 440px; }
 .envelope-gate .ornament-line {
@@ -162,6 +173,80 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   background: var(--color-neutral-200); border: 1px solid var(--color-divider);
   border-radius: 14px; box-shadow: var(--shadow-md);
 }
+/* — la hoja que sale del sobre —
+   Va detrás de la cara del sobre (z-index:-1, dentro del contexto de
+   apilamiento que crea el perspective de .envelope), así que mientras
+   está guardada no se ve. Al abrir sube y asoma por encima del borde
+   superior, justo cuando la solapa ya se levantó. Después crece hasta
+   tapar la pantalla y su contenido se desvanece: lo que queda es papel
+   del color del fondo de la página, así que el corte hacia la
+   invitación no se nota. — */
+.envelope-letter {
+  position: absolute; left: 14px; right: 14px; top: 30px; bottom: 26px;
+  z-index: -1; background: var(--color-bg);
+  border: 1px solid var(--color-divider); border-radius: 10px;
+  box-shadow: 0 -3px 14px color-mix(in srgb, #372c1d 18%, transparent);
+  display: flex; align-items: flex-start; justify-content: center;
+  overflow: hidden;
+  transition: transform .85s cubic-bezier(.22, 1, .36, 1),
+              border-radius .6s ease, border-color .4s ease, box-shadow .6s ease;
+}
+.envelope-letter-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 12px 0; text-align: center;
+  transition: opacity .45s ease;
+}
+.envelope-letter-rule {
+  width: 46px; height: 1px; background: var(--color-accent);
+  opacity: .55; margin-bottom: 2px;
+}
+.envelope-letter-eyebrow {
+  font-size: 7px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--color-accent-700);
+}
+.envelope-letter-names {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 19px; line-height: 1.1; color: var(--color-text);
+}
+.envelope-letter-names em { font-style: normal; color: var(--color-accent); }
+.envelope-letter-date {
+  font-size: 8px; letter-spacing: .18em;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+
+/* Paso 1 — la hoja asoma por encima del sobre. */
+.envelope-gate.is-opening .envelope-letter { transform: translateY(-58%); }
+
+/* Paso 2 — ya afuera, pasa al frente y crece hasta cubrir la pantalla.
+   El z-index no se puede animar, pero para cuando cambia la hoja ya
+   está fuera del sobre, así que el salto no se ve. */
+.envelope-gate.is-unfolding .envelope-letter {
+  z-index: 3;
+  /* La escala la calcula site.js según el tamaño de la pantalla: un
+     valor fijo se quedaba corto en monitores grandes y dejaba ver el
+     borde del papel. El 9 es solo el respaldo si el JS no llegó a
+     ponerla. */
+  transform: translateY(-58%) scale(var(--letter-scale, 9));
+  border-radius: 0; border-color: transparent; box-shadow: none;
+  /* El borde y la sombra se van con retraso a propósito: el papel es del
+     mismo color que el fondo de la pantalla, así que sin su canto la
+     hoja creciendo sería invisible y el efecto se vería como un simple
+     fundido. Manteniéndolos durante la primera mitad, se ve el borde del
+     papel barriendo la pantalla hacia afuera, y recién cuando ya la tapó
+     desaparecen. */
+  transition: transform 1s cubic-bezier(.4, 0, .2, 1),
+              border-radius .8s ease,
+              border-color .3s ease .5s,
+              box-shadow .35s ease .55s;
+}
+/* El contenido aguanta un cuarto de segundo antes de disolverse: así se
+   alcanza a ver la miniatura creciendo hacia el invitado. Más allá de
+   eso la escala la vuelve borrosa, por eso no se mantiene hasta el
+   final. */
+.envelope-gate.is-unfolding .envelope-letter-inner {
+  opacity: 0; transition: opacity .4s ease .25s;
+}
+
 .envelope-flap {
   position: absolute; top: 24px; left: 0; right: 0; height: 102px;
   background: var(--color-neutral-300);
@@ -228,4 +313,16 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   /* En celular el botón ocupa todo el ancho, como en el mockup: es la
      única acción de la pantalla y así queda cómodo para el pulgar. */
   .envelope-cta { display: flex; width: 100%; }
+}
+
+/* Quien tenga activado "reducir movimiento" en su sistema no debería
+   recibir una animación de casi dos segundos: el sobre simplemente se
+   desvanece y aparece la invitación. */
+@media (prefers-reduced-motion: reduce) {
+  .envelope-letter,
+  .envelope-letter-inner,
+  .envelope-flap { transition: none; }
+  .envelope-gate.is-opening .envelope-letter,
+  .envelope-gate.is-unfolding .envelope-letter { transform: none; }
+  .envelope-gate.is-unfolding .envelope-letter { opacity: 0; }
 }
