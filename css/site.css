@@ -326,30 +326,24 @@ body { background: var(--color-neutral-100); }
 .gifts-aviso strong { color: var(--color-accent-700); }
 
 /* — modal de "Ya hice mi depósito" — mismo tratamiento que el de
-   agradecimiento del RSVP; ver .rsvp-thanks-* más abajo. — */
+   agradecimiento del RSVP; ver .rsvp-thanks-* más abajo. Solo lleva el
+   área para la captura (opcional) y el botón: no le pide nada al
+   invitado, el nombre sale de su ?codigo=. Reusa .gift-upload, el mismo
+   control de archivo de la lista de regalos. — */
 .deposito { opacity: 0; transition: opacity .2s ease; }
 .deposito.is-open { opacity: 1; }
 .deposito-dialog {
-  position: relative; width: min(460px, 100%); padding: 34px 30px 30px; text-align: left;
+  position: relative; width: min(420px, 100%); padding: 34px 30px 30px; text-align: center;
 }
 .deposito.is-open .dialog { transform: none; }
-.deposito-dialog .section-kicker { text-align: center; }
-.deposito-dialog .dialog-title { margin: 10px 0 10px; font-size: 24px; text-align: center; }
+.deposito-dialog .dialog-title { margin: 10px 0 10px; font-size: 24px; }
 .deposito-dialog .dialog-body {
-  margin: 0 0 18px; font-size: 14px; line-height: 1.6; text-align: center;
+  margin: 0 0 18px; font-size: 14px; line-height: 1.6;
   color: color-mix(in srgb, var(--color-text) 72%, transparent);
 }
-.deposito-form .field + .field, .deposito-form .row + .field { margin-top: 12px; }
-.deposito-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
 .deposito-opcional {
-  font-weight: 400; text-transform: none; letter-spacing: 0;
   color: color-mix(in srgb, var(--color-text) 45%, transparent);
 }
-.deposito-form textarea.input { resize: vertical; font-family: inherit; }
-/* El selector de archivo nativo no acepta el padding de .input sin
-   quedar desalineado con el botón "Elegir archivo" que dibuja el
-   navegador. */
-.deposito-form input[type="file"] { padding: 9px 12px; font-size: 13px; }
 /* .rsvp-error solo existía como estilo en línea en el formulario de
    confirmación; acá se le da regla propia para que el error del modal de
    depósito se vea igual (el inline del otro sigue ganando, así que no
@@ -357,16 +351,8 @@ body { background: var(--color-neutral-100); }
 .rsvp-error {
   margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #8c491a;
 }
-.deposito-actions {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px;
-}
-.deposito-ok { text-align: center; }
 .deposito-ok .rsvp-thanks-icon { margin-bottom: 14px; }
 .deposito-ok .btn { margin-top: 6px; }
-@media (max-width: 480px) {
-  .deposito-form .row { grid-template-columns: 1fr; }
-  .deposito-actions .btn { width: 100%; }
-}
 /* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
    disponible en celular (envelope-card + su padding le dejan bastante
    menos que eso) — sin este límite, .money-card se salía del borde y

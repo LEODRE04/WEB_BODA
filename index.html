@@ -438,44 +438,17 @@
   <div class="dialog deposito-dialog">
     <button type="button" class="rsvp-thanks-close" id="deposito-close" aria-label="Cerrar">✕</button>
 
-    <form class="deposito-form" id="deposito-form" novalidate>
+    <div id="deposito-paso1">
       <div class="section-kicker">Confirmar depósito</div>
       <h3 class="dialog-title">Gracias por tu detalle</h3>
-      <p class="dialog-body">Cuéntanos qué enviaste para que podamos reconocerlo. Solo toma un momento.</p>
+      <p class="dialog-body">Si quieres, adjunta la captura del depósito. Si no, dale a confirmar y listo.</p>
 
-      <div class="field">
-        <label for="deposito-nombre">Tu nombre</label>
-        <input class="input" id="deposito-nombre" name="nombre" autocomplete="name" required>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label for="deposito-monto">Monto (S/)</label>
-          <input class="input" id="deposito-monto" name="monto" type="number" min="1" step="1" inputmode="numeric" required>
-        </div>
-        <div class="field">
-          <label for="deposito-medio">¿Por dónde?</label>
-          <select class="input" id="deposito-medio" name="medio">
-            <option value="yape">Yape</option>
-            <option value="bcp">BCP</option>
-            <option value="interbank">Interbank</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label for="deposito-mensaje">Mensaje para los novios <span class="deposito-opcional">(opcional)</span></label>
-        <textarea class="input" id="deposito-mensaje" name="mensaje" rows="2"></textarea>
-      </div>
-      <div class="field">
-        <label for="deposito-comprobante">Captura del depósito <span class="deposito-opcional">(opcional)</span></label>
-        <input class="input" id="deposito-comprobante" name="comprobante" type="file" accept="image/*">
-      </div>
+      <label class="gift-upload" for="deposito-comprobante" id="deposito-upload-label">Toca para elegir la captura <span class="deposito-opcional">(opcional)</span></label>
+      <input type="file" id="deposito-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
 
       <p class="rsvp-error" id="deposito-error" role="alert" hidden></p>
-      <div class="deposito-actions">
-        <button type="submit" class="btn btn-primary" id="deposito-submit">Confirmar depósito</button>
-        <span class="rsvp-note">No te pedimos ningún dato bancario.</span>
-      </div>
-    </form>
+      <button type="button" class="btn btn-primary btn-block" id="deposito-submit">Confirmar mi depósito</button>
+    </div>
 
     <div class="deposito-ok" id="deposito-ok" hidden>
       <div class="rsvp-thanks-icon" aria-hidden="true">

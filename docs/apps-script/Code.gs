@@ -43,10 +43,10 @@ var SHEET_APORTES = "Aportes";
 
 var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "enviado_en", "actualizado_en"];
 var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
-// Ids reservados para los depósitos directos por Yape o transferencia,
-// que no corresponden a ningún regalo de la lista. Si se agrega otro
-// medio de pago en index.html, hay que agregarlo también acá.
-var APORTES_DIRECTOS = ["yape", "bcp", "interbank"];
+// Id reservado para el botón "Ya hice mi depósito" de la mesa de regalos:
+// un aviso de que alguien depositó por Yape o transferencia, que no
+// corresponde a ningún regalo de la lista.
+var APORTE_DEPOSITO = "deposito";
 
 // Carpeta de Drive donde se guardan las capturas de las transferencias.
 // Se crea sola la primera vez (no hay que crearla a mano) y queda
@@ -337,17 +337,18 @@ function handleAporte(data) {
   var nombre = String(data.nombre || "").trim();
 
   if (!regaloId) return jsonOut({ error: "falta el regalo" });
-  if (!nombre) return jsonOut({ error: "falta el nombre" });
-  if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
-  // Los depósitos directos (el botón "Ya hice mi depósito" de la mesa de
-  // regalos en index.html) no van contra un regalo de la lista: se
-  // guardan en la misma hoja de Aportes con el medio de pago como
-  // regalo_id, para que la pareja los vea todos juntos y sepa de dónde
-  // vino cada uno. Como no existen en la hoja de Regalos, se saltan la
-  // validación — y como ningún regalo tiene esos ids, tampoco alteran el
+
+  // El aviso de depósito no va contra un regalo de la lista y no pide
+  // nada al invitado: el nombre sale de su ?codigo= (vacío si entró sin
+  // link) y no hay monto. Por eso se salta las tres validaciones de
+  // abajo. Se guarda en la misma hoja de Aportes para que la pareja los
+  // vea todos juntos; como ningún regalo usa este id, no altera el
   // "recaudado" de nadie.
-  if (APORTES_DIRECTOS.indexOf(regaloId) === -1 && !existeRegalo(regaloId)) {
-    return jsonOut({ error: "ese regalo ya no existe" });
+  var esDeposito = regaloId === APORTE_DEPOSITO;
+  if (!esDeposito) {
+    if (!nombre) return jsonOut({ error: "falta el nombre" });
+    if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
+    if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
   }
 
   // Subir la captura a Drive es lo más lento de todo el request (varios

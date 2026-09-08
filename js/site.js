@@ -57,7 +57,6 @@
     initMusicToggle();
     initPetals();
     initSaveDateCalendar();
-    initDeposito();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -75,6 +74,7 @@
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
     initGiftListLink(codigo);
+    initDeposito(guestPromise);
   }
 
   // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
@@ -883,32 +883,44 @@
 
   // — confirmación de depósito (botón "Ya hice mi depósito" de la mesa de
   // regalos) — Un Yape o una transferencia llegan sin identificar; esto
-  // es lo único que le dice a la pareja de quién vino cada aporte. Se
-  // guarda en la misma hoja de Aportes que la lista de regalos, con el
-  // medio de pago en la columna regalo_id (ver APORTES_DIRECTOS en
+  // es lo único que le dice a la pareja de quién vino. No se le pide
+  // nada al invitado: el nombre sale del ?codigo= de su invitación y la
+  // captura es opcional. Se guarda en la misma hoja de Aportes que la
+  // lista de regalos, con regalo_id "deposito" (ver APORTES_DIRECTOS en
   // docs/apps-script/Code.gs). —
-  function initDeposito() {
+  function initDeposito(guestPromise) {
     var btn = document.querySelector("#deposito-btn");
     var modal = document.querySelector("#deposito-modal");
     if (!btn || !modal) return;
 
-    var form = modal.querySelector("#deposito-form");
+    var paso1 = modal.querySelector("#deposito-paso1");
     var okBlock = modal.querySelector("#deposito-ok");
     var okMsg = modal.querySelector("#deposito-ok-msg");
     var errorEl = modal.querySelector("#deposito-error");
     var submitBtn = modal.querySelector("#deposito-submit");
     var fileInput = modal.querySelector("#deposito-comprobante");
+    var uploadLabel = modal.querySelector("#deposito-upload-label");
     var etiquetaEnvio = submitBtn.textContent;
+    var etiquetaSubida = uploadLabel.innerHTML;
+
+    // El nombre del invitado sale del link, no de un campo: por eso el
+    // modal no le pide nada. Si entró sin ?codigo= no hay nombre y el
+    // aporte queda solo con la captura y la hora.
+    var nombreInvitado = "";
+    if (guestPromise) {
+      guestPromise.then(function (guest) {
+        if (guest && guest.nombre) nombreInvitado = guest.nombre;
+      });
+    }
 
     function cerrar() {
       modal.classList.remove("is-open");
       setTimeout(function () { modal.hidden = true; }, 200);
     }
     btn.addEventListener("click", function () {
-      // Al reabrir, siempre desde el formulario: si quedó en la pantalla
-      // de "gracias" de un aporte anterior, no tendría cómo registrar
-      // uno nuevo.
-      form.hidden = false;
+      // Al reabrir, siempre desde el paso 1: si quedó en la pantalla de
+      // "gracias", no tendría cómo registrar otro.
+      paso1.hidden = false;
       okBlock.hidden = true;
       errorEl.hidden = true;
       abrirDialogo(modal);
@@ -920,40 +932,49 @@
       if (e.key === "Escape" && !modal.hidden) cerrar();
     });
 
-    // La captura viaja como data URL en el JSON, igual que en la lista de
-    // regalos. Se lee al elegirla y no al enviar, para que el envío no
-    // tenga que esperar al FileReader.
+    // Misma compresión que la lista de regalos: una foto de celular sin
+    // reescalar hace que el request se caiga por tamaño.
+    function comprimirImagen(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = function () {
+          var img = new Image();
+          img.onerror = reject;
+          img.onload = function () {
+            var scale = Math.min(1, 1000 / img.width);
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.72));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     var comprobanteDataUrl = "";
     fileInput.addEventListener("change", function () {
-      comprobanteDataUrl = "";
       var file = fileInput.files && fileInput.files[0];
       if (!file) return;
-      // 6 MB: una foto de celular pasa de eso y el request se cae por
-      // tamaño sin decir por qué.
-      if (file.size > 6 * 1024 * 1024) {
-        errorEl.textContent = "Esa imagen pesa demasiado. Prueba con una captura de pantalla.";
-        errorEl.hidden = false;
-        fileInput.value = "";
-        return;
-      }
       errorEl.hidden = true;
-      var reader = new FileReader();
-      reader.onload = function () { comprobanteDataUrl = String(reader.result || ""); };
-      reader.readAsDataURL(file);
+      uploadLabel.textContent = "Cargando…";
+      comprimirImagen(file)
+        .then(function (dataUrl) {
+          comprobanteDataUrl = dataUrl;
+          uploadLabel.textContent = "✓ " + file.name;
+          uploadLabel.classList.add("has-file");
+        })
+        .catch(function () {
+          comprobanteDataUrl = "";
+          uploadLabel.textContent = "No se pudo leer esa imagen, intenta con otra";
+          uploadLabel.classList.remove("has-file");
+        });
     });
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var nombre = form.querySelector("#deposito-nombre").value.trim();
-      var monto = Number(form.querySelector("#deposito-monto").value);
-      var medio = form.querySelector("#deposito-medio").value;
-      var mensaje = form.querySelector("#deposito-mensaje").value.trim();
-
-      if (!nombre || !monto || monto <= 0) {
-        errorEl.textContent = "Completa tu nombre y el monto que enviaste.";
-        errorEl.hidden = false;
-        return;
-      }
+    submitBtn.addEventListener("click", function () {
       errorEl.hidden = true;
       submitBtn.disabled = true;
       submitBtn.textContent = "Enviando…";
@@ -964,34 +985,41 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" }, // ver docs/RSVP-BACKEND.md: evita el preflight CORS
         body: JSON.stringify({
           tipo: "aporte",
-          regalo_id: medio,
-          nombre: nombre,
-          monto: monto,
-          mensaje: mensaje,
+          regalo_id: "deposito",
+          nombre: nombreInvitado,
+          monto: 0,
+          mensaje: "",
           comprobante_base64: comprobanteDataUrl || "",
-          comprobante_nombre: nombre.replace(/\s+/g, "-").toLowerCase(),
+          comprobante_nombre: (nombreInvitado || "invitado").replace(/\s+/g, "-").toLowerCase(),
         }),
       }, 45000)
         .then(function (r) { return r.json().catch(function () { throw new Error("respuesta inesperada"); }); })
         .then(function (data) {
           if (data && data.error) throw new Error(data.error);
-          // weddingDateLabel ya termina en punto ("…4:00 p.m."), así que
-          // sin quitárselo la frase cierra con dos puntos seguidos.
-          var cuando = String(W.weddingDateLabel || "día de la boda").replace(/\.+$/, "");
-          okMsg.textContent = "Anotamos tu aporte de S/ " + monto + ", " + nombre.split(" ")[0] +
-            ". Nos hace muy felices — nos vemos el " + cuando + ".";
-          form.hidden = true;
+          var primerNombre = nombreInvitado ? nombreInvitado.split(" ")[0] : "";
+          okMsg.textContent = primerNombre
+            ? "Ya lo anotamos, " + primerNombre + ". Gracias de corazón — nos vemos en la boda."
+            : "Ya lo anotamos. Gracias de corazón — nos vemos en la boda.";
+          paso1.hidden = true;
           okBlock.hidden = false;
         })
         .catch(function (err) {
           console.error("No se pudo registrar el depósito:", err);
-          errorEl.textContent = "No pudimos registrarlo — parece un problema de conexión. " +
-            "Intenta de nuevo en un momento; tu depósito ya llegó igual, esto es solo el aviso.";
+          errorEl.textContent = "No pudimos avisarles — parece un problema de conexión. " +
+            "Prueba de nuevo en un momento; tu depósito ya llegó igual, esto es solo el aviso.";
           errorEl.hidden = false;
         })
         .then(function () {
           submitBtn.disabled = false;
           submitBtn.textContent = etiquetaEnvio;
+          // Si vuelve a abrir para registrar otro, el área de la captura
+          // tiene que estar limpia y no mostrando el archivo anterior.
+          if (okBlock.hidden === false) {
+            comprobanteDataUrl = "";
+            fileInput.value = "";
+            uploadLabel.innerHTML = etiquetaSubida;
+            uploadLabel.classList.remove("has-file");
+          }
         });
     });
   }
