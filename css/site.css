@@ -312,80 +312,112 @@ body { background: var(--color-neutral-100); }
   gap: 20px; max-width: 900px; margin: 0 auto; align-items: start;
 }
 .gifts-grid .money-card + .money-card { margin-top: 0; }
-/* Aviso que cruza las tres tarjetas de pago: los aportes por Yape o
-   transferencia no llegan identificados, así que hay que pedir el aviso
-   explícitamente o los novios no saben de quién vino. */
-.gifts-aviso {
-  grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 14px;
-  margin: 0; text-align: center;
+/* — aviso de transferencia (bloques 3a y 6g de claude.ai/design) —
+   Cruza las tres tarjetas de pago. Fondo salvia para separarla de las
+   tarjetas de datos sin competir con la franja terracota de abajo.
+   Son tres estados de la misma tarjeta, no un modal: el invitado no
+   sale de la sección en ningún momento. — */
+.transferencia-card {
+  grid-column: 1 / -1;
+  background: var(--color-accent-2-100); border-radius: 24px; padding: 20px 22px;
 }
-.gifts-aviso p {
-  margin: 0; max-width: 52ch; font-size: 13.5px; line-height: 1.65;
+.transferencia-paso {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.transferencia-gracias { align-items: flex-start; }
+.transferencia-texto { flex: 1; min-width: 200px; }
+.transferencia-texto > strong {
+  display: block; font-size: 16px; font-weight: 600; color: var(--color-accent-2-800);
+}
+.transferencia-texto > p {
+  margin: 3px 0 0; font-size: 13.5px; line-height: 1.6;
   color: color-mix(in srgb, var(--color-text) 70%, transparent);
 }
-.gifts-aviso strong { color: var(--color-accent-700); }
-
-/* — modal de "Ya hice mi depósito" — mismo tratamiento que el de
-   agradecimiento del RSVP; ver .rsvp-thanks-* más abajo. Solo lleva el
-   área para la captura (opcional) y el botón: no le pide nada al
-   invitado, el nombre sale de su ?codigo=. Reusa .gift-upload, el mismo
-   control de archivo de la lista de regalos. — */
-.deposito { opacity: 0; transition: opacity .2s ease; }
-.deposito.is-open { opacity: 1; }
-.deposito-dialog {
-  position: relative; width: min(420px, 100%); padding: 34px 30px 30px; text-align: center;
+.transferencia-titulo {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 22px !important; line-height: 1.2;
 }
-.deposito.is-open .dialog { transform: none; }
-.deposito-dialog .dialog-title { margin: 10px 0 10px; font-size: 24px; }
-.deposito-dialog .dialog-body {
-  margin: 0 0 18px; font-size: 14px; line-height: 1.6;
-  color: color-mix(in srgb, var(--color-text) 72%, transparent);
+.transferencia-icono {
+  flex: none; width: 44px; height: 44px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-accent-2); color: #fff;
 }
-.deposito-opcional {
+.transferencia-fecha {
+  margin: 4px 0 0 !important; font-size: 12.5px !important;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent) !important;
+}
+.transferencia-card .field { margin-top: 14px; }
+.transferencia-card textarea.input { resize: vertical; font-family: inherit; }
+/* El mensaje es obligatorio (así lo pidió André en el diseño), y la
+   marca va en terracota para que se note frente al "(opcional)" de la
+   constancia, que es gris. */
+.transferencia-obligatorio {
+  font-weight: 600; text-transform: none; letter-spacing: 0;
+  color: var(--color-accent-700);
+}
+.transferencia-opcional {
+  font-weight: 400; text-transform: none; letter-spacing: 0;
   color: color-mix(in srgb, var(--color-text) 45%, transparent);
 }
-/* .rsvp-error solo existía como estilo en línea en el formulario de
-   confirmación; acá se le da regla propia para que el error del modal de
-   depósito se vea igual (el inline del otro sigue ganando, así que no
-   cambia nada de lo que ya había). */
+.transferencia-nota {
+  margin: 8px 0 0; font-size: 12.5px; text-align: center;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
 .rsvp-error {
   margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #8c491a;
 }
-.deposito-ok .rsvp-thanks-icon { margin-bottom: 14px; }
-.deposito-ok .btn { margin-top: 6px; }
+
+/* — franja de la lista de regalos (bloque 3a) —
+   Antes era una fila más del grid y se perdía entre las tarjetas de
+   pago. Ahora cruza todo el ancho en terracota, con el título grande.
+   El botón invierte los colores (relleno crema, letra terracota
+   oscura) porque un .btn-primary encima del terracota no se vería. — */
+.gift-list-band {
+  grid-column: 1 / -1; margin-top: 24px;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 28px;
+  background: var(--color-accent); color: var(--color-bg);
+  border-radius: 28px; padding: 30px 32px;
+}
+.gift-list-band-kicker {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bg) 78%, transparent);
+}
+.gift-list-band-title {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 32px; line-height: 1.15; margin: 8px 0 10px; color: var(--color-bg);
+}
+.gift-list-band-text p {
+  margin: 0; font-size: 15px; line-height: 1.65; max-width: 52ch;
+  color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+}
+.gift-list-band-action {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.gift-list-band-btn {
+  background: var(--color-bg); color: #8c491a; font-size: 15px; padding: 13px 26px;
+}
+.gift-list-band-btn:hover { background: var(--color-neutral-200); color: #8c491a; }
+.gift-list-band-note {
+  font-size: 12.5px; text-align: center; max-width: 22ch;
+  color: color-mix(in srgb, var(--color-bg) 72%, transparent);
+}
+@media (max-width: 700px) {
+  .gift-list-band {
+    grid-template-columns: 1fr; gap: 18px; padding: 26px 22px; text-align: center;
+  }
+  .gift-list-band-title { font-size: 26px; }
+  .gift-list-band-text p { margin-inline: auto; }
+  .gift-list-band-btn { width: 100%; }
+  .transferencia-paso { justify-content: center; text-align: center; }
+  .transferencia-gracias { text-align: left; }
+  .transferencia-paso > .btn { width: 100%; }
+}
 /* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
    disponible en celular (envelope-card + su padding le dejan bastante
    menos que eso) — sin este límite, .money-card se salía del borde y
    toda la página quedaba con scroll horizontal. — */
 @media (max-width: 640px) {
   .gifts-grid { grid-template-columns: 1fr; }
-}
-
-/* — CTA a la lista de regalos elegible (regalos.html): antes era una
-   .money-card más, con el mismo peso visual que las tarjetas de
-   Yape/transferencia — se perdía entre esas. Ahora ocupa todo el ancho
-   del grid, con fondo de acento e ícono, para que se note que es la
-   forma más completa de regalar (con fotos y avance), no un dato de
-   pago más. — */
-.gift-list-cta {
-  grid-column: 1 / -1; display: flex; align-items: center; gap: 16px;
-  background: var(--color-accent-100); border-radius: 24px; padding: 22px 24px;
-}
-.gift-list-cta-icon {
-  flex: none; width: 52px; height: 52px; border-radius: 999px;
-  background: var(--color-accent); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-}
-.gift-list-cta-text { flex: 1; min-width: 0; }
-.gift-list-cta-text strong {
-  display: block; font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 19px;
-}
-.gift-list-cta-text p {
-  margin: 4px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--color-accent-800);
-}
-@media (max-width: 560px) {
-  .gift-list-cta { flex-wrap: wrap; }
-  .gift-list-cta .btn { flex: 1 0 100%; }
 }
 
 /* — lista de regalos elegible (initGiftRegistry en site.js) —

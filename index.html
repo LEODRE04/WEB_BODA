@@ -296,20 +296,75 @@
           <p style="margin:10px 0 0;font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">A nombre de André Leon</p>
         </div>
 
-        <div class="gifts-aviso">
-          <p>Un Yape o una transferencia nos llega sin nombre. Si ya nos enviaste algo, <strong>avísanos con este botón</strong> y sabremos que fue tuyo.</p>
-          <button type="button" class="btn btn-primary" id="deposito-btn">Ya hice mi depósito</button>
+        <!-- Aviso de transferencia (bloques 3a y 6g de claude.ai/design).
+             Son tres estados de la MISMA tarjeta, no un modal: preguntar,
+             luego el formulario de agradecimiento, luego el acuse. El
+             invitado nunca sale de la sección. -->
+        <div class="transferencia-card" id="transferencia-card">
+
+          <!-- Paso 1 — la pregunta -->
+          <div class="transferencia-paso" id="transferencia-paso1">
+            <div class="transferencia-texto">
+              <strong>¿Ya hiciste la transferencia?</strong>
+              <p>Un Yape o una transferencia nos llega sin nombre. Avísanos y sabremos que fue tuyo.</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="transferencia-btn">Ya transferí</button>
+          </div>
+
+          <!-- Paso 2 — el agradecimiento, que es también el formulario -->
+          <div class="transferencia-paso transferencia-gracias" id="transferencia-paso2" hidden>
+            <span class="transferencia-icono" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </span>
+            <div class="transferencia-texto">
+              <strong class="transferencia-titulo" id="transferencia-titulo">¡Gracias!</strong>
+              <p>Le avisaremos a André y Krisli de tu detalle.</p>
+              <p class="transferencia-fecha" id="transferencia-fecha"></p>
+
+              <div class="field">
+                <label for="transferencia-mensaje">Mensaje para los novios <span class="transferencia-obligatorio">obligatorio</span></label>
+                <textarea class="input" id="transferencia-mensaje" rows="2" placeholder="Cuéntales algo, aunque sea corto"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="transferencia-constancia">Constancia de la transferencia <span class="transferencia-opcional">(opcional)</span></label>
+                <label class="gift-upload" for="transferencia-constancia" id="transferencia-upload">Toca para elegir la captura</label>
+                <input type="file" id="transferencia-constancia" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
+              </div>
+
+              <p class="rsvp-error" id="transferencia-error" role="alert" hidden></p>
+              <button type="button" class="btn btn-primary btn-block" id="transferencia-enviar">Enviar aviso</button>
+              <p class="transferencia-nota">Sin el mensaje no podemos enviarlo.</p>
+            </div>
+          </div>
+
+          <!-- Paso 3 — acuse -->
+          <div class="transferencia-paso transferencia-gracias" id="transferencia-paso3" hidden>
+            <span class="transferencia-icono" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </span>
+            <div class="transferencia-texto">
+              <strong class="transferencia-titulo">Aviso enviado</strong>
+              <p id="transferencia-acuse"></p>
+            </div>
+          </div>
+
         </div>
 
-        <div class="gift-list-cta">
-          <div class="gift-list-cta-icon" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+        <!-- Franja de la lista de regalos (bloque 3a): antes era una fila
+             más dentro del grid y se perdía entre las tarjetas de pago.
+             Ahora cruza todo el ancho, en terracota, con el título grande
+             y la explicación de que se puede aportar por partes. -->
+        <div class="gift-list-band">
+          <div class="gift-list-band-text">
+            <div class="gift-list-band-kicker">Lista de regalos</div>
+            <h3 class="gift-list-band-title">Elige un regalo puntual</h3>
+            <p>Mira las fotos, elige el que más te guste y aporta lo que quieras — no hace falta cubrirlo entero, entre varios invitados se completa.</p>
           </div>
-          <div class="gift-list-cta-text">
-            <strong>Lista de regalos</strong>
-            <p>Elige un regalo puntual, mira las fotos y aporta por Yape o transferencia.</p>
+          <div class="gift-list-band-action">
+            <a class="btn gift-list-band-btn" id="gift-list-link" href="regalos.html">Ver la lista de regalos</a>
+            <span class="gift-list-band-note">Se paga por Yape o transferencia, igual que arriba.</span>
           </div>
-          <a class="btn btn-primary" id="gift-list-link" href="regalos.html">Ver la lista</a>
         </div>
 
       </div>
@@ -440,40 +495,6 @@
   </section>
 
 </main>
-
-<!-- Confirmación de depósito — el botón "Ya hice mi depósito" de la mesa
-     de regalos. Un Yape o una transferencia llegan sin identificar, así
-     que esto es lo único que le dice a la pareja de quién vino cada
-     aporte. Se guarda en la misma hoja de Aportes que la lista de
-     regalos, con el medio de pago en la columna regalo_id (ver
-     APORTES_DIRECTOS en docs/apps-script/Code.gs). -->
-<div class="dialog-backdrop deposito" id="deposito-modal" hidden>
-  <div class="dialog deposito-dialog">
-    <button type="button" class="rsvp-thanks-close" id="deposito-close" aria-label="Cerrar">✕</button>
-
-    <div id="deposito-paso1">
-      <div class="section-kicker">Confirmar depósito</div>
-      <h3 class="dialog-title">Gracias por tu detalle</h3>
-      <p class="dialog-body">Si quieres, adjunta la captura del depósito. Si no, dale a confirmar y listo.</p>
-
-      <label class="gift-upload" for="deposito-comprobante" id="deposito-upload-label">Toca para elegir la captura <span class="deposito-opcional">(opcional)</span></label>
-      <input type="file" id="deposito-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
-
-      <p class="rsvp-error" id="deposito-error" role="alert" hidden></p>
-      <button type="button" class="btn btn-primary btn-block" id="deposito-submit">Confirmar mi depósito</button>
-    </div>
-
-    <div class="deposito-ok" id="deposito-ok" hidden>
-      <div class="rsvp-thanks-icon" aria-hidden="true">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-      </div>
-      <div class="section-kicker">Depósito registrado</div>
-      <h3 class="dialog-title">¡Muchas gracias!</h3>
-      <p class="dialog-body" id="deposito-ok-msg"></p>
-      <button type="button" class="btn btn-secondary" id="deposito-cerrar-ok">Cerrar</button>
-    </div>
-  </div>
-</div>
 
 <!-- Modal de agradecimiento al confirmar el RSVP — site.js elige el texto
      según si la respuesta fue "sí" o "no" (initThanksModal). Reutiliza

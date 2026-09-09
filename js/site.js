@@ -74,7 +74,7 @@
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
     initGiftListLink(codigo);
-    initDeposito(guestPromise);
+    initTransferencia(guestPromise);
   }
 
   // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
@@ -908,55 +908,53 @@
   var API_TIMEOUT_MS = 15000;
   var PENDIENTE_KEY = "rsvp_pendiente";
 
-  // — confirmación de depósito (botón "Ya hice mi depósito" de la mesa de
-  // regalos) — Un Yape o una transferencia llegan sin identificar; esto
-  // es lo único que le dice a la pareja de quién vino. No se le pide
-  // nada al invitado: el nombre sale del ?codigo= de su invitación y la
-  // captura es opcional. Se guarda en la misma hoja de Aportes que la
-  // lista de regalos, con regalo_id "deposito" (ver APORTES_DIRECTOS en
-  // docs/apps-script/Code.gs). —
-  function initDeposito(guestPromise) {
-    var btn = document.querySelector("#deposito-btn");
-    var modal = document.querySelector("#deposito-modal");
-    if (!btn || !modal) return;
+  // — aviso de transferencia (bloques 3a y 6g de claude.ai/design) —
+  // Tres estados de la misma tarjeta, sin modal: la pregunta, el
+  // agradecimiento —que es también el formulario— y el acuse. El
+  // mensaje es obligatorio (así lo pidió André en el diseño); la
+  // constancia es opcional. Se guarda en la misma hoja de Aportes que
+  // la lista de regalos, con regalo_id "deposito" (ver APORTE_DEPOSITO
+  // en docs/apps-script/Code.gs). El nombre sale del ?codigo= de la
+  // invitación, así que no hay campo que llenar para eso. —
+  function initTransferencia(guestPromise) {
+    var card = document.querySelector("#transferencia-card");
+    if (!card) return;
 
-    var paso1 = modal.querySelector("#deposito-paso1");
-    var okBlock = modal.querySelector("#deposito-ok");
-    var okMsg = modal.querySelector("#deposito-ok-msg");
-    var errorEl = modal.querySelector("#deposito-error");
-    var submitBtn = modal.querySelector("#deposito-submit");
-    var fileInput = modal.querySelector("#deposito-comprobante");
-    var uploadLabel = modal.querySelector("#deposito-upload-label");
-    var etiquetaEnvio = submitBtn.textContent;
-    var etiquetaSubida = uploadLabel.innerHTML;
+    var paso1 = card.querySelector("#transferencia-paso1");
+    var paso2 = card.querySelector("#transferencia-paso2");
+    var paso3 = card.querySelector("#transferencia-paso3");
+    var abrirBtn = card.querySelector("#transferencia-btn");
+    var enviarBtn = card.querySelector("#transferencia-enviar");
+    var mensajeEl = card.querySelector("#transferencia-mensaje");
+    var errorEl = card.querySelector("#transferencia-error");
+    var tituloEl = card.querySelector("#transferencia-titulo");
+    var acuseEl = card.querySelector("#transferencia-acuse");
+    var fileInput = card.querySelector("#transferencia-constancia");
+    var uploadLabel = card.querySelector("#transferencia-upload");
+    var etiquetaEnvio = enviarBtn.textContent;
 
-    // El nombre del invitado sale del link, no de un campo: por eso el
-    // modal no le pide nada. Si entró sin ?codigo= no hay nombre y el
-    // aporte queda solo con la captura y la hora.
     var nombreInvitado = "";
     if (guestPromise) {
       guestPromise.then(function (guest) {
-        if (guest && guest.nombre) nombreInvitado = guest.nombre;
+        if (guest && guest.nombre) {
+          nombreInvitado = guest.nombre;
+          tituloEl.textContent = "¡Gracias, " + nombreInvitado.split(" ")[0] + "!";
+        }
       });
     }
 
-    function cerrar() {
-      modal.classList.remove("is-open");
-      setTimeout(function () { modal.hidden = true; }, 200);
-    }
-    btn.addEventListener("click", function () {
-      // Al reabrir, siempre desde el paso 1: si quedó en la pantalla de
-      // "gracias", no tendría cómo registrar otro.
-      paso1.hidden = false;
-      okBlock.hidden = true;
-      errorEl.hidden = true;
-      abrirDialogo(modal);
-    });
-    modal.querySelector("#deposito-close").addEventListener("click", cerrar);
-    modal.querySelector("#deposito-cerrar-ok").addEventListener("click", cerrar);
-    modal.addEventListener("click", function (e) { if (e.target === modal) cerrar(); });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && !modal.hidden) cerrar();
+    abrirBtn.addEventListener("click", function () {
+      // La fecha se pone al abrir, no al cargar la página: es la fecha
+      // del aviso, no la de la visita.
+      var fechaEl = card.querySelector("#transferencia-fecha");
+      if (fechaEl) {
+        fechaEl.textContent = "Aviso del " + new Date().toLocaleDateString("es-PE", {
+          day: "numeric", month: "long", year: "numeric", timeZone: "America/Lima",
+        }) + ".";
+      }
+      paso1.hidden = true;
+      paso2.hidden = false;
+      mensajeEl.focus();
     });
 
     // Misma compresión que la lista de regalos: una foto de celular sin
@@ -982,7 +980,7 @@
       });
     }
 
-    var comprobanteDataUrl = "";
+    var constanciaDataUrl = "";
     fileInput.addEventListener("change", function () {
       var file = fileInput.files && fileInput.files[0];
       if (!file) return;
@@ -990,21 +988,28 @@
       uploadLabel.textContent = "Cargando…";
       comprimirImagen(file)
         .then(function (dataUrl) {
-          comprobanteDataUrl = dataUrl;
+          constanciaDataUrl = dataUrl;
           uploadLabel.textContent = "✓ " + file.name;
           uploadLabel.classList.add("has-file");
         })
         .catch(function () {
-          comprobanteDataUrl = "";
+          constanciaDataUrl = "";
           uploadLabel.textContent = "No se pudo leer esa imagen, intenta con otra";
           uploadLabel.classList.remove("has-file");
         });
     });
 
-    submitBtn.addEventListener("click", function () {
+    enviarBtn.addEventListener("click", function () {
+      var mensaje = mensajeEl.value.trim();
+      if (!mensaje) {
+        errorEl.textContent = "Escríbeles un mensaje, aunque sea corto — es lo que les llega.";
+        errorEl.hidden = false;
+        mensajeEl.focus();
+        return;
+      }
       errorEl.hidden = true;
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Enviando…";
+      enviarBtn.disabled = true;
+      enviarBtn.textContent = "Enviando…";
 
       var url = (W.rsvp && W.rsvp.apiUrl) || "";
       fetchConTimeout(url, {
@@ -1015,38 +1020,29 @@
           regalo_id: "deposito",
           nombre: nombreInvitado,
           monto: 0,
-          mensaje: "",
-          comprobante_base64: comprobanteDataUrl || "",
+          mensaje: mensaje,
+          comprobante_base64: constanciaDataUrl || "",
           comprobante_nombre: (nombreInvitado || "invitado").replace(/\s+/g, "-").toLowerCase(),
         }),
       }, 45000)
         .then(function (r) { return r.json().catch(function () { throw new Error("respuesta inesperada"); }); })
         .then(function (data) {
           if (data && data.error) throw new Error(data.error);
-          var primerNombre = nombreInvitado ? nombreInvitado.split(" ")[0] : "";
-          okMsg.textContent = primerNombre
-            ? "Ya lo anotamos, " + primerNombre + ". Gracias de corazón — nos vemos en la boda."
-            : "Ya lo anotamos. Gracias de corazón — nos vemos en la boda.";
-          paso1.hidden = true;
-          okBlock.hidden = false;
+          acuseEl.textContent = "Ya se lo hicimos saber a André y Krisli" +
+            (constanciaDataUrl ? ", con tu constancia adjunta." : ".") +
+            " Gracias de corazón.";
+          paso2.hidden = true;
+          paso3.hidden = false;
         })
         .catch(function (err) {
-          console.error("No se pudo registrar el depósito:", err);
-          errorEl.textContent = "No pudimos avisarles — parece un problema de conexión. " +
-            "Prueba de nuevo en un momento; tu depósito ya llegó igual, esto es solo el aviso.";
+          console.error("No se pudo enviar el aviso de transferencia:", err);
+          errorEl.textContent = "No pudimos enviarlo — parece un problema de conexión. " +
+            "Prueba de nuevo en un momento; tu transferencia ya llegó igual, esto es solo el aviso.";
           errorEl.hidden = false;
         })
         .then(function () {
-          submitBtn.disabled = false;
-          submitBtn.textContent = etiquetaEnvio;
-          // Si vuelve a abrir para registrar otro, el área de la captura
-          // tiene que estar limpia y no mostrando el archivo anterior.
-          if (okBlock.hidden === false) {
-            comprobanteDataUrl = "";
-            fileInput.value = "";
-            uploadLabel.innerHTML = etiquetaSubida;
-            uploadLabel.classList.remove("has-file");
-          }
+          enviarBtn.disabled = false;
+          enviarBtn.textContent = etiquetaEnvio;
         });
     });
   }
