@@ -58,14 +58,14 @@ window.WEDDING = {
     apiUrl: "https://script.google.com/macros/s/AKfycbx_mBldIKxpTDNUtRX-de-pOnkgwlM0YNTIvjzEreXGqPIRiOZcATPO7tjZsT_O5hfh/exec",
   },
 
+  // Solo referencia: ningún script lee este bloque. Los datos de pago que
+  // ve el invitado están escritos en index.html (mesa de regalos) y en
+  // regalos.html (cómo aportar). Si cambian, actualizar los tres lugares.
   gifts: {
-    yape: { number: "+51 987 654 321", holder: "Krisli", holderPending: true },
-    bank: {
-      soles: "191-0000000-0-00",
-      cci: "002-191-000000000000-00",
-      bankNamePending: true,
-    },
-    giftListUrl: null,
+    titular: "André Leon",
+    yape: "992770777",
+    bcp: { soles: "19111596053083", cci: "00219111159605308355" },
+    interbank: { soles: "8983225047822", cci: "00389801322504782240" },
   },
 
   // Lo mismo que dice la sección "Código de vestimenta" de index.html —

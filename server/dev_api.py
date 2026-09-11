@@ -164,19 +164,42 @@ class Handler(SimpleHTTPRequestHandler):
 
         if not data.get("nombre") or not data.get("asistencia"):
             return self._json(400, {"error": "faltan campos requeridos"})
+        # Mismas reglas que doPost en docs/apps-script/Code.gs.
+        asistencia = str(data.get("asistencia")).strip()
+        if asistencia not in ("si", "no"):
+            return self._json(400, {"error": "respuesta de asistencia no válida"})
+        nombre = str(data.get("nombre")).strip()[:120]
+        try:
+            num = int(data.get("num_asistentes"))
+        except (TypeError, ValueError):
+            num = -1
+        if codigo:
+            nombre = load_guests()[codigo]["nombre"]
+            if num < 0:
+                num = (1 + load_guests()[codigo]["acompanantes_permitidos"]) if asistencia == "si" else 0
+        elif num < 0:
+            num = 1 if asistencia == "si" else 0
+        else:
+            num = min(num, 10)
+        limpio = {"codigo": codigo, "nombre": nombre, "num_asistentes": str(num), "asistencia": asistencia}
+        ahora = datetime.now(timezone.utc).isoformat()
 
         with _lock:
             rows = load_responses()
-            key = codigo or data.get("nombre")
-            idx = next((i for i, r in enumerate(rows) if (r.get("codigo") or r.get("nombre")) == key), None)
-            if idx is not None:
-                # Reemplaza la fila entera (no la mezcla): si algún campo ya
-                # no viaja, debe desaparecer, no quedarse con el valor viejo.
-                data["enviado_en"] = rows[idx].get("enviado_en", data.get("enviado_en"))
-                data["actualizado_en"] = datetime.now(timezone.utc).isoformat()
-                rows[idx] = data
+            # Sin código solo se reemplazan filas que tampoco tienen código:
+            # alguien sin link no puede pisar la respuesta de un invitado.
+            if codigo:
+                idx = next((i for i, r in enumerate(rows) if r.get("codigo") == codigo), None)
             else:
-                rows.append(data)
+                idx = next((i for i, r in enumerate(rows) if not r.get("codigo") and r.get("nombre") == nombre), None)
+            if idx is not None:
+                limpio["enviado_en"] = rows[idx].get("enviado_en", ahora)
+                limpio["actualizado_en"] = ahora
+                rows[idx] = limpio
+            else:
+                limpio["enviado_en"] = ahora
+                limpio["actualizado_en"] = ""
+                rows.append(limpio)
             save_responses(rows)
 
         return self._json(200, {"ok": True})
@@ -205,7 +228,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "ese regalo ya no existe"})
 
         comprobante_url = ""
-        b64 = data.get("comprobante_base64")
+        b64 = data.get("comprobante_base64") or ""
+        if len(b64) > 6 * 1024 * 1024:
+            return self._json(400, {"error": "la imagen es demasiado pesada"})
+        if b64.startswith("data:") and not b64.startswith("data:image/"):
+            return self._json(400, {"error": "la constancia tiene que ser una imagen"})
         if b64:
             if "," in b64:
                 b64 = b64.split(",", 1)[1]

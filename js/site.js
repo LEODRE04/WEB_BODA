@@ -728,7 +728,10 @@
         asistentesInput.value = 1 + (Number(guest.acompanantes_permitidos) || 0);
 
         if (guest.respuesta) {
-          if (guest.respuesta.asistencia) {
+          // Solo "si"/"no": el valor viene de la hoja y va dentro de un
+          // selector; cualquier otra cosa (p. ej. con comillas) lanzaba un
+          // SyntaxError y dejaba la invitación de ese invitado rota.
+          if (guest.respuesta.asistencia === "si" || guest.respuesta.asistencia === "no") {
             var radio = form.querySelector('input[name="asistencia"][value="' + guest.respuesta.asistencia + '"]');
             if (radio) radio.checked = true;
           }

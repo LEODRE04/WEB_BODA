@@ -43,10 +43,31 @@ var SHEET_APORTES = "Aportes";
 
 var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "enviado_en", "actualizado_en"];
 var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
-// Id reservado para el botón "Ya hice mi depósito" de la mesa de regalos:
-// un aviso de que alguien depositó por Yape o transferencia, que no
-// corresponde a ningún regalo de la lista.
+// Id reservado para el aviso "Ya transferí" de la mesa de regalos: alguien
+// avisa que depositó por Yape o transferencia, sin que corresponda a
+// ningún regalo de la lista.
 var APORTE_DEPOSITO = "deposito";
+
+// Topes a lo que puede escribir un invitado. El frontend ya comprime las
+// capturas a 1000px (~100-300 KB), así que el tope de la imagen solo
+// frena envíos anómalos que llenarían el Drive.
+var MAX_NOMBRE = 120;
+var MAX_MENSAJE = 1000;
+var MAX_COMPROBANTE_B64 = 6 * 1024 * 1024;
+
+// Inyección de fórmulas: en Sheets, un texto que empieza con = + - @ se
+// guarda como FÓRMULA, no como texto. Un "mensaje para los novios" como
+// =IMPORTXML("https://...";...) se ejecutaría al abrir la hoja y podría
+// sacar datos hacia afuera. El apóstrofo inicial fuerza texto literal
+// (no se ve en la celda). Solo se aplica a strings: los números
+// (num_asistentes, monto) se escriben tal cual.
+function celda(v, max) {
+  if (typeof v !== "string") return v == null ? "" : v;
+  var s = v.trim();
+  if (max && s.length > max) s = s.slice(0, max);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return s;
+}
 
 // Carpeta de Drive donde se guardan las capturas de las transferencias.
 // Se crea sola la primera vez (no hay que crearla a mano) y queda
@@ -112,8 +133,18 @@ function doPost(e) {
     if (!data.nombre || !data.asistencia) {
       return jsonOut({ error: "faltan campos requeridos" });
     }
+    // Solo "si" o "no". Antes se guardaba lo que llegara, y el frontend
+    // usa este valor dentro de un selector CSS al volver a cargar la
+    // invitación: un valor raro (con comillas) rompía la página de ese
+    // invitado.
+    var asistencia = String(data.asistencia).trim();
+    if (asistencia !== "si" && asistencia !== "no") {
+      return jsonOut({ error: "respuesta de asistencia no válida" });
+    }
 
-    var codigo = (data.codigo || "").trim();
+    var codigo = String(data.codigo || "").trim();
+    var nombre = String(data.nombre).trim().slice(0, MAX_NOMBRE);
+    var num = parseInt(data.num_asistentes, 10);
     if (codigo) {
       var guest = findGuest(codigo);
       if (!guest) return jsonOut({ error: "código de invitado no reconocido" });
@@ -121,12 +152,27 @@ function doPost(e) {
       // red de seguridad que una validación real, por si alguien lo edita a
       // mano en el navegador.
       var esperado = 1 + guest.acompanantes_permitidos;
-      if (Number(data.num_asistentes || esperado) > esperado) {
+      if (isNaN(num) || num < 0) num = asistencia === "si" ? esperado : 0;
+      if (num > esperado) {
         return jsonOut({ error: "supera los asistentes de tu invitación (" + esperado + ")" });
       }
+      // Con código, el nombre es el de la hoja de Invitados, no el que
+      // mande el navegador.
+      nombre = String(guest.nombre).trim();
+    } else {
+      if (isNaN(num) || num < 0) num = asistencia === "si" ? 1 : 0;
+      if (num > 10) num = 10;
     }
 
-    upsertRespuesta(codigo, data);
+    // Se arma la fila con los campos permitidos y nada más: antes se
+    // copiaba el objeto del navegador entero, y con él las fechas
+    // enviado_en/actualizado_en, que cualquiera podía falsear.
+    upsertRespuesta(codigo, {
+      codigo: codigo,
+      nombre: nombre,
+      num_asistentes: num,
+      asistencia: asistencia,
+    });
     return jsonOut({ ok: true });
   } catch (err) {
     return errorReintentable(err);
@@ -214,12 +260,11 @@ function upsertRespuesta(codigo, data) {
   lock.waitLock(LOCK_ESPERA_MS);
   try {
     var sheet = requireSheet(SHEET_RESPUESTAS);
-    var key = codigo || data.nombre;
-    var existing = key ? findRespuestaByKey(sheet, key) : null;
+    var existing = findRespuestaExistente(sheet, codigo, data.nombre);
 
-    var row = RESPUESTA_COLUMNAS.map(function (col) { return data[col] || ""; });
+    var row = RESPUESTA_COLUMNAS.map(function (col) { return celda(data[col], MAX_NOMBRE); });
     var ahora = new Date().toISOString();
-    if (!data.enviado_en) row[RESPUESTA_COLUMNAS.indexOf("enviado_en")] = ahora;
+    row[RESPUESTA_COLUMNAS.indexOf("enviado_en")] = ahora;
 
     if (existing) {
       row[RESPUESTA_COLUMNAS.indexOf("enviado_en")] = existing.data.enviado_en; // conserva la fecha original
@@ -233,18 +278,22 @@ function upsertRespuesta(codigo, data) {
   }
 }
 
-// Busca por código (columna A) y, si no aparece, por nombre (columna B) —
-// para las confirmaciones sin ?codigo=. Dos lecturas de una columna en vez
-// de una de la hoja entera.
-function findRespuestaByKey(sheet, key) {
-  var fila = buscarFilaPorClave(sheet, key);
-  if (fila) return leerRespuestaEnFila(sheet, fila);
-
+// Con código, busca por código (columna A). Sin código, busca por nombre
+// (columna B) pero SOLO entre las filas que tampoco tienen código. Antes
+// buscaba por nombre en todas: alguien sin link podía pisar la respuesta
+// de un invitado real con solo escribir su nombre en el formulario.
+function findRespuestaExistente(sheet, codigo, nombre) {
+  if (codigo) {
+    var fila = buscarFilaPorClave(sheet, codigo);
+    return fila ? leerRespuestaEnFila(sheet, fila) : null;
+  }
   var ultimaFila = sheet.getLastRow();
   if (ultimaFila < 2) return null;
-  var nombres = sheet.getRange(2, 2, ultimaFila - 1, 1).getValues();
-  for (var i = 0; i < nombres.length; i++) {
-    if (String(nombres[i][0]).trim() === key) return leerRespuestaEnFila(sheet, i + 2);
+  var ab = sheet.getRange(2, 1, ultimaFila - 1, 2).getValues();
+  for (var i = 0; i < ab.length; i++) {
+    if (!String(ab[i][0]).trim() && String(ab[i][1]).trim() === nombre) {
+      return leerRespuestaEnFila(sheet, i + 2);
+    }
   }
   return null;
 }
@@ -338,6 +387,14 @@ function handleAporte(data) {
 
   if (!regaloId) return jsonOut({ error: "falta el regalo" });
 
+  // La captura ya viene comprimida desde el frontend; algo de este tamaño
+  // no la manda la página, y sin tope se podría llenar el Drive.
+  var b64 = String(data.comprobante_base64 || "");
+  if (b64.length > MAX_COMPROBANTE_B64) return jsonOut({ error: "la imagen es demasiado pesada" });
+  if (b64 && b64.indexOf("data:") === 0 && b64.indexOf("data:image/") !== 0) {
+    return jsonOut({ error: "la constancia tiene que ser una imagen" });
+  }
+
   // El aviso de depósito no va contra un regalo de la lista y no pide
   // nada al invitado: el nombre sale de su ?codigo= (vacío si entró sin
   // link) y no hay monto. Por eso se salta las tres validaciones de
@@ -356,9 +413,9 @@ function handleAporte(data) {
   // si no, dos personas aportando a la vez se quedarían esperando una a
   // la otra sin necesidad.
   var comprobanteUrl = "";
-  if (data.comprobante_base64) {
+  if (b64) {
     try {
-      comprobanteUrl = guardarComprobante(data.comprobante_base64, data.comprobante_nombre, nombre);
+      comprobanteUrl = guardarComprobante(b64, data.comprobante_nombre, nombre.slice(0, MAX_NOMBRE));
     } catch (err) {
       // Un problema guardando la captura no debería tumbar todo el
       // aporte — se guarda igual, sin el link, y ya lo piden a mano por
@@ -371,10 +428,10 @@ function handleAporte(data) {
   lock.waitLock(LOCK_ESPERA_MS);
   try {
     requireSheet(SHEET_APORTES).appendRow([
-      regaloId,
-      nombre,
-      monto,
-      String(data.mensaje || ""),
+      celda(regaloId),
+      celda(nombre, MAX_NOMBRE),
+      esDeposito ? 0 : monto,
+      celda(String(data.mensaje || ""), MAX_MENSAJE),
       comprobanteUrl,
       new Date().toISOString(),
     ]);
@@ -396,11 +453,14 @@ function guardarComprobante(base64, nombreArchivo, nombreAportante) {
   if (base64.indexOf("base64") !== -1 && comma !== -1) base64 = base64.slice(comma + 1);
 
   var bytes = Utilities.base64Decode(base64);
-  var blob = Utilities.newBlob(bytes, "image/jpeg", (nombreArchivo || "comprobante") + ".jpg");
+  var blob = Utilities.newBlob(bytes, "image/jpeg", String(nombreArchivo || "comprobante").slice(0, 80) + ".jpg");
   var folder = getOrCreateCarpetaComprobantes();
   var file = folder.createFile(blob);
-  file.setName(nombreAportante + " — " + file.getName());
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  file.setName((nombreAportante || "Sin nombre") + " — " + file.getName());
+  // Antes cada captura quedaba "cualquiera con el enlace puede ver": son
+  // constancias bancarias (nombre, banco, parte del número de cuenta). El
+  // archivo hereda los permisos de la carpeta, que se comparte solo con
+  // quienes ya pueden editar la hoja (ver asegurarCarpetaPrivada).
   return file.getUrl();
 }
 
@@ -409,14 +469,39 @@ function getOrCreateCarpetaComprobantes() {
   var folderId = props.getProperty("carpeta_comprobantes_id");
   if (folderId) {
     try {
-      return DriveApp.getFolderById(folderId);
+      var existente = DriveApp.getFolderById(folderId);
+      asegurarCarpetaPrivada(existente, props);
+      return existente;
     } catch (err) {
       // La carpeta se borró o ya no es accesible — se crea otra abajo.
     }
   }
   var folder = DriveApp.createFolder(CARPETA_COMPROBANTES);
   props.setProperty("carpeta_comprobantes_id", folder.getId());
+  asegurarCarpetaPrivada(folder, props);
   return folder;
+}
+
+// Una sola vez por carpeta: la comparte con los editores de la hoja (así
+// la pareja puede abrir las constancias desde cualquiera de sus cuentas)
+// y le quita el acceso público a las capturas que se subieron antes de
+// este cambio, que quedaban abiertas a cualquiera con el enlace.
+function asegurarCarpetaPrivada(folder, props) {
+  var marca = "carpeta_privada_" + folder.getId();
+  if (props.getProperty(marca)) return;
+  try {
+    folder.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  } catch (err) {}
+  try {
+    SpreadsheetApp.getActiveSpreadsheet().getEditors().forEach(function (u) {
+      try { folder.addViewer(u); } catch (e) {} // el dueño ya tiene acceso
+    });
+  } catch (err) {}
+  var archivos = folder.getFiles();
+  while (archivos.hasNext()) {
+    try { archivos.next().setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (err) {}
+  }
+  props.setProperty(marca, "1");
 }
 
 function jsonOut(obj) {
