@@ -373,6 +373,7 @@ body { background: var(--color-neutral-100); }
    y se distingue a primera vista de lo que el invitado ya escribió. */
 .transferencia-card textarea.input::placeholder {
   font-family: var(--font-heading); font-style: italic; font-weight: 400;
+  font-size: 14.5px;
   color: color-mix(in srgb, var(--color-text) 40%, transparent);
 }
 .transferencia-card textarea.input:hover {
@@ -473,6 +474,10 @@ body { background: var(--color-neutral-100); }
   .transferencia-obligatorio::before,
   .transferencia-opcional::before { content: "· "; }
   .transferencia-obligatorio, .transferencia-opcional { white-space: nowrap; }
+  /* El texto de guía heredaba los 16px del campo y, en la serif itálica,
+     se veía grande y ocupaba dos líneas enteras. Achicarlo no reactiva el
+     zoom de Safari: ese depende del tamaño del campo, que sigue en 16px. */
+  .transferencia-card textarea.input::placeholder { font-size: 13.5px; }
 }
 /* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
    disponible en celular (envelope-card + su padding le dejan bastante
