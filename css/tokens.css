@@ -262,3 +262,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 .card, .dialog { border-radius: calc(var(--radius-lg) * 1.15); }
 .btn, .tag, .seg, .input { border-radius: 999px; }
 .input { padding-inline: 14px; }
+/* La píldora es para controles de una línea. En un textarea el 999px
+   deja los extremos abombados, como una cápsula; un campo de varias
+   líneas lleva radio contenido y aire de texto de verdad. */
+textarea.input { border-radius: 14px; padding: 12px 14px; line-height: 1.55; }

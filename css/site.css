@@ -347,16 +347,62 @@ body { background: var(--color-neutral-100); }
   color: color-mix(in srgb, var(--color-text) 50%, transparent) !important;
 }
 .transferencia-card .field { margin-top: 14px; }
-.transferencia-card textarea.input { resize: vertical; font-family: inherit; }
+/* Rótulo a la izquierda y la marca (obligatorio / opcional) a la
+   derecha, más discreta que el texto en negrita que había pegado al
+   rótulo. :not(.gift-upload) porque la zona de la constancia también es
+   un <label> hijo directo del .field. */
+.transferencia-card .field > label:not(.gift-upload) {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin-bottom: 7px; font-size: 12.5px; font-weight: 500; color: var(--color-accent-2-800);
+}
+/* El mensaje se escribe sobre "papel": fondo casi blanco sobre la
+   tarjeta salvia (el beige de superficie que tenía peleaba con el
+   verde), borde fino teñido de salvia y radio contenido. El foco es un
+   halo suave en vez del doble anillo borde + outline del navegador.
+   16px y no 15: con menos, Safari de iPhone hace zoom al tocar el campo. */
+.transferencia-card textarea.input {
+  resize: vertical; min-height: 96px; padding: 13px 15px;
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  background: var(--color-bg);
+  border: 1px solid color-mix(in srgb, var(--color-accent-2) 28%, transparent);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, #3d472b 6%, transparent);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+/* El texto de ejemplo en la serif itálica: tono de nota escrita a mano,
+   y se distingue a primera vista de lo que el invitado ya escribió. */
+.transferencia-card textarea.input::placeholder {
+  font-family: var(--font-heading); font-style: italic; font-weight: 400;
+  color: color-mix(in srgb, var(--color-text) 40%, transparent);
+}
+.transferencia-card textarea.input:hover {
+  border-color: color-mix(in srgb, var(--color-accent-2) 55%, transparent);
+}
+.transferencia-card textarea.input:focus {
+  outline: none; border-color: var(--color-accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-2) 24%, transparent);
+}
+/* Estado de error en el propio campo (aria-invalid lo pone site.js al
+   intentar enviar sin mensaje), además del texto de abajo. */
+.transferencia-card textarea.input[aria-invalid="true"] {
+  border-color: var(--color-accent-600);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-600) 16%, transparent);
+}
+/* La zona de la constancia con el mismo radio que el mensaje, para que
+   los dos campos se lean como un solo formulario. */
+.transferencia-card .gift-upload {
+  border-radius: 12px; background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  transition: border-color .2s ease, color .2s ease;
+}
 /* El mensaje es obligatorio (así lo pidió André en el diseño), y la
    marca va en terracota para que se note frente al "(opcional)" de la
    constancia, que es gris. */
 .transferencia-obligatorio {
-  font-weight: 600; text-transform: none; letter-spacing: 0;
+  font-size: 11.5px; font-weight: 500; text-transform: none; letter-spacing: 0;
   color: var(--color-accent-700);
 }
 .transferencia-opcional {
-  font-weight: 400; text-transform: none; letter-spacing: 0;
+  font-size: 11.5px; font-weight: 400; text-transform: none; letter-spacing: 0;
   color: color-mix(in srgb, var(--color-text) 45%, transparent);
 }
 .transferencia-nota {
@@ -409,8 +455,24 @@ body { background: var(--color-neutral-100); }
   .gift-list-band-text p { margin-inline: auto; }
   .gift-list-band-btn { width: 100%; }
   .transferencia-paso { justify-content: center; text-align: center; }
-  .transferencia-gracias { text-align: left; }
+  /* El paso 1 va centrado (pregunta + botón), pero en los pasos de
+     agradecimiento el título y el formulario van a la izquierda: el
+     ícono también, o queda centrado sobre un bloque alineado a la
+     izquierda y la tarjeta se ve descuadrada. */
+  .transferencia-gracias { text-align: left; justify-content: flex-start; }
   .transferencia-paso > .btn { width: 100%; }
+  /* En celular el formulario queda angosto (se suman el relleno de la
+     sección, el de la tarjeta blanca y el de esta), así que la tarjeta
+     salvia cede algo de relleno lateral. */
+  .transferencia-card { padding: 18px 16px; }
+  /* Con la marca a la derecha (space-between), "Constancia de la
+     transferencia" se partía en dos líneas para dejarle sitio a
+     "opcional". En celular la marca va en línea, a continuación del
+     rótulo, y si no entra baja entera a la línea siguiente. */
+  .transferencia-card .field > label:not(.gift-upload) { display: block; }
+  .transferencia-obligatorio::before,
+  .transferencia-opcional::before { content: "· "; }
+  .transferencia-obligatorio, .transferencia-opcional { white-space: nowrap; }
 }
 /* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
    disponible en celular (envelope-card + su padding le dejan bastante

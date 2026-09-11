@@ -946,6 +946,14 @@
       });
     }
 
+    // En cuanto escribe algo, el campo deja de marcarse como error.
+    mensajeEl.addEventListener("input", function () {
+      if (mensajeEl.value.trim()) {
+        mensajeEl.removeAttribute("aria-invalid");
+        errorEl.hidden = true;
+      }
+    });
+
     abrirBtn.addEventListener("click", function () {
       // La fecha se pone al abrir, no al cargar la página: es la fecha
       // del aviso, no la de la visita.
@@ -1007,6 +1015,7 @@
       if (!mensaje) {
         errorEl.textContent = "Escríbeles un mensaje, aunque sea corto — es lo que les llega.";
         errorEl.hidden = false;
+        mensajeEl.setAttribute("aria-invalid", "true");
         mensajeEl.focus();
         return;
       }
