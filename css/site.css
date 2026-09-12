@@ -1081,8 +1081,10 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 }
 .whatsapp-fab:active { background: #17a54c; transform: scale(.96); }
 
-/* — pétalos cayendo (decorativo) — forma dibujada con CSS (óvalo con dos
-   esquinas rectas = silueta de pétalo), sin imágenes. Cada pétalo trae sus
+/* — hojas cayendo (decorativo) — forma dibujada con CSS (óvalo con dos
+   esquinas rectas = silueta de hoja/pétalo), sin imágenes. El color es un
+   verde tenue tomado de la paleta (--color-accent-100/300/400), así que
+   sigue al tema solo: si cambia la paleta, cambian las hojas. Cada pétalo trae sus
    propios --size/--duration/--delay/--sway/--opacity puestos por JS
    (initPetals en site.js) para que no caigan todos igual — ver
    docs/FOTOS.md si algún día se preferiría una imagen real en su lugar. */
@@ -1090,7 +1092,10 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 .petal {
   position: absolute; top: -8vh; left: 0;
   width: var(--size, 14px); height: var(--size, 14px);
-  background: linear-gradient(135deg, #fdf0ee, #f3c9c3 55%, #e29891);
+  background: linear-gradient(135deg,
+    var(--color-accent-100, #eef2e6),
+    var(--color-accent-300, #c3d1b4) 55%,
+    var(--color-accent-400, #9fb28e));
   border-radius: 100% 0 100% 0;
   opacity: var(--opacity, .7);
   box-shadow: 0 1px 3px color-mix(in srgb, #2f4429 12%, transparent);
@@ -1108,25 +1113,26 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .petals { display: none; }
 }
 
-/* — marco floral: ramo acuarela terracota/durazno + hojas salvia y doradas
+/* — marco floral: ramo acuarela de rosas blancas y eucalipto
    (img/floral-corner.png, fondo transparente) en las esquinas superiores
    de una tarjeta, espejado para el lado derecho. Agregar la clase
    "floral-frame" a cualquier tarjeta para aplicarlo ahí también — no
-   requiere tocar el CSS. El recuadro es casi cuadrado (relación real del
-   ramo, 240×238) — antes era más alto que ancho, ajustado al asset previo.
-   El ramo en el asset original carga hacia la esquina superior derecha del
-   recuadro, con hojas sueltas hacia la inferior izquierda — por eso el
-   lado izquierdo va espejado (scaleX) para que lo tupido del ramo quede
-   pegado a la esquina real de la tarjeta (como un marco) y las hojas
-   sueltas caigan hacia adentro, no al revés. — */
+   requiere tocar el CSS. El recuadro sigue la relación real del ramo
+   (340×229, apaisado); el asset anterior era casi cuadrado, de ahí que
+   estas medidas cambiaran.
+   Este ramo carga hacia la esquina superior IZQUIERDA, con las ramas de
+   eucalipto abriéndose a la derecha — al revés que el asset anterior. Por
+   eso ahora el espejado (scaleX) va en el lado DERECHO: así lo tupido de
+   las rosas queda pegado a la esquina real de la tarjeta en ambos lados y
+   las ramas caen hacia adentro, no al revés. — */
 .floral-frame { position: relative; }
 .floral-frame::before, .floral-frame::after {
-  content: ""; position: absolute; top: -22px; width: 106px; height: 105px;
+  content: ""; position: absolute; top: -22px; width: 140px; height: 95px;
   background: url('../img/floral-corner.png') no-repeat center / contain;
   pointer-events: none; z-index: 1;
 }
-.floral-frame::before { left: -22px; transform: scaleX(-1); }
-.floral-frame::after { right: -22px; }
+.floral-frame::before { left: -22px; }
+.floral-frame::after { right: -22px; transform: scaleX(-1); }
 
 /* — en la portada (el sobre), el marco cuelga de .envelope-gate-inner,
    que es angosto (max-width 440px) y queda centrado en toda la pantalla
@@ -1140,13 +1146,13 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 @media (min-width: 700px) {
   .envelope-gate .floral-frame::before,
   .envelope-gate .floral-frame::after {
-    position: fixed; top: 8%; width: 132px; height: 131px;
+    position: fixed; top: 8%; width: 172px; height: 116px;
   }
   .envelope-gate .floral-frame::before { left: 5%; }
   .envelope-gate .floral-frame::after { right: 5%; }
 }
 @media (max-width: 480px) {
-  .floral-frame::before, .floral-frame::after { width: 68px; height: 67px; top: -11px; }
+  .floral-frame::before, .floral-frame::after { width: 92px; height: 62px; top: -11px; }
   .floral-frame::before { left: -11px; }
   .floral-frame::after { right: -11px; }
 }
