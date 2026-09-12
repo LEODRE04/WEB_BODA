@@ -301,6 +301,12 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 }
 .envelope-to-pases b {
   font-family: var(--font-heading); font-size: 15px; letter-spacing: 0;
+  /* Cormorant trae cifras elzevirianas por defecto y ahí el 1 es un
+     palo con serifas, idéntico a una I — y al lado de "PASES" en
+     mayúsculas se leía como letra, no como número. lining-nums pide
+     las cifras de caja alta del mismo tipo (con banderilla y base),
+     así que se arregla el glifo sin cambiar de tipografía. */
+  font-variant-numeric: lining-nums;
 }
 
 /* Antes era un link de texto de 14px sin fondo — se perdía debajo del

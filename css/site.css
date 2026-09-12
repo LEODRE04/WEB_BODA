@@ -124,7 +124,10 @@ body { background: var(--color-neutral-100); }
   border-radius: 999px; padding: 4px 12px;
   font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
 }
-.hero-greeting-pases b { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0; }
+.hero-greeting-pases b {
+  font-family: var(--font-heading); font-size: 14px; letter-spacing: 0;
+  font-variant-numeric: lining-nums; /* mismo caso que .envelope-to-pases b */
+}
 /* Frase de bienvenida bajo la fecha/lugar — el detalle cálido que antes
    iba apretado dentro de la franja del saludo. */
 .hero-welcome {
@@ -220,42 +223,19 @@ body { background: var(--color-neutral-100); }
 .welcome-inner { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: center; }
 .welcome .photo { border-radius: 0 0 200px 200px; height: 420px; box-shadow: var(--shadow-lg); }
 .welcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
-/* Los textos de ceremonia y recepción no miden lo mismo, así que la foto
-   y el botón de cada columna quedaban a distinta altura y las dos
-   tarjetas se veían descuadradas. Cada columna es una columna flex y la
-   foto se empuja al fondo con margin-top:auto, de modo que las dos fotos
-   —y los dos botones— arrancan a la misma altura sin importar cuánto
-   texto tenga cada lado. */
-.welcome-grid > div { display: flex; flex-direction: column; }
-.welcome-grid .welcome-venue-photo { margin-top: auto; }
 .welcome-item { display: flex; align-items: center; gap: 10px; }
 .welcome-item .dot { width: 34px; height: 34px; border-radius: 999px; flex: none; }
 .welcome-item .dot.accent { background: var(--color-accent-200); }
 .welcome-item .dot.sage { background: var(--color-accent-2-200); }
 
-/* — foto de referencia del lugar (ceremonia/recepción): tarjeta chica
-   debajo de la descripción — notoria sin ser una foto grande/protagónica.
-   En celular .welcome-grid pasa a una sola columna (ver el media query de
-   abajo), así que cada foto deja de compartir fila con la otra y se ve a
-   todo el ancho de la tarjeta — por eso ahí va más alta, no más baja
-   (antes bajaba a 110px justo en celular, que es al revés de lo que
-   conviene). — */
-.welcome-venue-photo {
-  margin-top: 12px; border-radius: 18px; overflow: hidden; height: 140px;
-  box-shadow: var(--shadow-sm);
-}
-.welcome-venue-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 860px) {
   .welcome-inner { grid-template-columns: 1fr; }
   .welcome .photo { height: 280px; border-radius: 24px; }
   .welcome-grid { grid-template-columns: 1fr; }
-  .welcome-venue-photo { height: 200px; }
 }
-@media (max-width: 480px) { .welcome-venue-photo { height: 170px; } }
-
 /* — .timeline-desc: se quedó del itinerario (ya no existe como sección),
-   pero sigue en uso en "Bienvenida" para la descripción bajo la foto de
-   ceremonia/recepción (.welcome-venue-photo). — */
+   pero sigue en uso en "Bienvenida" para la descripción de ceremonia y
+   recepción. — */
 .timeline-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
 
 /* — detalles (cuándo y dónde) — */
@@ -1211,7 +1191,10 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   border-radius: 999px; padding: 6px 18px; width: fit-content; margin: 0 auto 22px;
   font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
 }
-.pase-pases strong { font-family: var(--font-heading); font-size: 18px; text-transform: none; letter-spacing: 0; }
+.pase-pases strong {
+  font-family: var(--font-heading); font-size: 18px; text-transform: none; letter-spacing: 0;
+  font-variant-numeric: lining-nums; /* mismo caso que .envelope-to-pases b */
+}
 .pase-date-block {
   background: var(--color-accent); color: #fff; border-radius: 20px; padding: 22px 20px;
   text-align: center; margin: 0 0 20px;
