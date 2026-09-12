@@ -1,6 +1,7 @@
 /* theme-elegante.css — prueba de diseño inspirada en festejabonito.com
    (paleta dorado/marfil, tarjetas con más aire y sombra, sobre de
-   apertura). La tipografía se queda la original (Caprasimo/Figtree) —
+   apertura). La tipografía la define tokens.css (Parisienne manuscrita
+   para nombres y títulos, Cormorant Garamond para todo lo demás) —
    solo cambia color/forma. NO copia ningún asset de esa web (ni fotos,
    ni ilustraciones florales) — es una interpretación propia sobre la
    maqueta que ya existía.
@@ -11,52 +12,54 @@
    tipografía y algunos acabados (sombras, viñetas). */
 
 :root {
-  /* — paleta: marfil cálido + terracota + verde follaje oscuro — */
-  --color-bg: #fdfaf3;
-  --color-surface: #f6ecd8;
-  --color-text: #4a3826;
-  --color-divider: color-mix(in srgb, var(--color-text) 16%, transparent);
+  /* — paleta del bloque 11 de claude.ai/design: blanco de base, cremas y
+     arena en las bandas y los bordes, y una sola familia verde para
+     tinta y acentos. Reemplaza la de marfil + terracota. — */
+  --color-bg: #ffffff;
+  --color-surface: #f7f4ea;
+  --color-text: #364c2f;
+  --color-divider: color-mix(in srgb, #c9b894 65%, transparent);
 
-  --color-neutral-100: #fdfaf3;
-  --color-neutral-200: #f7f0e2;
-  --color-neutral-300: #ecdfc6;
-  --color-neutral-400: #d9c49a;
-  --color-neutral-500: #bfa676;
-  --color-neutral-600: #9c8459;
-  --color-neutral-700: #7a6544;
-  --color-neutral-800: #57492f;
-  --color-neutral-900: #372c1d;
+  /* cremas y arena: fondos de banda, tarjetas y bordes finos */
+  --color-neutral-100: #ffffff;
+  --color-neutral-200: #faf8f1;
+  --color-neutral-300: #f7f4ea;
+  --color-neutral-400: #f2ede0;
+  --color-neutral-500: #eae3d2;
+  --color-neutral-600: #c9b894;
+  --color-neutral-700: #a3936e;
+  --color-neutral-800: #7a6a45;
+  --color-neutral-900: #4a4132;
 
-  /* terracota medio — acento principal (antes dorado) */
-  --color-accent: #bc5a35;
-  --color-accent-100: #fbeae2;
-  --color-accent-200: #f6d2c0;
-  --color-accent-300: #eeb195;
-  --color-accent-400: #de8a66;
-  --color-accent-500: #cc6f49;
-  --color-accent-600: #bc5a35;
-  --color-accent-700: #96472a;
-  --color-accent-800: #6f351f;
-  --color-accent-900: #4a2314;
+  /* verde medio — acento principal: botones y franja de regalos */
+  --color-accent: #5a7350;
+  --color-accent-100: #eef2e6;
+  --color-accent-200: #dfe8d4;
+  --color-accent-300: #c3d1b4;
+  --color-accent-400: #9fb28e;
+  --color-accent-500: #7b9370;
+  --color-accent-600: #5a7350;
+  --color-accent-700: #4a6242;
+  --color-accent-800: #364c2f;
+  --color-accent-900: #24331f;
 
-  /* verde follaje oscuro — acento secundario (antes bronce) */
-  --color-accent-2: #4a5c34;
-  --color-accent-2-100: #e8ece0;
-  --color-accent-2-200: #d1dbc2;
-  --color-accent-2-300: #b0c093;
-  --color-accent-2-400: #869c66;
-  --color-accent-2-500: #647848;
-  --color-accent-2-600: #4a5c34;
-  --color-accent-2-700: #3a4828;
-  --color-accent-2-800: #2b361d;
-  --color-accent-2-900: #1c2412;
+  /* verde pleno — acento secundario: etiquetas pequeñas y tinta de apoyo */
+  --color-accent-2: #4a6242;
+  --color-accent-2-100: #eef2e6;
+  --color-accent-2-200: #dfe8d4;
+  --color-accent-2-300: #c3d1b4;
+  --color-accent-2-400: #9fb28e;
+  --color-accent-2-500: #6f8a63;
+  --color-accent-2-600: #4a6242;
+  --color-accent-2-700: #3f5439;
+  --color-accent-2-800: #364c2f;
+  --color-accent-2-900: #24331f;
 
-  /* tipografía: se queda la original (Caprasimo/Figtree, ver tokens.css) —
-     este tema solo toca color/sombras/forma, no letras */
+  /* tipografía: ver tokens.css (Parisienne + Cormorant Garamond) */
 
-  --shadow-sm: 0 1px 3px color-mix(in srgb, #372c1d 16%, transparent);
-  --shadow-md: 0 4px 16px color-mix(in srgb, #372c1d 14%, transparent);
-  --shadow-lg: 0 16px 40px color-mix(in srgb, #372c1d 20%, transparent);
+  --shadow-sm: 0 1px 3px color-mix(in srgb, #2f4429 14%, transparent);
+  --shadow-md: 0 4px 16px color-mix(in srgb, #2f4429 12%, transparent);
+  --shadow-lg: 0 16px 40px color-mix(in srgb, #2f4429 18%, transparent);
 }
 
 /* — viñeta "línea – punto – línea" sobre los antetítulos, solo donde el
@@ -185,7 +188,7 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   position: absolute; left: 14px; right: 14px; top: 30px; bottom: 26px;
   z-index: -1; background: var(--color-bg);
   border: 1px solid var(--color-divider); border-radius: 10px;
-  box-shadow: 0 -3px 14px color-mix(in srgb, #372c1d 18%, transparent);
+  box-shadow: 0 -3px 14px color-mix(in srgb, #2f4429 16%, transparent);
   display: flex; align-items: flex-start; justify-content: center;
   overflow: hidden;
   transition: transform .85s cubic-bezier(.22, 1, .36, 1),
@@ -261,7 +264,7 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   width: 58px; height: 58px; border-radius: 999px;
   background: var(--color-accent); color: #fff;
   display: flex; align-items: center; justify-content: center; z-index: 2;
-  font-family: var(--font-heading); font-size: 22px; box-shadow: var(--shadow-sm);
+  font-family: var(--font-script); font-size: 17px; box-shadow: var(--shadow-sm);
 }
 .envelope-gate.is-opening .envelope-flap { transform: rotateX(180deg); }
 
@@ -326,3 +329,30 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   .envelope-gate.is-unfolding .envelope-letter { transform: none; }
   .envelope-gate.is-unfolding .envelope-letter { opacity: 0; }
 }
+
+/* — tipografía manuscrita (bloque 11 de claude.ai/design) —
+   Parisienne se reserva a los nombres y a los títulos de sección. Todo
+   lo demás —botones, etiquetas, campos y cifras— se queda en Cormorant
+   Garamond, que es legible; poner números o botones en manuscrita era
+   justo lo que André no quería. Este bloque va al final del último CSS
+   que carga la página, así que gana sin tener que editar cada regla. — */
+.hero h1,
+.hero-amp span.amp,
+.section-title,
+.gift-list-band-title,
+.dresscode-message,
+.site-footer .names,
+.prayer-signature,
+.pase-heading,
+.pase-nombre,
+.nav-brand,
+.envelope-title,
+.envelope-letter-names,
+.envelope-to-name,
+.envelope-seal {
+  font-family: var(--font-script);
+  font-weight: 400;
+}
+/* La manuscrita tiene trazos altos y bajos muy largos: sin algo de aire
+   las mayúsculas de una línea chocan con la siguiente. */
+.hero h1, .section-title, .gift-list-band-title, .dresscode-message { line-height: 1.25; }
