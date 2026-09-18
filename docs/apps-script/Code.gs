@@ -8,10 +8,13 @@
  * Espera un Google Sheet con estas pestañas:
  *
  *   Invitados   (una fila por invitado, la cargan ustedes a mano)
- *     código | nombre | acompañantes_permitidos | tipo_invitacion
+ *     código | nombre | acompañantes_permitidos | tipo_invitacion |
+ *     abierto_en | ultima_apertura | aperturas
  *     (tipo_invitacion: "completa" = ceremonia + recepción, o
  *     "ceremonia" = solo ceremonia — deja la celda vacía y cuenta como
  *     "completa")
+ *     (las tres últimas se llenan solas cuando el invitado abre su link:
+ *     ustedes solo ponen el encabezado y no las tocan más)
  *
  *   Respuestas  (se llena sola cuando alguien confirma)
  *     codigo | nombre | num_asistentes | asistencia | enviado_en | actualizado_en
@@ -42,6 +45,9 @@ var SHEET_REGALOS = "Regalos";
 var SHEET_APORTES = "Aportes";
 
 var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "enviado_en", "actualizado_en"];
+// Primera de las 3 columnas de seguimiento en Invitados (E, F y G):
+// abierto_en | ultima_apertura | aperturas.
+var APERTURA_COL = 5;
 var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
 // Id reservado para el aviso "Ya transferí" de la mesa de regalos: alguien
 // avisa que depositó por Yape o transferencia, sin que corresponda a
@@ -103,6 +109,8 @@ function doGet(e) {
 
     var guest = findGuest(codigo);
     if (!guest) return jsonOut({ found: false });
+
+    registrarApertura(codigo);
 
     var respuesta = findRespuesta(codigo);
     return jsonOut({
@@ -234,6 +242,42 @@ function findGuest(codigo) {
     acompanantes_permitidos: Number(v[2] || 0),
     tipo_invitacion: String(v[3] || "completa").trim() || "completa",
   };
+}
+
+// — "¿ya abrió el link?" —
+// El sitio llama a este mismo endpoint en CADA carga con ?codigo= (para
+// saber el nombre y cuántos pases tiene), así que la apertura se anota
+// acá y el frontend no cambia ni una línea: no hay pedido extra ni
+// píxel de rastreo.
+//
+// Escribe 3 columnas en Invitados: abierto_en (la primera vez, nunca se
+// pisa — es la que dice "ya lo vio"), ultima_apertura y aperturas.
+//
+// Todo va dentro de try/catch a propósito: esto es telemetría, y si
+// falla (faltan las columnas, se acabó la cuota de escritura del día)
+// el invitado TIENE que ver su invitación igual. Nunca puede tumbar el
+// doGet.
+//
+// Sin LockService, al revés que upsertRespuesta: dos invitados distintos
+// escriben filas distintas y no se estorban. El único choque posible es
+// el mismo código abriendo dos veces en el mismo instante, y ahí lo peor
+// que pasa es que se pierda un +1 del contador — no vale la pena
+// serializar todas las cargas de página por eso.
+function registrarApertura(codigo) {
+  try {
+    var sheet = requireSheet(SHEET_INVITADOS);
+    // Hoja todavía sin las columnas nuevas: no es un error, simplemente
+    // aún no las agregaron. Se sale en silencio.
+    if (sheet.getMaxColumns() < APERTURA_COL + 2) return;
+    var fila = buscarFilaPorClave(sheet, codigo);
+    if (!fila) return;
+    var rango = sheet.getRange(fila, APERTURA_COL, 1, 3);
+    var v = rango.getValues()[0];
+    var ahora = new Date();
+    rango.setValues([[v[0] || ahora, ahora, Number(v[2] || 0) + 1]]);
+  } catch (err) {
+    // Telemetría: se pierde el dato, no la invitación.
+  }
 }
 
 function findRespuesta(codigo) {

@@ -7,6 +7,7 @@ __pycache__/
 # lista de invitados real ni respuestas reales, no debe subirse.
 server/respuestas.local.json
 server/aportes.local.json
+server/aperturas.local.json
 server/comprobantes.local/
 
 # Lista REAL de invitados (nombres reales de personas) — el repo es

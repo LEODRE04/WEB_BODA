@@ -31,6 +31,7 @@ GUESTS_FILE_REAL = ROOT / "server" / "invitados.real.json"  # no está en git �
 RESPONSES_FILE = ROOT / "server" / "respuestas.local.json"
 GIFTS_FILE = ROOT / "server" / "regalos.json"
 CONTRIBUTIONS_FILE = ROOT / "server" / "aportes.local.json"
+APERTURAS_FILE = ROOT / "server" / "aperturas.local.json"  # no está en git — ver .gitignore
 # Igual que APORTE_DEPOSITO en docs/apps-script/Code.gs.
 APORTE_DEPOSITO = "deposito"
 COMPROBANTES_DIR = ROOT / "server" / "comprobantes.local"  # no está en git — ver .gitignore
@@ -54,6 +55,37 @@ def load_responses():
 
 def save_responses(rows):
     RESPONSES_FILE.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load_aperturas():
+    if not APERTURAS_FILE.exists():
+        return {}
+    return json.loads(APERTURAS_FILE.read_text(encoding="utf-8"))
+
+
+def registrar_apertura(codigo):
+    """Espejo de registrarApertura() en docs/apps-script/Code.gs.
+
+    El sitio llama a este GET en cada carga con ?codigo= (para saber el
+    nombre y los pases), así que la apertura se anota acá y el frontend
+    no cambia nada. En producción esto son 3 columnas de la pestaña
+    Invitados; en local, un JSON que no se sube a git.
+    """
+    ahora = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    try:
+        with _lock:
+            datos = load_aperturas()
+            fila = datos.get(codigo) or {"abierto_en": ahora, "aperturas": 0}
+            fila["ultima_apertura"] = ahora
+            fila["aperturas"] = int(fila.get("aperturas", 0)) + 1
+            datos[codigo] = fila
+            APERTURAS_FILE.write_text(
+                json.dumps(datos, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+    except OSError:
+        # Telemetría: se pierde el dato, no la invitación. Mismo criterio
+        # que el try/catch de registrarApertura() en Code.gs.
+        pass
 
 
 def load_gifts():
@@ -123,6 +155,8 @@ class Handler(SimpleHTTPRequestHandler):
         guest = guests.get(codigo)
         if not guest:
             return self._json(200, {"found": False})
+
+        registrar_apertura(codigo)
 
         with _lock:
             existing = next((r for r in load_responses() if r.get("codigo") == codigo), None)

@@ -125,10 +125,14 @@ La recepción es en un **local distinto** a la iglesia (columna nueva en
 2. Crea 2 pestañas con estos encabezados exactos en la fila 1:
 
    **`Invitados`**
-   | código | nombre | acompañantes_permitidos | tipo_invitacion |
-   |---|---|---|---|
-   | familia-garcia | Familia García | 2 | completa |
-   | carlos-mendoza | Carlos Mendoza | 0 | ceremonia |
+   | código | nombre | acompañantes_permitidos | tipo_invitacion | abierto_en | ultima_apertura | aperturas |
+   |---|---|---|---|---|---|---|
+   | familia-garcia | Familia García | 2 | completa | | | |
+   | carlos-mendoza | Carlos Mendoza | 0 | ceremonia | | | |
+
+   Las tres últimas columnas (`abierto_en`, `ultima_apertura`,
+   `aperturas`) se llenan solas — ver "Saber si el invitado abrió su
+   link" más abajo. Ustedes solo ponen el encabezado y no las tocan.
 
    **`Respuestas`** (se llena sola — solo pon los encabezados)
    | codigo | nombre | num_asistentes | asistencia | enviado_en | actualizado_en |
@@ -155,6 +159,65 @@ La recepción es en un **local distinto** a la iglesia (columna nueva en
    ```
 8. Commit + push. Ya no hace falta `server/dev_api.py` para producción
    (sigue sirviendo para seguir probando cambios en local).
+
+## Saber si el invitado abrió su link
+
+Cada vez que alguien abre su invitación, el sitio le pregunta al backend
+quién es ese `?codigo=` (lo necesita para el nombre y los pases). Ese
+mismo pedido es el que anota la apertura, así que **no hay rastreo
+aparte**: ni un pedido extra, ni un píxel, ni nada nuevo en el frontend.
+La función es `registrarApertura()` en `docs/apps-script/Code.gs`.
+
+Escribe tres columnas en `Invitados`:
+
+| columna | qué guarda |
+|---|---|
+| `abierto_en` | la **primera** vez que lo abrió — nunca se pisa. Esta es la que responde "¿ya lo vio?" |
+| `ultima_apertura` | la última vez |
+| `aperturas` | cuántas veces (cargas de página, no personas) |
+
+### El estado consolidado
+
+Para verlo como un estado más junto a confirmado/rechazado, agrega una
+columna `estado` en `Invitados` y pega esto en la fila 2 (y arrástralo
+hacia abajo):
+
+```
+=IF(A2="","",IFERROR(IF(VLOOKUP(A2,Respuestas!A:D,4,FALSE)="si","confirmado","rechazado"),IF(E2<>"","leído","sin abrir")))
+```
+
+Si tu hoja está en español y te da error de fórmula, es por el separador
+— usa esta:
+
+```
+=SI(A2="";"";SI.ERROR(SI(BUSCARV(A2;Respuestas!A:D;4;FALSO)="si";"confirmado";"rechazado");SI(E2<>"";"leído";"sin abrir")))
+```
+
+Da uno de cuatro valores: `confirmado`, `rechazado`, `leído` (abrió pero
+todavía no responde — el que te faltaba) y `sin abrir`.
+
+### Lo que este dato NO dice
+
+- **Es "abrió", no "leyó".** Puede abrirlo, mirar dos segundos y cerrar.
+- **Cuenta cargas, no personas.** Si recarga tres veces, `aperturas` dice
+  3. Para "¿ya lo vio?" mira `abierto_en`, no el contador.
+- **La mesa de regalos también cuenta**, porque `regalos.html?codigo=`
+  hace la misma consulta. Es coherente (igual abrió su link), pero por eso
+  el contador sube más rápido de lo que uno esperaría.
+- **Tus propias pruebas cuentan.** Si abres el link de alguien para
+  revisarlo, le queda marcado como abierto. Si quieres probar sin
+  ensuciar el dato, usa un código de prueba.
+- **La vista previa de WhatsApp no cuenta**, que es lo que uno querría:
+  ese robot descarga el HTML pero no ejecuta JavaScript, así que nunca
+  llega a consultar el backend. La marca aparece solo cuando una persona
+  abre de verdad la página.
+
+Si algo falla al anotar (falta una columna, se acabó la cuota diaria de
+escritura de Apps Script), se ignora en silencio y la invitación carga
+igual: es telemetría, nunca puede tumbar el `doGet`.
+
+> Cuidado: el script escribe en las columnas E, F y G de `Invitados`. No
+> pongas datos tuyos ahí.
 
 ## Por qué el frontend no mira el código HTTP para saber si hubo error
 
