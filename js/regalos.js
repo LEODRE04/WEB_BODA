@@ -200,6 +200,7 @@
     var pickedNameEl = document.querySelector("#gift-picked-name");
     var pickedProgressEl = document.querySelector("#gift-picked-progress");
     var montoInput = document.querySelector("#gift-monto");
+    var montoNumInput = document.querySelector("#gift-monto-num");
     var montoBubbleEl = document.querySelector("#gift-monto-bubble");
     var montoMarksEl = document.querySelector("#gift-monto-marks");
     var completeHintEl = document.querySelector("#gift-complete-hint");
@@ -478,6 +479,15 @@
       return 1;
     }
 
+    // El monto que vale es el del campo escrito, no el del riel: el riel
+    // avanza de a S/5 o S/10 (sliderStepFor) y no puede representar un
+    // "S/ 137". El riel es un atajo para elegir rápido; el campo es el
+    // dato que se envía.
+    function montoActual() {
+      var v = Number(montoNumInput.value);
+      return isFinite(v) && v > 0 ? v : 0;
+    }
+
     function updateSliderVisual() {
       var min = Number(montoInput.min), max = Number(montoInput.max), val = Number(montoInput.value);
       // Cuando min === max (un regalo ya casi completo, con solo 1 sol de
@@ -487,7 +497,10 @@
       var pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
       montoInput.style.setProperty("--fill", pct + "%");
       if (montoBubbleEl) {
-        montoBubbleEl.textContent = money(val);
+        // La burbuja muestra lo que se va a aportar de verdad (el campo),
+        // aunque el thumb se haya acomodado al escalón más cercano. Si no,
+        // alguien que escribe 137 vería "S/ 140" flotando sobre el riel.
+        montoBubbleEl.textContent = money(montoActual());
         montoBubbleEl.style.left = pct + "%";
       }
     }
@@ -513,6 +526,9 @@
       montoInput.max = max;
       montoInput.step = sliderStepFor(max);
       montoInput.value = max; // arranca en el monto final (lo que falta)
+      montoNumInput.min = min;
+      montoNumInput.max = max;
+      montoNumInput.value = max;
       renderSliderMarks(min, max);
       updateSliderVisual();
     }
@@ -524,12 +540,40 @@
       if (!completeHintEl) return;
       var g = regalos.filter(function (r) { return r.id === seleccionadoId; })[0];
       if (!g) { completeHintEl.hidden = true; return; }
-      var monto = Number(montoInput.value) || 0;
+      var monto = montoActual();
       var falta = Math.max(0, g.precio - g.recaudado);
       var completa = falta > 0 && monto >= falta;
       completeHintEl.hidden = !completa;
     }
+    // Riel -> campo. Arrastrar siempre da un valor válido, así que se
+    // copia tal cual.
     montoInput.addEventListener("input", function () {
+      montoNumInput.value = montoInput.value;
+      updateSliderVisual();
+      checkComplete();
+    });
+
+    // Campo -> riel. Acá NO se corrige lo que se escribe: si alguien
+    // empieza a tipear "150", el primer carácter es "1" y ajustarlo al
+    // mínimo en ese instante lo dejaría peleando con el campo. Solo se
+    // mueve el thumb al escalón más cercano, que es decorativo.
+    montoNumInput.addEventListener("input", function () {
+      var v = montoActual();
+      if (v) {
+        montoInput.value = Math.min(Number(montoInput.max), Math.max(Number(montoInput.min), v));
+      }
+      updateSliderVisual();
+      checkComplete();
+    });
+
+    // Al salir del campo (o dar Enter) sí se acomoda dentro del rango
+    // permitido: ya terminó de escribir.
+    montoNumInput.addEventListener("change", function () {
+      var min = Number(montoInput.min), max = Number(montoInput.max);
+      var v = montoActual();
+      if (!v) v = min;
+      montoNumInput.value = Math.min(max, Math.max(min, Math.round(v)));
+      montoInput.value = montoNumInput.value;
       updateSliderVisual();
       checkComplete();
     });
@@ -600,7 +644,7 @@
     });
 
     submitBtn.addEventListener("click", function () {
-      var monto = Number(montoInput.value);
+      var monto = montoActual();
       var nombre = nombreInput.value.trim();
 
       if (!seleccionadoId) {

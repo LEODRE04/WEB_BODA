@@ -284,7 +284,23 @@ body { background: var(--color-neutral-100); }
   background: var(--color-neutral-100); border-radius: 16px;
 }
 .money-row .value { font: 13.5px ui-monospace, Menlo, monospace; flex: 1 1 auto; min-width: 0; word-break: break-all; letter-spacing: .02em; }
-.money-row.copied .value::after { content: ' ✓ copiado'; color: var(--color-accent-2-700); font-family: var(--font-body); }
+/* Estos botones eran .btn-ghost puro: sin fondo ni borde, se leían como
+   una etiqueta más debajo del número y no como algo que se toca. Mucha
+   gente iba a intentar seleccionar 20 dígitos a mano en el celular. Se
+   les da superficie propia — siguen siendo discretos, pero ahora se ve
+   que son botones. */
+.money-row .btn[data-copy] {
+  flex: none; background: var(--color-bg);
+  border-color: var(--color-divider); color: var(--color-accent-700);
+}
+/* El aviso de copiado iba pegado al final del número con ::after. Como
+   el número lleva word-break: break-all, en un CCI de 20 dígitos el
+   "✓ copiado" podía saltar a la línea siguiente y pasar desapercibido,
+   justo cuando más importa saber si copió. Ahora el que cambia es el
+   botón, que ya dice "Copiado" por JS y está en un lugar fijo. */
+.money-row.copied .btn[data-copy] {
+  background: var(--color-accent); border-color: var(--color-accent); color: #fff;
+}
 .money-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); flex: 1 0 100%; }
 @media (max-width: 860px) {
   .details-grid { grid-template-columns: 1fr; }
@@ -636,6 +652,21 @@ body { background: var(--color-neutral-100); }
    recorrida quede coloreada, como en ese ejemplo. Estilizar
    <input type="range"> requiere repetir cada regla para
    -webkit-/-moz- por separado — no hay una sola propiedad estándar. —*/
+/* Campo para escribir el monto exacto. El "S/" va como prefijo fijo
+   dentro del campo (no en el texto) para que el invitado escriba solo el
+   número y no tenga que borrar nada. Se ocultan las flechitas de
+   type=number: desentonan con el campo redondeado y para eso ya está el
+   riel justo debajo. */
+.gift-monto-field { position: relative; display: flex; align-items: center; }
+.gift-monto-prefix {
+  position: absolute; left: 15px; pointer-events: none;
+  font: 14px ui-monospace, Menlo, monospace;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.gift-monto-num { width: 100%; padding-left: 40px; font-variant-numeric: lining-nums; }
+.gift-monto-num::-webkit-outer-spin-button,
+.gift-monto-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gift-monto-num { -moz-appearance: textfield; appearance: textfield; }
 .gift-slider { position: relative; padding-top: 30px; padding-bottom: 22px; }
 .gift-slider-input {
   -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
@@ -843,6 +874,15 @@ body { background: var(--color-neutral-100); }
   .rsvp-form .attending-toggle { flex-direction: column; }
 }
 .rsvp-actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+/* En celular "Confirmar" es LA acción de toda la invitación y quedaba
+   angosta y pegada a la izquierda, donde el pulgar llega peor. A lo
+   ancho y con la nota centrada debajo. Aplica también al estado ya
+   respondido (descargar pase / editar respuesta). */
+@media (max-width: 640px) {
+  .rsvp-actions { flex-direction: column; align-items: stretch; gap: 12px; }
+  .rsvp-actions .btn { width: 100%; }
+  .rsvp-actions .rsvp-note { text-align: center; }
+}
 .rsvp-note { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 .rsvp-success {
   display: none; margin-top: 14px; padding: 14px 16px; border-radius: 20px;

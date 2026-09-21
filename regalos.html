@@ -58,7 +58,18 @@
             <div class="gift-progress" id="gift-picked-progress"></div>
             <div class="gift-contribute-fields">
               <div class="field">
-                <label for="gift-monto">Monto a aportar (S/)</label>
+                <label for="gift-monto-num">Monto a aportar (S/)</label>
+                <!-- El monto se podía elegir SOLO arrastrando, así que no
+                     había forma de aportar una cifra exacta (el riel va de
+                     a S/5 o S/10). Este campo es ahora el valor de verdad
+                     y el riel queda como atajo para elegir rápido; los dos
+                     se mantienen sincronizados (initSlider en regalos.js).
+                     inputmode="numeric" abre el teclado de números. -->
+                <div class="gift-monto-field">
+                  <span class="gift-monto-prefix" aria-hidden="true">S/</span>
+                  <input type="number" class="input gift-monto-num" id="gift-monto-num"
+                         inputmode="numeric" step="1" min="1" value="1">
+                </div>
                 <div class="gift-slider">
                   <output class="gift-slider-bubble" id="gift-monto-bubble" for="gift-monto"></output>
                   <input type="range" class="gift-slider-input" id="gift-monto" min="1" max="1" step="1" value="1" aria-label="Monto a aportar, en soles">
