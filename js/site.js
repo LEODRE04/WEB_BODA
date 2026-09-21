@@ -510,12 +510,17 @@
       btn.addEventListener("click", function () {
         var text = btn.getAttribute("data-copy");
         copyText(text).then(function (ok) {
-          var row = btn.closest(".money-row");
+          var row = btn.closest(".pay-card");
+          // El botón de las tarjetas de pago es un icono (bloque 3c): si
+          // acá se le escribiera textContent se borrarían los dos SVG de
+          // adentro y quedaría un círculo vacío para siempre. Ese botón
+          // avisa cambiando de icono y de color, vía la clase .copied.
+          var esIcono = !!btn.querySelector("svg");
           var original = btn.textContent;
-          btn.textContent = ok ? "Copiado" : "No se pudo";
+          if (!esIcono) btn.textContent = ok ? "Copiado" : "No se pudo";
           if (row) row.classList.toggle("copied", ok);
           setTimeout(function () {
-            btn.textContent = original;
+            if (!esIcono) btn.textContent = original;
             if (row) row.classList.remove("copied");
           }, 1500);
         });

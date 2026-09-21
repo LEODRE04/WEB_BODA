@@ -260,7 +260,7 @@ body { background: var(--color-neutral-100); }
 .details-heading { font-family: var(--font-heading); font-size: 26px; margin: 10px 0 12px; }
 .map-embed { border-radius: 28px; overflow: hidden; height: 250px; }
 .map-embed iframe { width: 100%; height: 100%; border: 0; display: block; }
-.venue-card, .money-card { background: var(--color-bg); border-radius: 28px; padding: 20px 22px; }
+.venue-card { background: var(--color-bg); border-radius: 28px; padding: 20px 22px; }
 .venue-card { margin-top: 14px; }
 /* Los dos párrafos de la tarjeta de lugar (horario/dirección y la nota de
    cómo llegar). Estaban con style="" en el HTML, así que ninguna regla
@@ -273,52 +273,101 @@ body { background: var(--color-neutral-100); }
   margin-bottom: 14px; font-size: 13.5px; line-height: 1.6;
   color: color-mix(in srgb, var(--color-text) 62%, transparent);
 }
-.money-card + .money-card { margin-top: 12px; }
-/* flex-wrap + radius moderado (no pastilla completa): con etiqueta +
-   valor monoespaciado largo (CCI, cuenta) + botón "Copiar", una pastilla
-   999px se deforma apenas el contenido no entra en una sola línea. La
-   etiqueta va siempre en su propia línea arriba para que value+botón
-   quepan holgados sin importar cuántas columnas tenga el grid. */
-.money-row {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 10px 14px;
-  background: var(--color-neutral-100); border-radius: 16px;
+
+/* — datos para transferir (bloque 3c de claude.ai/design) —
+   Antes esto eran tarjetas dentro de tarjetas: una .money-card por banco
+   y dentro una .money-row por número, las dos con fondo y radio. En
+   celular se veía como cajas anidadas y el número —que es lo único que
+   el invitado necesita— quedaba del mismo tamaño que todo lo demás.
+   3c lo aplana: una tarjeta por NÚMERO, la cifra grande, y el copiar
+   como botón redondo a la derecha.
+   Los hexadecimales del bloque vienen de la paleta anterior del diseño
+   (salvia #f0fae1, durazno #ffe1d0…), así que acá se usan los tokens
+   equivalentes de la paleta actual: se copia la jerarquía, no los
+   colores. — */
+.pay-list { display: grid; gap: 10px; max-width: 560px; margin: 0 auto; }
+/* flex-wrap + una base de 150px en el cuerpo: donde la tarjeta es
+   angosta (el panel de aporte de regalos deja ~174px útiles) el número
+   y el botón no entran en la misma fila, y un CCI de 20 dígitos se
+   partía a la mitad — «1911159605308 / 3» —, que en un número de cuenta
+   es peor que tenerlo chico. Al no alcanzar la base, el botón baja solo
+   a la línea siguiente y la cifra se queda con todo el ancho, entera.
+   Donde sí hay espacio, la fila se mantiene como en el bloque 3c. */
+.pay-card {
+  /* row-gap chico: cuando el botón baja de línea (pantallas de 320px),
+     con los 12px de la fila quedaba un hueco raro entre el número y el
+     botón. Horizontal sigue en 12. */
+  display: flex; align-items: center; flex-wrap: wrap;
+  column-gap: 12px; row-gap: 4px;
+  border-radius: 24px; padding: 16px 18px;
+  background: var(--color-neutral-400);
 }
-.money-row .value { font: 13.5px ui-monospace, Menlo, monospace; flex: 1 1 auto; min-width: 0; word-break: break-all; letter-spacing: .02em; }
-/* Estos botones eran .btn-ghost puro: sin fondo ni borde, se leían como
-   una etiqueta más debajo del número y no como algo que se toca. Mucha
-   gente iba a intentar seleccionar 20 dígitos a mano en el celular. Se
-   les da superficie propia — siguen siendo discretos, pero ahora se ve
-   que son botones. */
-.money-row .btn[data-copy] {
-  flex: none; background: var(--color-bg);
-  border-color: var(--color-divider); color: var(--color-accent-700);
+/* Yape sube de jerarquía porque es el camino más corto: fondo salvia en
+   vez de crema, cifra más grande y botón verde lleno. */
+.pay-card-primary { background: var(--color-accent-100); }
+.pay-body { min-width: 0; flex: 1 1 150px; }
+.pay-label {
+  display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
 }
-/* El aviso de copiado iba pegado al final del número con ::after. Como
-   el número lleva word-break: break-all, en un CCI de 20 dígitos el
-   "✓ copiado" podía saltar a la línea siguiente y pasar desapercibido,
-   justo cuando más importa saber si copió. Ahora el que cambia es el
-   botón, que ya dice "Copiado" por JS y está en un lugar fijo. */
-.money-row.copied .btn[data-copy] {
-  background: var(--color-accent); border-color: var(--color-accent); color: #fff;
+.pay-card-primary .pay-label { color: var(--color-accent-700); }
+/* Sin monoespaciada, como pide el bloque. Cormorant trae cifras
+   elzevirianas (el 1 se confunde con la I), así que acá también van
+   lining-nums — mismo arreglo que en la cuenta regresiva y el pase.
+   Los tamaños suben ~15% sobre los del bloque (21/17/15) porque aquel
+   estaba pensado en Figtree y Cormorant compone bastante más chico. */
+.pay-value {
+  display: block; margin-top: 2px;
+  font-size: 24px; font-weight: 600; letter-spacing: .01em; line-height: 1.2;
+  font-variant-numeric: lining-nums; color: var(--color-text);
+  overflow-wrap: anywhere;
 }
-.money-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); flex: 1 0 100%; }
+.pay-value-md { font-size: 19px; }
+.pay-value-sm { font-size: 16.5px; }
+.pay-holder {
+  display: block; margin-top: 6px; font-size: 12.5px;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+}
+/* 44x44 es el mínimo táctil (ver el bloque de pointer: coarse). Acá va
+   fijo y no como min-height, porque tiene que ser un círculo. */
+.pay-copy {
+  flex: none; width: 44px; height: 44px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; cursor: pointer; padding: 0;
+  /* Arena, no crema: sobre la tarjeta (neutral-400) un neutral-500 casi
+     no se despega y el botón volvía a parecer parte del fondo — que es
+     justo el problema que este rediseño venía a resolver. En 3c este
+     botón era durazno sobre crema, o sea un tono aparte; acá el tono
+     aparte que tiene la paleta es la arena. */
+  background: var(--color-neutral-600); color: var(--color-accent-800);
+  margin-left: auto; /* cuando baja de línea, queda alineado a la derecha */
+  transition: background-color .15s ease, transform .1s ease;
+}
+.pay-card-primary .pay-copy { background: var(--color-accent-600); color: var(--color-accent-100); }
+.pay-copy:active { transform: scale(.94); }
+.pay-copy:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.pay-copy svg { width: 18px; height: 18px; }
+/* El acuse ya no es texto que se acomode donde pueda: el botón cambia de
+   icono y de color en el sitio. */
+.pay-copy-ok { display: none; }
+.pay-card.copied .pay-copy { background: var(--color-accent-600); color: #fff; }
+.pay-card.copied .pay-copy-i { display: none; }
+.pay-card.copied .pay-copy-ok { display: block; }
+.pay-note {
+  margin: 4px 0 0; font-size: 12.5px; text-align: center;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
 @media (max-width: 860px) {
   .details-grid { grid-template-columns: 1fr; }
 }
 
 /* — mesa de regalos (sección propia, separada de "cuándo y dónde") — */
 .gifts { padding: 56px 44px; background: var(--color-bg); }
-/* 236px de piso (era 280): con las tres formas de pago —Yape, BCP e
-   Interbank— tres columnas de 280 no entraban en el ancho útil de la
-   tarjeta (~812px), así que Interbank caía sola a una segunda fila. Con
-   236 las tres van en una línea; el número de cuenta y su botón se
-   reparten en dos líneas dentro de la tarjeta, que .money-row ya
-   contempla con flex-wrap. */
-.gifts-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr));
-  gap: 20px; max-width: 900px; margin: 0 auto; align-items: start;
-}
-.gifts-grid .money-card + .money-card { margin-top: 0; }
+/* Antes esto era una rejilla de tres columnas, una por forma de pago.
+   Con .pay-list los datos son una sola columna angosta y centrada: se
+   leen de corrido, igual en celular que en escritorio, y ya no hay una
+   retícula que se rompa cuando cambia el número de cuentas. */
+.gifts-grid { max-width: 560px; margin: 0 auto; display: grid; gap: 20px; }
 /* — aviso de transferencia (bloques 3a y 6g de claude.ai/design) —
    Cruza las tres tarjetas de pago. Fondo salvia para separarla de las
    tarjetas de datos sin competir con la franja terracota de abajo.
@@ -486,13 +535,8 @@ body { background: var(--color-neutral-100); }
      zoom de Safari: ese depende del tamaño del campo, que sigue en 16px. */
   .transferencia-card textarea.input::placeholder { font-size: 13.5px; }
 }
-/* — el piso de 280px por columna (arriba) es más ancho que la tarjeta
-   disponible en celular (envelope-card + su padding le dejan bastante
-   menos que eso) — sin este límite, .money-card se salía del borde y
-   toda la página quedaba con scroll horizontal. — */
-@media (max-width: 640px) {
-  .gifts-grid { grid-template-columns: 1fr; }
-}
+/* .pay-list ya es de una sola columna en todos los anchos, así que el
+   bloqueo de la rejilla en celular dejó de hacer falta. */
 
 /* — lista de regalos elegible (initGiftRegistry en site.js) —
    grid de regalos, cada uno con nombre/descripción/foto/precio/avance +
@@ -597,7 +641,14 @@ body { background: var(--color-neutral-100); }
 .gift-contribute { background: var(--color-surface); border-radius: 28px; padding: 26px 24px; margin-bottom: 24px; }
 .gift-contribute-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 22px; align-items: start; }
 .gift-contribute-fields { display: grid; gap: 12px; margin-top: 16px; }
-.gift-contribute-howto .money-row { margin-bottom: 8px; }
+/* En el panel de aporte la tarjeta es mucho más angosta que en la
+   invitación, así que las cifras bajan un escalón para que la lista no
+   se estire de más. */
+.gift-contribute-howto .pay-list { max-width: none; gap: 8px; }
+.gift-contribute-howto .pay-card { padding: 13px 15px; }
+.gift-contribute-howto .pay-value { font-size: 19px; }
+.gift-contribute-howto .pay-value-md { font-size: 16px; }
+.gift-contribute-howto .pay-value-sm { font-size: 15px; }
 .gift-mobile-back { display: none; }
 @media (max-width: 720px) {
   .gift-contribute-grid { grid-template-columns: 1fr; }
@@ -1370,4 +1421,21 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
      celular abren la app nativa — mejor que empujar un mapa diminuto
      dentro de la página. */
   .map-embed iframe { pointer-events: none; }
+}
+
+
+/* — aire lateral en celular —
+   Las ocho secciones usaban «padding: 56px 44px» en todos los tamaños.
+   En un teléfono de 390px eso son 88px (el 23% de la pantalla) gastados
+   en márgenes antes de que empiece el contenido — y encima se acumulan
+   con los de las tarjetas: en la mesa de regalos, entre sección,
+   envelope-card, panel de aporte y tarjeta quedaban 180px de padding y
+   solo 180px útiles. Por eso un CCI no entraba al lado de su botón.
+   Bajando el lateral a 20px en celular, cada sección recupera 48px y
+   las tarjetas de pago vuelven a caber en una sola fila. El vertical
+   también baja un poco: con la página ya larga, 56px entre secciones se
+   sentía como un hueco. — */
+@media (max-width: 640px) {
+  .save-date, .welcome, .details, .gifts,
+  .dresscode-section, .rsvp, .faq, .prayer { padding: 44px 20px; }
 }

@@ -95,11 +95,43 @@
             <div class="details-heading" style="font-size:20px;margin:6px 0 14px">Transferencia o Yape</div>
             <!-- Mismos datos que la mesa de regalos de index.html. Si cambian,
                  actualizar los dos lugares (y el bloque gifts de config.js). -->
-            <div class="money-row"><span class="money-label">Yape</span><span class="value">992 770 777</span><button class="btn btn-ghost" type="button" data-copy="992770777">Copiar</button></div>
-            <div class="money-row"><span class="money-label">BCP · Cuenta soles</span><span class="value">19111596053083</span><button class="btn btn-ghost" type="button" data-copy="19111596053083">Copiar</button></div>
-            <div class="money-row"><span class="money-label">BCP · CCI</span><span class="value">00219111159605308355</span><button class="btn btn-ghost" type="button" data-copy="00219111159605308355">Copiar</button></div>
-            <div class="money-row"><span class="money-label">Interbank · Cuenta simple soles</span><span class="value">8983225047822</span><button class="btn btn-ghost" type="button" data-copy="8983225047822">Copiar</button></div>
-            <div class="money-row"><span class="money-label">Interbank · CCI</span><span class="value">00389801322504782240</span><button class="btn btn-ghost" type="button" data-copy="00389801322504782240">Copiar</button></div>
+            <div class="pay-list">
+              <div class="pay-card pay-card-primary">
+                <div class="pay-body">
+                  <span class="pay-label">Yape · lo más rápido</span>
+                  <span class="pay-value">992 770 777</span>
+                </div>
+                <button class="pay-copy" type="button" data-copy="992770777" aria-label="Copiar el número de Yape"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+              <div class="pay-card">
+                <div class="pay-body">
+                  <span class="pay-label">BCP · Cuenta en soles</span>
+                  <span class="pay-value pay-value-md">19111596053083</span>
+                </div>
+                <button class="pay-copy" type="button" data-copy="19111596053083" aria-label="Copiar la cuenta BCP en soles"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+              <div class="pay-card">
+                <div class="pay-body">
+                  <span class="pay-label">BCP · CCI</span>
+                  <span class="pay-value pay-value-sm">00219111159605308355</span>
+                </div>
+                <button class="pay-copy" type="button" data-copy="00219111159605308355" aria-label="Copiar el CCI del BCP"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+              <div class="pay-card">
+                <div class="pay-body">
+                  <span class="pay-label">Interbank · Cuenta simple</span>
+                  <span class="pay-value pay-value-md">8983225047822</span>
+                </div>
+                <button class="pay-copy" type="button" data-copy="8983225047822" aria-label="Copiar la cuenta simple de Interbank"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+              <div class="pay-card">
+                <div class="pay-body">
+                  <span class="pay-label">Interbank · CCI</span>
+                  <span class="pay-value pay-value-sm">00389801322504782240</span>
+                </div>
+                <button class="pay-copy" type="button" data-copy="00389801322504782240" aria-label="Copiar el CCI de Interbank"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+            </div>
             <p class="rsvp-note" style="margin:2px 0 0">Todas a nombre de André Leon.</p>
 
             <div class="field" style="margin-top:14px">

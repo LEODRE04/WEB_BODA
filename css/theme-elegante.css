@@ -88,7 +88,7 @@
 .photo img { filter: sepia(.14) saturate(.85) contrast(.92) brightness(1.05); }
 
 /* — tarjetas con más aire y una sombra suave (look "invitación impresa") — */
-.venue-card, .money-card, .faq-item, .companion-card, .rsvp-form {
+.venue-card, .faq-item, .companion-card, .rsvp-form {
   box-shadow: var(--shadow-sm);
 }
 .rsvp-form { box-shadow: var(--shadow-md); }
