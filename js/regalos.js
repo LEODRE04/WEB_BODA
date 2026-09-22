@@ -102,7 +102,7 @@
       btn.addEventListener("click", function () {
         var text = btn.getAttribute("data-copy");
         copyText(text).then(function (ok) {
-          var row = btn.closest(".pay-card");
+          var row = btn.closest(".pay-row");
           // El botón de las tarjetas de pago es un icono (bloque 3c): si
           // acá se le escribiera textContent se borrarían los dos SVG de
           // adentro y quedaría un círculo vacío para siempre. Ese botón

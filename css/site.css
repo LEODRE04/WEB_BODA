@@ -274,89 +274,91 @@ body { background: var(--color-neutral-100); }
   color: color-mix(in srgb, var(--color-text) 62%, transparent);
 }
 
-/* — datos para transferir (bloque 3c de claude.ai/design) —
-   Antes esto eran tarjetas dentro de tarjetas: una .money-card por banco
-   y dentro una .money-row por número, las dos con fondo y radio. En
-   celular se veía como cajas anidadas y el número —que es lo único que
-   el invitado necesita— quedaba del mismo tamaño que todo lo demás.
-   3c lo aplana: una tarjeta por NÚMERO, la cifra grande, y el copiar
-   como botón redondo a la derecha.
-   Los hexadecimales del bloque vienen de la paleta anterior del diseño
-   (salvia #f0fae1, durazno #ffe1d0…), así que acá se usan los tokens
-   equivalentes de la paleta actual: se copia la jerarquía, no los
-   colores. — */
-.pay-list { display: grid; gap: 10px; max-width: 560px; margin: 0 auto; }
-/* flex-wrap + una base de 150px en el cuerpo: donde la tarjeta es
-   angosta (el panel de aporte de regalos deja ~174px útiles) el número
-   y el botón no entran en la misma fila, y un CCI de 20 dígitos se
-   partía a la mitad — «1911159605308 / 3» —, que en un número de cuenta
-   es peor que tenerlo chico. Al no alcanzar la base, el botón baja solo
-   a la línea siguiente y la cifra se queda con todo el ancho, entera.
-   Donde sí hay espacio, la fila se mantiene como en el bloque 3c. */
-.pay-card {
-  /* row-gap chico: cuando el botón baja de línea (pantallas de 320px),
-     con los 12px de la fila quedaba un hueco raro entre el número y el
-     botón. Horizontal sigue en 12. */
-  display: flex; align-items: center; flex-wrap: wrap;
-  column-gap: 12px; row-gap: 4px;
-  border-radius: 24px; padding: 16px 18px;
-  background: var(--color-neutral-400);
+/* — datos para transferir (bloque 12b de claude.ai/design) —
+   12b rehace el 3c mirando la versión publicada. Lo que no funcionaba:
+   cinco pastillas casi idénticas competían entre sí, y el botón de
+   copiar en arena (mi elección al adaptar 3c) ensuciaba el verde.
+   Ahora los datos van dentro de UNA tarjeta blanca y se agrupan por
+   banco con una pastilla salvia; los tres medios quedan al mismo nivel
+   (Yape deja de ser una tarjeta destacada) y el botón de copiar es
+   blanco con contorno verde, para no competir con esas pastillas.
+   Los hexadecimales del bloque ya son los de la paleta actual, así que
+   acá van sus tokens: #eef2e6 = accent-100, #4a6242 = accent-700,
+   rgba(201,184,148) = neutral-600, rgba(54,76,47) = text. — */
+.pay-list { max-width: 560px; margin: 0 auto; }
+/* Las hojas que caen son position:fixed con z-index 5, así que pasaban
+   por encima de los números — molesto justo donde hay que leer dígito a
+   dígito para transferir. Este contexto las deja por detrás solo acá;
+   en el resto de la página siguen flotando igual. */
+.pay-card-wrap { position: relative; z-index: 6; }
+.pay-sheet {
+  background: var(--color-bg); border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--color-neutral-600) 60%, transparent);
+  padding: 4px 16px; text-align: left;
 }
-/* Yape sube de jerarquía porque es el camino más corto: fondo salvia en
-   vez de crema, cifra más grande y botón verde lleno. */
-.pay-card-primary { background: var(--color-accent-100); }
-.pay-body { min-width: 0; flex: 1 1 150px; }
-.pay-label {
-  display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+/* Cada banco aporta su propio aire arriba y abajo; el hairline entre
+   bloques sale del borde superior, así el primero no lo lleva. */
+.pay-bank { padding: 14px 0; }
+.pay-bank + .pay-bank {
+  border-top: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
 }
-.pay-card-primary .pay-label { color: var(--color-accent-700); }
-/* Sin monoespaciada, como pide el bloque. Cormorant trae cifras
-   elzevirianas (el 1 se confunde con la I), así que acá también van
-   lining-nums — mismo arreglo que en la cuenta regresiva y el pase.
-   Los tamaños suben ~15% sobre los del bloque (21/17/15) porque aquel
-   estaba pensado en Figtree y Cormorant compone bastante más chico. */
-.pay-value {
-  display: block; margin-top: 2px;
-  font-size: 24px; font-weight: 600; letter-spacing: .01em; line-height: 1.2;
-  font-variant-numeric: lining-nums; color: var(--color-text);
-  overflow-wrap: anywhere;
+.pay-bank-tag {
+  display: inline-flex; margin-bottom: 6px; padding: 3px 11px;
+  background: var(--color-accent-100); color: var(--color-accent-800);
+  font-size: 11px; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; border-radius: 999px;
 }
-.pay-value-md { font-size: 19px; }
-.pay-value-sm { font-size: 16.5px; }
-.pay-holder {
-  display: block; margin-top: 6px; font-size: 12.5px;
+.pay-row { display: flex; align-items: center; gap: 12px; }
+/* Dos filas del mismo banco (cuenta y CCI) no se separan con borde ni
+   fondo: basta el aire. La pastilla ya dice dónde empieza cada banco. */
+.pay-row + .pay-row { margin-top: 9px; }
+.pay-row-body { flex: 1 1 auto; min-width: 0; }
+.pay-row-label {
+  display: block; font-size: 12.5px;
   color: color-mix(in srgb, var(--color-text) 62%, transparent);
 }
-/* 44x44 es el mínimo táctil (ver el bloque de pointer: coarse). Acá va
-   fijo y no como min-height, porque tiene que ser un círculo. */
+/* Los dígitos van separados por espacios en el HTML (no hay nada que
+   los agrupe por CSS), y data-copy conserva el número sin espacios. */
+.pay-num {
+  display: block; font-weight: 600; font-size: 17px; letter-spacing: .02em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-text);
+  /* SIN overflow-wrap: anywhere. Los dígitos ya vienen en grupos
+     separados por espacios, así que si en una pantalla muy angosta
+     (320px) la cifra no entra, corta por un espacio —entre grupos— y no
+     a mitad de un grupo, que es lo que hace ilegible un número de
+     cuenta. */
+}
+.pay-num-tel { letter-spacing: .03em; }
+.pay-num-cci { font-size: 15px; }
+/* Blanco con contorno verde en vez del relleno arena de antes: al lado
+   de la pastilla salvia, dos rellenos se peleaban. El borde va como
+   box-shadow inset para que no sume al tamaño de la caja. */
 .pay-copy {
-  flex: none; width: 44px; height: 44px; border-radius: 999px;
+  flex: none; width: 40px; height: 40px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   border: 0; cursor: pointer; padding: 0;
-  /* Arena, no crema: sobre la tarjeta (neutral-400) un neutral-500 casi
-     no se despega y el botón volvía a parecer parte del fondo — que es
-     justo el problema que este rediseño venía a resolver. En 3c este
-     botón era durazno sobre crema, o sea un tono aparte; acá el tono
-     aparte que tiene la paleta es la arena. */
-  background: var(--color-neutral-600); color: var(--color-accent-800);
-  margin-left: auto; /* cuando baja de línea, queda alineado a la derecha */
+  background: var(--color-bg); color: var(--color-accent-700);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-accent-600) 40%, transparent);
   transition: background-color .15s ease, transform .1s ease;
 }
-.pay-card-primary .pay-copy { background: var(--color-accent-600); color: var(--color-accent-100); }
 .pay-copy:active { transform: scale(.94); }
 .pay-copy:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-.pay-copy svg { width: 18px; height: 18px; }
-/* El acuse ya no es texto que se acomode donde pueda: el botón cambia de
-   icono y de color en el sitio. */
+.pay-copy svg { width: 17px; height: 17px; }
 .pay-copy-ok { display: none; }
-.pay-card.copied .pay-copy { background: var(--color-accent-600); color: #fff; }
-.pay-card.copied .pay-copy-i { display: none; }
-.pay-card.copied .pay-copy-ok { display: block; }
-.pay-note {
-  margin: 4px 0 0; font-size: 12.5px; text-align: center;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+.pay-row.copied .pay-copy {
+  background: var(--color-accent-600); color: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-600);
 }
+.pay-row.copied .pay-copy-i { display: none; }
+.pay-row.copied .pay-copy-ok { display: block; }
+/* Fuera de la tarjeta: cierra el bloque y evita repetir el titular en
+   cada banco. */
+.pay-note {
+  margin: 14px 0 0; font-size: 13.5px; text-align: center;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+}
+
 @media (max-width: 860px) {
   .details-grid { grid-template-columns: 1fr; }
 }
@@ -645,10 +647,10 @@ body { background: var(--color-neutral-100); }
    invitación, así que las cifras bajan un escalón para que la lista no
    se estire de más. */
 .gift-contribute-howto .pay-list { max-width: none; gap: 8px; }
-.gift-contribute-howto .pay-card { padding: 13px 15px; }
-.gift-contribute-howto .pay-value { font-size: 19px; }
-.gift-contribute-howto .pay-value-md { font-size: 16px; }
-.gift-contribute-howto .pay-value-sm { font-size: 15px; }
+.gift-contribute-howto .pay-sheet { padding: 2px 13px; }
+.gift-contribute-howto .pay-bank { padding: 11px 0; }
+.gift-contribute-howto .pay-num { font-size: 15.5px; }
+.gift-contribute-howto .pay-num-cci { font-size: 14px; }
 .gift-mobile-back { display: none; }
 @media (max-width: 720px) {
   .gift-contribute-grid { grid-template-columns: 1fr; }
@@ -1395,6 +1397,10 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .btn { min-height: 44px; }
   .input { min-height: 44px; }
   .btn-icon { width: 44px; height: 44px; }
+  /* 12b pide 40x40 para el botón de copiar. En pantalla táctil sube a
+     los 44 de siempre: el bloque estaba pensado mirando el mockup, y
+     44 es el mínimo de Apple para algo que se toca con el dedo. */
+  .pay-copy { width: 44px; height: 44px; }
 
   /* 3. Los enlaces del menú medían 22px de alto apilados uno sobre otro:
      con ocho seguidos, tocar "Regalos" y caer en "Lugar" era cuestión de
