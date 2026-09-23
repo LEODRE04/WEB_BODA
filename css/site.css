@@ -854,12 +854,45 @@ body { background: var(--color-neutral-100); }
   max-width: 780px; margin: 0 auto;
 }
 .dresscode-figure { flex: none; width: 116px; height: auto; }
-/* Con la paleta nueva los dos acentos son verdes, así que vestido y saco
-   quedaban idénticos. El vestido pasa a la arena de la paleta (#c9b894,
-   la misma de los bordes finos) y el saco se queda en verde: se siguen
-   distinguiendo sin salirse del bloque 11. */
-.dresscode-figure-dress { color: var(--color-neutral-600); }
-.dresscode-figure-suit { color: var(--color-accent-400); }
+/* — las dos figuras —
+   Antes eran dos siluetas de línea: un contorno de vestido y uno de
+   saco, sin interior. Ahora son formas rellenas con volumen (maniquí,
+   corpiño, falda con pliegues; pantalón, solapas, botones, pañuelo),
+   inspiradas en el archivo «Traje de novia y novio» que pasaste.
+   De ahí se toma SOLO el dibujo: aquel era un configurador con botones
+   para elegir silueta, color y flores, y acá las figuras son decorativas
+   — el invitado no viste a los novios.
+   Los colores de aquel archivo (azul noche, marfil, dorado, rosa palo)
+   se cambian por los tokens de la paleta, igual que con los otros
+   bloques del diseño. La flor del fajín de la novia y la del ojal del
+   novio son la misma, que era la idea bonita del original. */
+.dc-veil { fill: #fff; opacity: .5; }
+.dc-stand { fill: var(--color-neutral-700); }
+.dc-form { fill: var(--color-neutral-600); }
+.dc-ivory { fill: #fff; }
+.dc-ivory-sh { fill: var(--color-neutral-500); }
+.dc-shirt { fill: #fff; }
+.dc-suit { fill: var(--color-accent-700); }
+.dc-suit-dk { fill: var(--color-accent-800); }
+.dc-suit-lt { fill: var(--color-accent-600); }
+.dc-tie { fill: var(--color-neutral-600); }
+.dc-btn { fill: var(--color-neutral-600); }
+.dc-sash { fill: var(--color-accent-300); }
+.dc-petal { fill: #fff; }
+.dc-heart { fill: var(--color-accent-300); }
+.dc-leaf { fill: var(--color-accent-500); }
+/* El vestido es blanco sobre la tarjeta crema, así que sin un contorno
+   fino se perdería: el borde de arena lo separa del fondo y los
+   pliegues le dan el volumen. */
+.dc-edge { stroke: var(--color-neutral-600); stroke-width: .9; }
+.dc-fold {
+  fill: none; stroke: var(--color-neutral-500);
+  stroke-width: 1.2; stroke-linecap: round;
+}
+.dc-crease {
+  fill: none; stroke: color-mix(in srgb, #fff 16%, transparent);
+  stroke-width: 1.2; stroke-linecap: round;
+}
 .dresscode-message {
   margin: 0; max-width: 24ch;
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);

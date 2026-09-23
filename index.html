@@ -415,16 +415,67 @@
     <div class="envelope-card floral-frame">
       <div class="section-kicker dresscode-kicker">Código de vestimenta</div>
       <div class="dresscode">
-        <svg class="dresscode-figure dresscode-figure-dress" viewBox="0 0 96 168" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
-          <path d="M38 14 L58 14 L60 66 C68 92 78 122 84 150 C72 158 24 158 12 150 C18 122 28 92 36 66 Z"/>
-          <path d="M36 66 C44 69 52 69 60 66"/>
+        <svg class="dresscode-figure dresscode-figure-dress" viewBox="0 0 120 210" aria-hidden="true" focusable="false">
+          <!-- velo, detrás de todo -->
+          <path class="dc-veil" d="M52,16 Q22,70 12,186 Q60,199 108,186 Q98,70 68,16Z"/>
+          <!-- maniquí: pie, poste, cuello y hombros -->
+          <rect class="dc-stand" x="57" y="178" width="6" height="23" rx="1"/>
+          <ellipse class="dc-stand" cx="60" cy="202" rx="26" ry="5"/>
+          <rect class="dc-form" x="54" y="14" width="12" height="12" rx="3"/>
+          <ellipse class="dc-stand" cx="60" cy="14" rx="7" ry="2.5"/>
+          <path class="dc-form" d="M43,26 Q60,20 77,26 Q84,34 82,46 L38,46 Q36,34 43,26Z"/>
+          <!-- corpiño con escote corazón -->
+          <path class="dc-ivory dc-edge" d="M38,42 Q49,35 60,44 Q71,35 82,42 Q83,62 76,80 L44,80 Q37,62 38,42Z"/>
+          <path class="dc-fold" d="M60,46 L60,78 M50,49 Q48,64 49,78 M70,49 Q72,64 71,78"/>
+          <!-- falda -->
+          <path class="dc-ivory dc-edge" d="M44,82 L76,82 Q97,126 118,186 Q60,199 2,186 Q23,126 44,82Z"/>
+          <path class="dc-fold" d="M51,86 Q41,130 25,188 M60,86 L60,194 M69,86 Q79,130 95,188"/>
+          <path class="dc-ivory-sh" d="M2,186 Q18,194 31,188 Q45,197 60,191 Q75,197 89,188 Q102,194 118,186 Q60,199 2,186Z"/>
+          <!-- fajín y la flor que comparte con el novio -->
+          <path class="dc-sash" d="M43,77 L77,77 L76,83 L44,83Z"/>
+          <g transform="translate(70,80)">
+            <circle class="dc-petal" r="5"/>
+            <circle class="dc-heart" r="1.9"/>
+            <path class="dc-leaf" d="M3,3 L8,10 L5,10 L1.6,4.4Z"/>
+          </g>
         </svg>
         <h2 class="dresscode-message">Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante.</h2>
-        <svg class="dresscode-figure dresscode-figure-suit" viewBox="0 0 96 168" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
-          <path d="M32 16 L48 24 L64 16 C74 21 80 31 80 44 L80 152 L16 152 L16 44 C16 31 22 21 32 16 Z"/>
-          <path d="M32 16 L48 92"/>
-          <path d="M64 16 L48 92"/>
-          <path d="M48 92 L48 152"/>
+        <svg class="dresscode-figure dresscode-figure-suit" viewBox="0 0 120 210" aria-hidden="true" focusable="false">
+          <!-- maniquí: pie, poste y cuello -->
+          <rect class="dc-stand" x="57" y="190" width="6" height="11" rx="1"/>
+          <ellipse class="dc-stand" cx="60" cy="202" rx="26" ry="5"/>
+          <rect class="dc-form" x="54" y="14" width="12" height="14" rx="3"/>
+          <ellipse class="dc-stand" cx="60" cy="14" rx="7" ry="2.5"/>
+          <!-- pantalón -->
+          <path class="dc-suit-dk" d="M40,112 L80,112 L79,194 L63,194 L60,131 L57,194 L41,194Z"/>
+          <path class="dc-crease" d="M49,124 L49,192 M71,124 L71,192"/>
+          <!-- mangas y puños -->
+          <path class="dc-suit-dk" d="M38,30 L29,35 L24,110 L34,111 L39,50Z"/>
+          <path class="dc-suit-dk" d="M82,30 L91,35 L96,110 L86,111 L81,50Z"/>
+          <rect class="dc-shirt" x="24" y="108" width="11" height="3" rx="1"/>
+          <rect class="dc-shirt" x="85" y="108" width="11" height="3" rx="1"/>
+          <!-- saco -->
+          <path class="dc-suit" d="M38,29 Q60,23 82,29 L85,114 Q72,118 60,114 Q48,118 35,114Z"/>
+          <!-- camisa y corbata -->
+          <path class="dc-shirt" d="M52,25 L68,25 L60,68Z"/>
+          <path class="dc-tie" d="M57.4,30 L62.6,30 L64,36 L61.4,66 L60,68 L58.6,66 L56,36Z"/>
+          <!-- solapas -->
+          <path class="dc-suit-lt" d="M52,25 L46,32 L52,48 L49,52 L60,78 L60,68Z"/>
+          <path class="dc-suit-lt" d="M68,25 L74,32 L68,48 L71,52 L60,78 L60,68Z"/>
+          <!-- botones y bolsillos -->
+          <circle class="dc-btn" cx="60" cy="86" r="1.8"/>
+          <circle class="dc-btn" cx="60" cy="97" r="1.8"/>
+          <rect class="dc-suit-dk" x="40" y="92" width="13" height="2.4" rx="1"/>
+          <rect class="dc-suit-dk" x="67" y="92" width="13" height="2.4" rx="1"/>
+          <!-- pañuelo del bolsillo -->
+          <rect class="dc-suit-dk" x="66" y="49" width="11" height="2.2" rx="1"/>
+          <path class="dc-shirt" d="M67,49 L69,44 L71,48 L73,43 L75,49Z"/>
+          <!-- boutonnière: la misma flor del fajín de la novia -->
+          <g transform="translate(47,45)">
+            <circle class="dc-petal" r="3.4"/>
+            <circle class="dc-heart" r="1.3"/>
+            <path class="dc-leaf" d="M-1.5,2.4 L-4.4,6.8 L-2.2,6.8 L0.4,3Z"/>
+          </g>
         </svg>
       </div>
       <p class="dresscode-note">Y con cariño, reservemos el blanco para la novia.</p>
