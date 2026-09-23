@@ -147,7 +147,10 @@ body { background: var(--color-neutral-100); }
   margin: 22px 0 0; font-size: 13px; line-height: 1.9; letter-spacing: .06em;
   text-transform: uppercase; color: var(--color-accent-700);
 }
-.hero-copy .countdown-grid { margin: 18px 0 0; }
+/* La cuenta regresiva vive ahora en «Reserva la fecha», junto al resto
+   de datos de la fecha. En la portada competía con los nombres, el
+   lugar y el botón. */
+.save-date .countdown-grid { margin: 22px 0 0; }
 .hero-cta { margin-top: auto; padding-top: 26px; }
 .hero .photo { min-height: 320px; }
 @media (max-width: 860px) {
@@ -1026,11 +1029,35 @@ body { background: var(--color-neutral-100); }
 /* — FAQ — */
 .faq { padding: 56px 44px; background: var(--color-neutral-100); }
 .faq-head { text-align: center; margin-bottom: 28px; }
-.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 920px; margin: 0 auto; }
-.faq-item { background: var(--color-bg); border-radius: 28px; padding: 20px 22px; }
-.faq-item .q { font-size: 16px; font-weight: 600; }
-.faq-item .a { margin: 6px 0 0; font-size: 14px; line-height: 1.6; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
-@media (max-width: 720px) { .faq-grid { grid-template-columns: 1fr; } }
+/* Acordeón en una sola columna. Con las cuatro respuestas siempre
+   abiertas, y en dos columnas, la sección medía casi dos pantallas de
+   celular y obligaba a leer de todo para encontrar la pregunta propia.
+   Plegado se ven las cuatro de un vistazo. Todo el abrir/cerrar lo pone
+   <details>, así que no hay JS ni estado que mantener. */
+.faq-grid { display: grid; gap: 10px; max-width: 640px; margin: 0 auto; }
+.faq-item { background: var(--color-bg); border-radius: 20px; }
+/* La fila que se toca: ocupa el ancho completo y llega a 44px de alto,
+   el mínimo táctil. */
+.faq-item .q {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 15px 20px; min-height: 44px; box-sizing: border-box;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  list-style: none; /* quita el triangulito por defecto */
+}
+.faq-item .q::-webkit-details-marker { display: none; } /* Safari */
+.faq-item .q:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; border-radius: 20px; }
+/* Flecha dibujada con dos bordes: gira al abrir y no necesita imagen. */
+.faq-item .q::after {
+  content: ""; flex: none; width: 8px; height: 8px; margin-top: -4px;
+  border-right: 2px solid var(--color-accent-600);
+  border-bottom: 2px solid var(--color-accent-600);
+  transform: rotate(45deg); transition: transform .2s ease;
+}
+.faq-item[open] .q::after { transform: rotate(-135deg); margin-top: 3px; }
+.faq-item .a {
+  margin: 0; padding: 0 20px 16px; font-size: 14px; line-height: 1.6;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
 
 /* — footer / cuenta regresiva — */
 /* El pie era marrón oscuro; el bloque 11 lo quiere blanco como el resto
@@ -1039,8 +1066,6 @@ body { background: var(--color-neutral-100); }
   background: #ffffff; color: var(--color-text); padding: 44px; text-align: center;
   border-top: 1px solid var(--color-divider);
 }
-.countdown-label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--color-accent); }
-.site-footer .countdown-grid { margin: 16px 0 24px; }
 
 /* — cuenta regresiva: mismo componente en la portada y en el pie — */
 .countdown-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
@@ -1052,7 +1077,6 @@ body { background: var(--color-neutral-100); }
 }
 /* el pie ya tiene fondo oscuro — un tono apenas más claro para que las
    cajas se distingan de ese fondo en vez de fundirse con él */
-.site-footer .countdown-box { background: var(--color-neutral-300); box-shadow: none; }
 .countdown-num {
   font-family: var(--font-heading); font-size: 30px; line-height: 1;
   font-variant-numeric: lining-nums; color: var(--color-accent-800);

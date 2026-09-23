@@ -106,18 +106,19 @@
 <header class="nav site-nav">
   <span class="nav-brand">A &amp; K</span>
   <button class="btn btn-icon nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
-  <!-- Un link por sección, en el mismo orden en que aparecen en la
-       página. El botón lleva a #rsvp, así que la confirmación no repite
-       link. Al agregar o quitar una sección, actualizar también acá. -->
+  <!-- Cinco enlaces, no uno por sección. Con ocho, y desde que los
+       enlaces miden 44px para el dedo, el menú desplegado ocupaba casi
+       toda la pantalla del celular. Quedan los cinco que un invitado
+       busca de verdad; se van "Inicio" (el nombre de arriba ya vuelve
+       al principio), "La boda" y "Oración", que siguen en la página
+       pero no son destinos que alguien busque en un menú. El botón
+       lleva a #rsvp, así que la confirmación no repite link. -->
   <nav class="nav-links">
-    <a href="#inicio">Inicio</a>
     <a href="#fecha">Fecha</a>
-    <a href="#boda">La boda</a>
     <a href="#lugar">Lugar</a>
-    <a href="#regalos">Regalos</a>
     <a href="#vestimenta">Vestimenta</a>
+    <a href="#regalos">Regalos</a>
     <a href="#preguntas">P&amp;R</a>
-    <a href="#oracion">Oración</a>
     <a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a>
   </nav>
 </header>
@@ -147,12 +148,6 @@
       <div class="hero-date">09 · 01 · 2027</div>
       <p class="hero-venue">4:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
       <p class="hero-welcome" data-guest-welcome hidden></p>
-      <div class="countdown-grid">
-        <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
-        <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
-        <div class="countdown-box"><span class="countdown-num" data-countdown="mins">–</span><span class="countdown-lbl">min</span></div>
-        <div class="countdown-box"><span class="countdown-num" data-countdown="segs">–</span><span class="countdown-lbl">seg</span></div>
-      </div>
       <div class="hero-cta"><a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a></div>
     </div>
     <div class="photo">
@@ -187,6 +182,12 @@
         </div>
       </div>
       <p class="save-date-note">La ceremonia empieza puntual a las <strong>4:00 p.m.</strong> en la Iglesia Vida Nueva Rinconada, La Molina. Te esperamos desde las <strong>2:30 p.m.</strong> para acomodarnos con calma.</p>
+      <div class="countdown-grid">
+        <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
+        <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
+        <div class="countdown-box"><span class="countdown-num" data-countdown="mins">–</span><span class="countdown-lbl">min</span></div>
+        <div class="countdown-box"><span class="countdown-num" data-countdown="segs">–</span><span class="countdown-lbl">seg</span></div>
+      </div>
       <div class="save-date-actions">
         <button type="button" class="btn btn-primary" id="save-date-calendar">Agregar al calendario</button>
         <a class="btn btn-secondary" data-directions-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Cómo llegar</a>
@@ -507,11 +508,28 @@
         <div class="section-kicker">Preguntas y respuestas</div>
         <h2 class="section-title" style="font-size:38px">Lo que suelen preguntarnos</h2>
       </div>
+      <!-- Acordeón (<details>/<summary>), no tarjetas abiertas: con las
+           cuatro respuestas desplegadas esta sección ocupaba casi dos
+           pantallas de celular. Plegadas se ven las cuatro preguntas de
+           un vistazo. <details> ya trae el abrir/cerrar y el soporte de
+           teclado y lectores de pantalla, así que no necesita JS. -->
       <div class="faq-grid">
-        <div class="faq-item"><div class="q">¿Puedo llevar niños?</div><p class="a">La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.</p></div>
-        <div class="faq-item"><div class="q">¿Hasta cuándo puedo confirmar?</div><p class="a">Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 30 de octubre de 2026. Después ya no podremos agregar cubiertos.</p></div>
-        <div class="faq-item"><div class="q">¿Puedo llevar acompañante?</div><p class="a">Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.</p></div>
-        <div class="faq-item"><div class="q">¿Hay estacionamiento?</div><p class="a">Sí, alrededor del recinto y contaremos con personal de seguridad. Llega con 20 minutos de anticipación.</p></div>
+        <details class="faq-item">
+          <summary class="q">¿Puedo llevar niños?</summary>
+          <p class="a">La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">¿Hasta cuándo puedo confirmar?</summary>
+          <p class="a">Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 30 de octubre de 2026. Después ya no podremos agregar cubiertos.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">¿Puedo llevar acompañante?</summary>
+          <p class="a">Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">¿Hay estacionamiento?</summary>
+          <p class="a">Sí, alrededor del recinto y contaremos con personal de seguridad. Llega con 20 minutos de anticipación.</p>
+        </details>
       </div>
     </div>
   </section>
@@ -572,13 +590,6 @@
 </div>
 
 <footer class="site-footer">
-  <div class="countdown-label">Faltan</div>
-  <div class="countdown-grid">
-    <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
-    <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
-    <div class="countdown-box"><span class="countdown-num" data-countdown="mins">–</span><span class="countdown-lbl">min</span></div>
-    <div class="countdown-box"><span class="countdown-num" data-countdown="segs">–</span><span class="countdown-lbl">seg</span></div>
-  </div>
   <div class="names">André &amp; Krisli</div>
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
