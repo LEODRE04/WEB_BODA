@@ -378,12 +378,14 @@ body { background: var(--color-neutral-100); }
 }
 .pay-row.copied .pay-copy-i { display: none; }
 .pay-row.copied .pay-copy-ok { display: block; }
-/* Fuera de la tarjeta: cierra el bloque y evita repetir el titular en
-   cada banco. */
+/* Cierra el bloque y evita repetir el titular en cada banco. En la
+   invitación va DENTRO del desplegable: plegado, decir "todas a nombre
+   de André Leon" mientras las cuentas están ocultas no significa nada. */
 .pay-note {
-  margin: 14px 0 0; font-size: 13.5px; text-align: center;
+  margin: 12px 0 14px; font-size: 13.5px; text-align: center;
   color: color-mix(in srgb, var(--color-text) 62%, transparent);
 }
+.gift-contribute-howto .pay-note { margin: 14px 0 0; }
 
 @media (max-width: 860px) {
   .details-grid { grid-template-columns: 1fr; }
@@ -695,7 +697,12 @@ body { background: var(--color-neutral-100); }
 .gift-contribute-fields { display: grid; gap: 12px; margin-top: 16px; }
 /* En el panel de aporte la tarjeta es mucho más angosta que en la
    invitación, así que las cifras bajan un escalón para que la lista no
-   se estire de más. */
+   se estire de más.
+   Acá la lista va SIEMPRE desplegada, al revés que en la invitación: el
+   invitado ya eligió su regalo y entró a transferir, así que esconderle
+   los números detrás de un clic es justo lo contrario de lo que vino a
+   hacer. Además el panel son dos columnas, y con la lista plegada la
+   derecha terminaba 277px antes que la izquierda. */
 .gift-contribute-howto .pay-list { max-width: none; gap: 8px; }
 .gift-contribute-howto .pay-sheet { padding: 2px 13px; }
 .gift-contribute-howto .pay-bank { padding: 11px 0; }
