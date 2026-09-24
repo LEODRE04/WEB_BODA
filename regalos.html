@@ -88,8 +88,8 @@
                   <p>¡Muchas gracias! Con tu aporte, André y Krisli ya podrán comprarlo.</p>
                 </div>
               </div>
-              <div class="field"><label for="gift-nombre">De parte de</label><input class="input" id="gift-nombre"></div>
-              <div class="field"><label for="gift-mensaje">Mensaje (opcional)</label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
+              <div class="field"><label for="gift-nombre">De parte de <span class="field-tag is-req">obligatorio</span></label><input class="input" id="gift-nombre"></div>
+              <div class="field"><label for="gift-mensaje">Mensaje <span class="field-tag is-opt">opcional</span></label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
             </div>
             <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
           </div>
@@ -100,7 +100,10 @@
             <!-- Mismos datos que la mesa de regalos de index.html. Si cambian,
                  actualizar los dos lugares (y el bloque gifts de config.js). -->
             <div class="pay-card-wrap">
-              <div class="pay-sheet">
+              <details class="pay-sheet">
+                <summary class="pay-toggle">
+                  <span class="pay-toggle-txt">Ver los datos para transferir</span>
+                </summary>
                 <div class="pay-bank">
                   <span class="pay-bank-tag">Yape / Plin</span>
                   <div class="pay-row">
@@ -145,12 +148,12 @@
                     <button class="pay-copy" type="button" data-copy="00389801322504782240" aria-label="Copiar el CCI de Interbank"><svg class="pay-copy-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="pay-copy-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
                   </div>
                 </div>
-              </div>
+              </details>
               <p class="pay-note">Todas a nombre de André Leon.</p>
             </div>
 
             <div class="field" style="margin-top:14px">
-              <label for="gift-comprobante">Constancia de la transferencia</label>
+              <label for="gift-comprobante">Constancia de la transferencia <span class="field-tag is-opt">opcional</span></label>
               <label class="gift-upload" for="gift-comprobante" id="gift-upload-label">Toca para elegir la captura</label>
               <input type="file" id="gift-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
             </div>

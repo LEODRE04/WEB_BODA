@@ -74,7 +74,46 @@
   }
 
   // Sin timeout, un backend colgado deja "Enviando…" para siempre.
-  var API_TIMEOUT_MS = 15000;
+  // Apps Script arranca en frío: la PRIMERA petición después de un rato
+  // sin uso levanta el contenedor y abre la hoja, y puede tardar 20-40s
+  // (medido: 1.7s, 3.6s, 10.7s, 13.3s y hasta 21s en la misma tarde). Con
+  // los 15s de antes, esa primera se abortaba y al invitado le salía "no
+  // pudimos cargar la lista de regalos" — que es justo lo que pasaba.
+  var API_TIMEOUT_MS = 30000;
+
+  // — llevar la pantalla al campo que falta —
+  // El aviso de error vive al pie del formulario, así que con el teclado
+  // abierto en el celular queda fuera de vista: el invitado tocaba
+  // "Confirmar", no pasaba nada visible y volvía a tocar. Esto marca el
+  // campo, lo enfoca y lo trae al centro de la pantalla.
+  // Va al centro de la pantalla (block: "center") y no arriba: así la
+  // barra fija no lo tapa y no hace falta compensar su alto.
+  function enfocarCampoFaltante(campo) {
+    if (!campo) return;
+    var envoltorio = campo.closest(".field") || campo;
+    envoltorio.classList.add("is-missing");
+    if (campo.setAttribute) campo.setAttribute("aria-invalid", "true");
+    try {
+      campo.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (e) {
+      campo.scrollIntoView();
+    }
+    // El foco va después del scroll, y a propósito SIN preventScroll:
+    // son dos vías independientes para lo mismo. Si el desplazamiento
+    // suave ya dejó el campo centrado, focus() no mueve nada; y si por
+    // lo que sea no ocurrió, focus() lo trae a la vista igual. Con
+    // preventScroll, un scrollIntoView que falle dejaría al invitado sin
+    // ver el campo y sin entender por qué no pasa nada.
+    setTimeout(function () { campo.focus(); }, 320);
+    var limpiar = function () {
+      envoltorio.classList.remove("is-missing");
+      campo.removeAttribute("aria-invalid");
+      campo.removeEventListener("input", limpiar);
+      campo.removeEventListener("change", limpiar);
+    };
+    campo.addEventListener("input", limpiar);
+    campo.addEventListener("change", limpiar);
+  }
 
   function fetchConTimeout(url, options, timeoutMs) {
     options = options || {};
@@ -590,7 +629,12 @@
       return lista.slice().sort(function (a, b) { return a.precio - b.precio; });
     }
 
-    function cargarRegalos() {
+    // Un reintento automático, y solo uno. La causa habitual del fallo es
+    // el arranque en frío de Apps Script: la petición que falla es la que
+    // despierta el backend, así que la segunda suele volver en 1-3s. Sin
+    // esto, el invitado veía el error y tenía que tocar "Reintentar" él
+    // mismo para algo que se arregla solo.
+    function cargarRegalos(esReintento) {
       if (!url) { errorDeCarga = true; regalos = []; renderGrid(); return; }
       return fetchConTimeout(url + "?tipo=regalos", { cache: "no-store" })
         .then(function (r) { return r.json(); })
@@ -600,6 +644,10 @@
           renderGrid();
         })
         .catch(function (err) {
+          if (!esReintento) {
+            console.warn("Primer intento fallido, reintentando:", err);
+            return cargarRegalos(true);
+          }
           console.warn("No se pudo cargar la lista de regalos:", err);
           errorDeCarga = true;
           regalos = [];
@@ -660,11 +708,13 @@
       if (!nombre) {
         errorEl.textContent = "Escribe tu nombre para que sepamos de parte de quién es.";
         errorEl.hidden = false;
+        enfocarCampoFaltante(nombreInput);
         return;
       }
       if (!monto || monto <= 0) {
         errorEl.textContent = "El monto tiene que ser mayor a 0.";
         errorEl.hidden = false;
+        enfocarCampoFaltante(montoNumInput);
         return;
       }
       errorEl.hidden = true;

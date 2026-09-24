@@ -80,6 +80,10 @@
   // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
   // (funciona con Apple/Google/Outlook Calendar) en vez de depender de un
   // link a un solo proveedor — no requiere backend ni conexión.
+  // Sin uso por ahora: el botón "Agregar al calendario" se quitó de
+  // "Reserva la fecha" (se encimaba con la cuenta regresiva en celular).
+  // La función se conserva armada porque genera el .ics al vuelo: si el
+  // botón vuelve, basta con volver a ponerlo en el HTML.
   function initSaveDateCalendar() {
     var btn = document.querySelector("#save-date-calendar");
     if (!btn) return;
@@ -760,8 +764,17 @@
 
       var errorEl = form.querySelector(".rsvp-error");
       if (!data.nombre || !data.asistencia) {
-        errorEl.textContent = "Completa tu nombre y si podrás asistir.";
-        errorEl.hidden = false;
+        // El mensaje nombra SOLO lo que falta: "completa tu nombre y si
+        // podrás asistir" cuando ya escribió el nombre confunde.
+        if (!data.nombre) {
+          errorEl.textContent = "Nos falta tu nombre para guardar la confirmación.";
+          errorEl.hidden = false;
+          enfocarCampoFaltante(form.querySelector("#rsvp-nombre"));
+        } else {
+          errorEl.textContent = "Falta decirnos si podrás acompañarnos.";
+          errorEl.hidden = false;
+          enfocarCampoFaltante(form.querySelector("input[name=\"asistencia\"]"));
+        }
         return;
       }
       errorEl.hidden = true;
@@ -913,7 +926,12 @@
   // despertar) deja el botón en "Enviando…" para siempre, sin error ni
   // forma de reintentar. AbortController corta a los 15s y el fallo se
   // trata igual que cualquier otro problema de conexión.
-  var API_TIMEOUT_MS = 15000;
+  // Apps Script arranca en frío: la PRIMERA petición después de un rato
+  // sin uso levanta el contenedor y abre la hoja, y puede tardar 20-40s
+  // (medido: 1.7s, 3.6s, 10.7s, 13.3s y hasta 21s en la misma tarde). Con
+  // los 15s de antes, esa primera se abortaba y al invitado le salía "no
+  // pudimos cargar la lista de regalos" — que es justo lo que pasaba.
+  var API_TIMEOUT_MS = 30000;
   var PENDIENTE_KEY = "rsvp_pendiente";
 
   // — aviso de transferencia (bloques 3a y 6g de claude.ai/design) —
@@ -1018,6 +1036,7 @@
     enviarBtn.addEventListener("click", function () {
       var mensaje = mensajeEl.value.trim();
       if (!mensaje) {
+        enfocarCampoFaltante(mensajeEl);
         errorEl.textContent = "Escríbeles un mensaje, aunque sea corto — es lo que les llega.";
         errorEl.hidden = false;
         mensajeEl.setAttribute("aria-invalid", "true");
@@ -1062,6 +1081,40 @@
           enviarBtn.textContent = etiquetaEnvio;
         });
     });
+  }
+
+  // — llevar la pantalla al campo que falta —
+  // El aviso de error vive al pie del formulario, así que con el teclado
+  // abierto en el celular queda fuera de vista: el invitado tocaba
+  // "Confirmar", no pasaba nada visible y volvía a tocar. Esto marca el
+  // campo, lo enfoca y lo trae al centro de la pantalla.
+  // Va al centro de la pantalla (block: "center") y no arriba: así la
+  // barra fija no lo tapa y no hace falta compensar su alto.
+  function enfocarCampoFaltante(campo) {
+    if (!campo) return;
+    var envoltorio = campo.closest(".field") || campo;
+    envoltorio.classList.add("is-missing");
+    if (campo.setAttribute) campo.setAttribute("aria-invalid", "true");
+    try {
+      campo.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (e) {
+      campo.scrollIntoView();
+    }
+    // El foco va después del scroll, y a propósito SIN preventScroll:
+    // son dos vías independientes para lo mismo. Si el desplazamiento
+    // suave ya dejó el campo centrado, focus() no mueve nada; y si por
+    // lo que sea no ocurrió, focus() lo trae a la vista igual. Con
+    // preventScroll, un scrollIntoView que falle dejaría al invitado sin
+    // ver el campo y sin entender por qué no pasa nada.
+    setTimeout(function () { campo.focus(); }, 320);
+    var limpiar = function () {
+      envoltorio.classList.remove("is-missing");
+      campo.removeAttribute("aria-invalid");
+      campo.removeEventListener("input", limpiar);
+      campo.removeEventListener("change", limpiar);
+    };
+    campo.addEventListener("input", limpiar);
+    campo.addEventListener("change", limpiar);
   }
 
   function fetchConTimeout(url, options, timeoutMs) {
