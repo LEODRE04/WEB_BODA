@@ -243,10 +243,8 @@
 
     var pickedNameEl = document.querySelector("#gift-picked-name");
     var pickedProgressEl = document.querySelector("#gift-picked-progress");
-    var montoInput = document.querySelector("#gift-monto");
     var montoNumInput = document.querySelector("#gift-monto-num");
-    var montoBubbleEl = document.querySelector("#gift-monto-bubble");
-    var montoMarksEl = document.querySelector("#gift-monto-marks");
+    var montosEl = document.querySelector("#gift-montos");
     var completeHintEl = document.querySelector("#gift-complete-hint");
     var nombreInput = document.querySelector("#gift-nombre");
     var mensajeInput = document.querySelector("#gift-mensaje");
@@ -512,74 +510,76 @@
     }
 
     // Slider del monto a aportar — inspirado en el "discrete slider" de
-    // MUI: arranca en el monto final (lo que falta para completar el
-    // regalo) y se puede arrastrar hacia abajo para dar solo una parte.
-    // El paso (step) se ajusta según el monto — de a 1 sol para montos
-    // chicos, de a 10 para los grandes — así no queda ni muy tosco ni
-    // con demasiados pasos para arrastrar.
-    function sliderStepFor(max) {
-      if (max > 200) return 10;
-      if (max > 50) return 5;
-      return 1;
-    }
-
-    // El monto que vale es el del campo escrito, no el del riel: el riel
-    // avanza de a S/5 o S/10 (sliderStepFor) y no puede representar un
-    // "S/ 137". El riel es un atajo para elegir rápido; el campo es el
-    // dato que se envía.
+    // El monto que vale es SIEMPRE el del campo escrito. Las pastillas de
+    // montos sugeridos solo lo rellenan, así que quien quiere una cifra
+    // exacta ("S/ 137") la escribe y punto.
     function montoActual() {
       var v = Number(montoNumInput.value);
       return isFinite(v) && v > 0 ? v : 0;
     }
 
-    function updateSliderVisual() {
-      var min = Number(montoInput.min), max = Number(montoInput.max), val = Number(montoInput.value);
-      // Cuando min === max (un regalo ya casi completo, con solo 1 sol de
-      // margen) el thumb queda fijo al inicio del riel — el relleno
-      // también va a 0% para que coincida, en vez de mostrarse lleno con
-      // el thumb en el otro extremo.
-      var pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
-      montoInput.style.setProperty("--fill", pct + "%");
-      if (montoBubbleEl) {
-        // La burbuja muestra lo que se va a aportar de verdad (el campo),
-        // aunque el thumb se haya acomodado al escalón más cercano. Si no,
-        // alguien que escribe 137 vería "S/ 140" flotando sobre el riel.
-        montoBubbleEl.textContent = money(montoActual());
-        montoBubbleEl.style.left = pct + "%";
-      }
+    // Los cuatro montos del bloque 13 (S/100, S/200, la mitad y el total)
+    // vienen escritos a mano en la maqueta, donde el regalo cuesta S/850 y
+    // nadie ha aportado. Acá se calculan sobre lo que FALTA, que es lo
+    // único que tiene sentido con regalos a medio completar:
+    //  - los fijos (100 y 200) se descartan si superan lo que falta;
+    //  - la mitad se redondea a múltiplos de 5 para que no salga "S/ 212.5";
+    //  - se quitan repetidos, que aparecen cuando falta poco (con S/200
+    //    restantes, "la mitad" es 100 y ya está en la lista).
+    // Así, si falta S/50 quedan dos pastillas y no cuatro inventadas.
+    function montosSugeridos(falta) {
+      var candidatos = [100, 200, Math.round(falta / 2 / 5) * 5, falta];
+      var vistos = {}, out = [];
+      candidatos.forEach(function (v) {
+        if (v > 0 && v <= falta && !vistos[v]) { vistos[v] = true; out.push(v); }
+      });
+      out.sort(function (a, b) { return a - b; });
+      return out;
     }
 
-    function renderSliderMarks(min, max) {
-      if (!montoMarksEl) return;
-      montoMarksEl.innerHTML = "";
-      var puntos = min === max ? [min] : [min, Math.round((min + max) / 2), max];
-      puntos.forEach(function (v) {
-        var pct = max > min ? ((v - min) / (max - min)) * 100 : 0;
-        var mark = document.createElement("span");
-        mark.className = "gift-slider-mark";
-        mark.style.left = pct + "%";
-        mark.textContent = money(v);
-        montoMarksEl.appendChild(mark);
+    function renderMontos(falta) {
+      if (!montosEl) return;
+      montosEl.innerHTML = "";
+      montosSugeridos(falta).forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "gift-monto-pill";
+        b.textContent = money(v);
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () {
+          montoNumInput.value = v;
+          marcarMontoElegido();
+          checkComplete();
+        });
+        montosEl.appendChild(b);
+      });
+      marcarMontoElegido();
+    }
+
+    // La pastilla se ilumina solo si coincide con lo que dice el campo, así
+    // que al escribir un monto propio se apagan todas — sin eso, quedaría
+    // una marcada mintiendo sobre lo que se va a aportar.
+    function marcarMontoElegido() {
+      if (!montosEl) return;
+      var actual = montoActual();
+      [].forEach.call(montosEl.children, function (b) {
+        var coincide = b.textContent === money(actual);
+        b.classList.toggle("is-selected", coincide);
+        b.setAttribute("aria-pressed", coincide ? "true" : "false");
       });
     }
 
     function initSlider(falta) {
       var min = Math.min(10, falta);
       var max = Math.max(min, falta);
-      montoInput.min = min;
-      montoInput.max = max;
-      montoInput.step = sliderStepFor(max);
-      montoInput.value = max; // arranca en el monto final (lo que falta)
       montoNumInput.min = min;
       montoNumInput.max = max;
-      montoNumInput.value = max;
-      renderSliderMarks(min, max);
-      updateSliderVisual();
+      montoNumInput.value = max; // arranca en lo que falta para completarlo
+      renderMontos(max);
     }
 
     // Aviso "con esto completas el regalo" cuando el monto ingresado
-    // alcanza o supera lo que falta — basado en un mockup de
-    // claude.ai/design.
+    // alcanza o supera lo que falta.
     function checkComplete() {
       if (!completeHintEl) return;
       var g = regalos.filter(function (r) { return r.id === seleccionadoId; })[0];
@@ -589,36 +589,22 @@
       var completa = falta > 0 && monto >= falta;
       completeHintEl.hidden = !completa;
     }
-    // Riel -> campo. Arrastrar siempre da un valor válido, así que se
-    // copia tal cual.
-    montoInput.addEventListener("input", function () {
-      montoNumInput.value = montoInput.value;
-      updateSliderVisual();
-      checkComplete();
-    });
 
-    // Campo -> riel. Acá NO se corrige lo que se escribe: si alguien
-    // empieza a tipear "150", el primer carácter es "1" y ajustarlo al
-    // mínimo en ese instante lo dejaría peleando con el campo. Solo se
-    // mueve el thumb al escalón más cercano, que es decorativo.
+    // Mientras se escribe NO se corrige el valor: si alguien va a poner
+    // 150, el primer carácter es "1" y ajustarlo al mínimo en ese instante
+    // lo dejaría peleando con el campo.
     montoNumInput.addEventListener("input", function () {
-      var v = montoActual();
-      if (v) {
-        montoInput.value = Math.min(Number(montoInput.max), Math.max(Number(montoInput.min), v));
-      }
-      updateSliderVisual();
+      marcarMontoElegido();
       checkComplete();
     });
 
-    // Al salir del campo (o dar Enter) sí se acomoda dentro del rango
-    // permitido: ya terminó de escribir.
+    // Al salir del campo (o dar Enter) sí se acomoda dentro del rango.
     montoNumInput.addEventListener("change", function () {
-      var min = Number(montoInput.min), max = Number(montoInput.max);
+      var min = Number(montoNumInput.min), max = Number(montoNumInput.max);
       var v = montoActual();
       if (!v) v = min;
       montoNumInput.value = Math.min(max, Math.max(min, Math.round(v)));
-      montoInput.value = montoNumInput.value;
-      updateSliderVisual();
+      marcarMontoElegido();
       checkComplete();
     });
 
@@ -680,19 +666,27 @@
       });
     }
 
+    // El botón de adjuntar lleva un clip (SVG) adentro, así que escribirle
+    // textContent lo borraría y quedaría una pastilla sin icono. Solo se
+    // cambia el <span> del texto.
+    var uploadTxt = uploadLabel.querySelector(".gift-upload-txt") || uploadLabel;
     fileInput.addEventListener("change", function () {
       var file = fileInput.files[0];
       if (!file) return;
-      uploadLabel.textContent = "Cargando…";
+      uploadTxt.textContent = "Cargando…";
       comprimirImagen(file)
         .then(function (dataUrl) {
           comprobanteDataUrl = dataUrl;
-          uploadLabel.textContent = "✓ " + file.name;
+          // El nombre del archivo puede ser larguísimo; se recorta para que
+          // la pastilla no se estire a media pantalla.
+          var nombre = file.name.length > 22 ? file.name.slice(0, 20) + "…" : file.name;
+          uploadTxt.textContent = nombre;
           uploadLabel.classList.add("has-file");
         })
         .catch(function () {
           comprobanteDataUrl = null;
-          uploadLabel.textContent = "No se pudo leer esa imagen, intenta con otra";
+          uploadTxt.textContent = "No se pudo leer, prueba con otra";
+          uploadLabel.classList.remove("has-file");
         });
     });
 

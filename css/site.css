@@ -475,12 +475,7 @@ body { background: var(--color-neutral-100); }
   border-color: var(--color-accent-600);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-600) 16%, transparent);
 }
-/* La zona de la constancia con el mismo radio que el mensaje, para que
-   los dos campos se lean como un solo formulario. */
-.transferencia-card .gift-upload {
-  border-radius: 12px; background: color-mix(in srgb, var(--color-bg) 55%, transparent);
-  transition: border-color .2s ease, color .2s ease;
-}
+
 /* El mensaje es obligatorio (así lo pidió André en el diseño), y la
    marca va en terracota para que se note frente al "(opcional)" de la
    constancia, que es gris. */
@@ -744,14 +739,28 @@ body { background: var(--color-neutral-100); }
   }
 }
 
+/* — adjuntar constancia (bloque 13) —
+   Era un recuadro punteado a todo el ancho que no se leía como botón —
+   fue la queja concreta de André. Ahora es una pastilla con contorno
+   verde y clip, del tamaño de un botón normal. El "· opcional" va en el
+   propio botón, en tono suave: así no hace falta la etiqueta aparte. */
 .gift-upload {
-  display: block; margin-top: 6px; padding: 16px; text-align: center;
-  border: 1.5px dashed color-mix(in srgb, var(--color-text) 30%, transparent);
-  border-radius: 20px; font-size: 13px; cursor: pointer;
-  color: color-mix(in srgb, var(--color-text) 65%, transparent);
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 20px; cursor: pointer;
+  border: 1.5px solid var(--color-accent-400);
+  border-radius: 999px; background: var(--color-bg);
+  font-size: 15px; color: var(--color-accent-700);
+  transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
 }
-.gift-upload:hover { border-color: var(--color-accent); color: var(--color-accent-700); }
-.gift-upload.has-file { border-style: solid; border-color: var(--color-accent-2); color: var(--color-accent-2-700); }
+.gift-upload svg { flex: none; width: 17px; height: 17px; }
+.gift-upload-opt { color: color-mix(in srgb, var(--color-text) 45%, transparent); font-size: 13.5px; }
+.gift-upload:hover { border-color: var(--color-accent-600); background: var(--color-accent-100); }
+.gift-upload:active { transform: scale(.98); }
+.gift-upload.has-file {
+  border-color: var(--color-accent-600); background: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+.gift-upload.has-file .gift-upload-opt { display: none; }
 
 
 /* — slider del monto a aportar: burbuja con el monto siempre visible
@@ -776,52 +785,52 @@ body { background: var(--color-neutral-100); }
 .gift-monto-num::-webkit-outer-spin-button,
 .gift-monto-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .gift-monto-num { -moz-appearance: textfield; appearance: textfield; }
-.gift-slider { position: relative; padding-top: 30px; padding-bottom: 22px; }
-.gift-slider-input {
-  -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
-  border-radius: 999px; outline: none; margin: 0; display: block; cursor: pointer;
-  background: linear-gradient(to right,
-    var(--color-accent) 0%, var(--color-accent) var(--fill, 100%),
-    var(--color-neutral-300) var(--fill, 100%), var(--color-neutral-300) 100%);
+/* — montos sugeridos (bloque 13) —
+   Reemplazan al riel: el monto se elige de un toque en vez de arrastrar.
+   Lo que el riel resolvía mal —dar una cifra exacta— lo cubre el campo
+   "Otro monto", que acá sí es un campo de verdad (en la maqueta solo lo
+   parece). */
+/* Rejilla de dos columnas, no una fila de cuatro como en la maqueta. Allí
+   los montos son S/100…S/850 y entran en línea; acá pueden ser S/1330 o
+   S/3000 y, con flex, la cuarta pastilla caía sola y estirada a todo el
+   ancho. Con 2x2 el bloque queda parejo con cualquier cifra, y si hay
+   menos de cuatro montos tampoco se deforma. */
+.gift-montos {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 8px; margin-bottom: 12px;
 }
-.gift-slider-input::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: transparent; }
-.gift-slider-input::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 999px;
-  background: var(--color-accent); border: 3px solid var(--color-bg); box-shadow: var(--shadow-sm);
-  margin-top: -7px; cursor: pointer; transition: transform .15s ease;
+.gift-monto-pill {
+  min-height: 48px; padding: 0 12px;
+  border-radius: 999px; cursor: pointer;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-neutral-600);
+  color: var(--color-text);
+  font-family: var(--font-heading); font-size: 18px; font-weight: 700;
+  font-variant-numeric: lining-nums;
+  transition: background-color .15s ease, color .15s ease, transform .1s ease;
 }
-.gift-slider-input:active::-webkit-slider-thumb { transform: scale(1.15); }
-.gift-slider-input::-moz-range-track { height: 6px; border-radius: 999px; background: var(--color-neutral-300); }
-.gift-slider-input::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--color-accent); }
-.gift-slider-input::-moz-range-thumb {
-  width: 20px; height: 20px; border-radius: 999px; border: 3px solid var(--color-bg);
-  background: var(--color-accent); box-shadow: var(--shadow-sm); cursor: pointer;
+.gift-monto-pill:hover { border-color: var(--color-accent-600); }
+.gift-monto-pill:active { transform: scale(.97); }
+.gift-monto-pill:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.gift-monto-pill.is-selected {
+  background: var(--color-accent-600); border-color: var(--color-accent-600); color: #fff;
 }
-.gift-slider-bubble {
-  position: absolute; top: 0; left: 0; transform: translateX(-50%);
-  font-size: 12.5px; font-weight: 600; color: #fff;
-  background: var(--color-accent); padding: 4px 10px; border-radius: 999px;
-  white-space: nowrap; pointer-events: none;
+.gift-monto-otro {
+  display: block; margin-bottom: 5px; font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
 }
-.gift-slider-bubble::after {
-  content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
-  border: 5px solid transparent; border-top-color: var(--color-accent);
-}
-.gift-slider-marks { position: relative; height: 15px; margin-top: 6px; }
-.gift-slider-mark {
-  position: absolute; left: 0; transform: translateX(-50%); font-size: 10.5px;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent); white-space: nowrap;
-}
-
-/* — aviso "con esto completas el regalo" cuando el monto ingresado
-   alcanza o supera lo que falta — basado en un mockup de
-   claude.ai/design. — */
+/* — aviso de "completas el regalo" —
+   El bloque 13 lo baja de banner verde oscuro a una línea con un check.
+   Antes pesaba más que el propio campo del monto. */
 .gift-complete-hint {
-  margin-top: 14px; background: var(--color-accent-2); color: var(--color-accent-2-100, #f0fae1);
-  border-radius: 20px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 12px 0 0; font-size: 15px; line-height: 1.45;
+  color: var(--color-text);
 }
-.gift-complete-hint strong { display: block; font-size: 14px; }
-.gift-complete-hint p { margin: 4px 0 0; font-size: 13px; line-height: 1.6; opacity: .92; }
+.gift-complete-hint svg {
+  flex: none; width: 18px; height: 18px; margin-top: 2px;
+  color: var(--color-accent-600);
+}
 
 /* — modal "Cómo funciona la lista" (al entrar a la página) — */
 .gift-intro { opacity: 0; transition: opacity .2s ease; }
@@ -1566,4 +1575,53 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .rsvp-note { font-size: 13.5px; }
   .rsvp-success { font-size: 15px; }
   .rsvp-error, .gift-error { font-size: 15px; }
+}
+
+
+/* — pasos numerados del panel de aporte (bloque 13) —
+   El bloque ordena la sección en tres: cuánto → a dónde → de parte de
+   quién. El número ayuda a que se lea como un recorrido y no como un
+   formulario suelto. */
+.gift-step {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 0 12px;
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 20px; color: var(--color-text);
+}
+.gift-step-n {
+  flex: none; width: 26px; height: 26px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--color-accent-100); color: var(--color-accent-800);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+/* Cabecera a todo el ancho: el regalo elegido y su avance mandan sobre
+   las dos columnas, no sobre una. */
+.gift-contribute-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+  padding-bottom: 18px; margin-bottom: 22px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
+}
+.gift-contribute-head .gift-progress { flex: 1 1 280px; max-width: 320px; margin: 0; }
+/* El riel vacío es neutral-300, que es exactamente el fondo de esta
+   tarjeta: dentro de la cabecera la barra desaparecía y solo se leía el
+   texto. Un tono más oscuro la devuelve. */
+.gift-contribute-head .gift-progress-bar { background: var(--color-neutral-500); }
+.gift-contribute-head .gift-progress-label { text-align: right; }
+/* Pie a todo el ancho: adjuntar y enviar van DESPUÉS de los tres pasos.
+   En el bloque 13a el botón vive en la columna de los datos bancarios, y
+   como el nombre está en la otra, se llega a "Ya transferí" sin haber
+   dicho quién eres. */
+.gift-contribute-foot {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
+}
+.gift-contribute-foot .gift-error { width: 100%; margin: 0; }
+.gift-contribute-foot .btn { width: 100%; margin: 0; }
+@media (max-width: 720px) {
+  .gift-contribute-head { display: block; }
+  .gift-contribute-head .gift-progress { max-width: none; margin-top: 12px; }
 }

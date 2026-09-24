@@ -55,48 +55,56 @@
 
       <div class="gift-contribute" id="gift-contribute" hidden>
         <button type="button" class="gift-mobile-back" id="gift-mobile-back">← Volver a la lista</button>
-        <div class="gift-contribute-grid">
-          <div class="gift-contribute-picked">
+        <!-- Cabecera a todo el ancho (bloque 13a): el regalo elegido y su
+             avance mandan sobre las dos columnas, no sobre una. -->
+        <div class="gift-contribute-head">
+          <div>
             <div class="details-label">Tu regalo</div>
             <div class="details-heading" id="gift-picked-name" style="font-size:24px">—</div>
-            <div class="gift-progress" id="gift-picked-progress"></div>
+          </div>
+          <div class="gift-progress" id="gift-picked-progress"></div>
+        </div>
+        <div class="gift-contribute-grid">
+          <div class="gift-contribute-picked">
             <div class="gift-contribute-fields">
               <div class="field">
-                <label for="gift-monto-num">Monto a aportar (S/)</label>
-                <!-- El monto se podía elegir SOLO arrastrando, así que no
-                     había forma de aportar una cifra exacta (el riel va de
-                     a S/5 o S/10). Este campo es ahora el valor de verdad
-                     y el riel queda como atajo para elegir rápido; los dos
-                     se mantienen sincronizados (initSlider en regalos.js).
-                     inputmode="numeric" abre el teclado de números. -->
+                <div class="gift-step"><span class="gift-step-n">1</span>¿Cuánto quieres aportar?</div>
+                <!-- Montos sugeridos en vez del riel: el bloque 13 elige el
+                     monto de un toque. A diferencia de la maqueta, que los
+                     trae escritos a mano, acá se calculan sobre lo que FALTA
+                     del regalo (ver montosSugeridos en regalos.js). -->
+                <div class="gift-montos" id="gift-montos" role="group" aria-label="Montos sugeridos"></div>
+                <label class="gift-monto-otro" for="gift-monto-num">Otro monto</label>
+                <!-- En la maqueta "Otro monto" NO es un campo de verdad: en
+                     web solo lo parece y en móvil es un enlace subrayado. Acá
+                     sí funciona, que es lo que permite aportar una cifra
+                     exacta. Es el valor que manda: las pastillas de arriba
+                     solo lo rellenan. inputmode abre el teclado numérico. -->
                 <div class="gift-monto-field">
                   <span class="gift-monto-prefix" aria-hidden="true">S/</span>
                   <input type="number" class="input gift-monto-num" id="gift-monto-num"
                          inputmode="numeric" step="1" min="1" value="1">
                 </div>
-                <div class="gift-slider">
-                  <output class="gift-slider-bubble" id="gift-monto-bubble" for="gift-monto"></output>
-                  <input type="range" class="gift-slider-input" id="gift-monto" min="1" max="1" step="1" value="1" aria-label="Monto a aportar, en soles">
-                  <div class="gift-slider-marks" id="gift-monto-marks"></div>
-                </div>
-                <!-- Aviso cuando el monto alcanza o supera lo que falta —
-                     pegado al slider (basado en un mockup de
-                     claude.ai/design, pero ahí quedaba lejos, como una
-                     nota al pie en vez de una reacción al slider). -->
-                <div class="gift-complete-hint" id="gift-complete-hint" hidden>
-                  <strong>Con esto completas el regalo</strong>
-                  <p>¡Muchas gracias! Con tu aporte, André y Krisli ya podrán comprarlo.</p>
-                </div>
+                <!-- Aviso de "completas el regalo": el bloque 13 lo baja de
+                     banner verde oscuro a una línea con un check al lado del
+                     monto. Antes pesaba más que el propio campo. -->
+                <p class="gift-complete-hint" id="gift-complete-hint" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                  Con esto completas el regalo. ¡Muchas gracias!
+                </p>
               </div>
-              <div class="field"><label for="gift-nombre">De parte de <span class="field-tag is-req">obligatorio</span></label><input class="input" id="gift-nombre"></div>
-              <div class="field"><label for="gift-mensaje">Mensaje <span class="field-tag is-opt">opcional</span></label><input class="input" id="gift-mensaje" placeholder="Con todo nuestro cariño…"></div>
+              <div class="field">
+                <div class="gift-step"><span class="gift-step-n">3</span>De parte de</div>
+                <label for="gift-nombre" class="sr-only-label">Tu nombre <span class="field-tag is-req">obligatorio</span></label>
+                <input class="input" id="gift-nombre" placeholder="Tu nombre">
+              </div>
+              <div class="field"><label for="gift-mensaje">Mensaje <span class="field-tag is-opt">opcional</span></label><input class="input" id="gift-mensaje" placeholder="Un mensaje para los novios, si quieres…"></div>
             </div>
             <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
           </div>
 
           <div class="gift-contribute-howto">
-            <div class="details-label">Cómo aportar</div>
-            <div class="details-heading" style="font-size:20px;margin:6px 0 14px">Transferencia o Yape</div>
+            <div class="gift-step"><span class="gift-step-n">2</span>Transfiere a cualquiera</div>
             <!-- Mismos datos que la mesa de regalos de index.html. Si cambian,
                  actualizar los dos lugares (y el bloque gifts de config.js). -->
             <div class="pay-card-wrap">
@@ -149,15 +157,26 @@
               <p class="pay-note">Todas a nombre de André Leon.</p>
             </div>
 
-            <div class="field" style="margin-top:14px">
-              <label for="gift-comprobante">Constancia de la transferencia <span class="field-tag is-opt">opcional</span></label>
-              <label class="gift-upload" for="gift-comprobante" id="gift-upload-label">Toca para elegir la captura</label>
-              <input type="file" id="gift-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
-            </div>
-
-            <p class="gift-error" id="gift-error" role="alert" hidden></p>
-            <button class="btn btn-primary btn-block" type="button" id="gift-submit" style="margin-top:6px">Ya transferí, avisar a los novios</button>
           </div>
+        </div>
+
+        <!-- Adjuntar y enviar van en un pie a todo el ancho, no dentro de la
+             columna derecha. En 13a el botón vive junto a los datos
+             bancarios, y como el nombre está en la OTRA columna, se llega a
+             "Ya transferí" sin haber dicho quién eres — lo advierte el propio
+             bloque. Acá el envío queda después de los tres pasos. -->
+        <div class="gift-contribute-foot">
+          <!-- Pastilla con contorno y clip: antes era un recuadro punteado
+               que no se leía como botón. -->
+          <label class="gift-upload" for="gift-comprobante" id="gift-upload-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span class="gift-upload-txt">Adjuntar constancia</span>
+            <span class="gift-upload-opt">· opcional</span>
+          </label>
+          <input type="file" id="gift-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
+
+          <p class="gift-error" id="gift-error" role="alert" hidden></p>
+          <button class="btn btn-primary btn-block" type="button" id="gift-submit">Ya transferí, avisar a los novios</button>
         </div>
       </div>
     </div>

@@ -1019,16 +1019,20 @@
       var file = fileInput.files && fileInput.files[0];
       if (!file) return;
       errorEl.hidden = true;
-      uploadLabel.textContent = "Cargando…";
+      // El botón lleva un clip (SVG) adentro: escribirle textContent lo
+      // borraría. Solo se cambia el <span> del texto.
+      var uploadTxt = uploadLabel.querySelector(".gift-upload-txt") || uploadLabel;
+      uploadTxt.textContent = "Cargando…";
       comprimirImagen(file)
         .then(function (dataUrl) {
           constanciaDataUrl = dataUrl;
-          uploadLabel.textContent = "✓ " + file.name;
+          uploadTxt.textContent = file.name.length > 22 ? file.name.slice(0, 20) + "…" : file.name;
           uploadLabel.classList.add("has-file");
         })
         .catch(function () {
           constanciaDataUrl = "";
-          uploadLabel.textContent = "No se pudo leer esa imagen, intenta con otra";
+          uploadTxt.textContent = "No se pudo leer, prueba con otra";
+          uploadLabel.classList.remove("has-file");
           uploadLabel.classList.remove("has-file");
         });
     });
