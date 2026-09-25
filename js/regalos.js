@@ -521,14 +521,36 @@
     // Los cuatro montos del bloque 13 (S/100, S/200, la mitad y el total)
     // vienen escritos a mano en la maqueta, donde el regalo cuesta S/850 y
     // nadie ha aportado. Acá se calculan sobre lo que FALTA, que es lo
-    // único que tiene sentido con regalos a medio completar:
-    //  - los fijos (100 y 200) se descartan si superan lo que falta;
-    //  - la mitad se redondea a múltiplos de 5 para que no salga "S/ 212.5";
-    //  - se quitan repetidos, que aparecen cuando falta poco (con S/200
-    //    restantes, "la mitad" es 100 y ya está en la lista).
-    // Así, si falta S/50 quedan dos pastillas y no cuatro inventadas.
+    // único que tiene sentido con regalos a medio completar, y con dos
+    // reglas según el tamaño:
+    //
+    //  - Hasta S/1000 los dos primeros son fijos (100 y 200). Son cifras
+    //    que uno reconoce como "un aporte chico" y no cambian de un
+    //    regalo a otro.
+    //  - De S/1000 para arriba esos fijos se vuelven testimoniales (100
+    //    sobre 3000 es un 3%), así que pasan a porcentajes: 10, 25, 50 y
+    //    100% de lo que falta.
+    //
+    // El último SIEMPRE es lo que falta exacto, sin redondear: es el que
+    // completa el regalo, y un redondeo lo dejaría a unos soles de la
+    // meta. Los intermedios sí se redondean para que no salga "S/ 332.5".
+    var MONTOS_FIJOS_HASTA = 1000;
+
     function montosSugeridos(falta) {
-      var candidatos = [100, 200, Math.round(falta / 2 / 5) * 5, falta];
+      var candidatos;
+      if (falta >= MONTOS_FIJOS_HASTA) {
+        candidatos = [
+          Math.round(falta * 0.10 / 10) * 10,
+          Math.round(falta * 0.25 / 10) * 10,
+          Math.round(falta * 0.50 / 10) * 10,
+          falta
+        ];
+      } else {
+        candidatos = [100, 200, Math.round(falta / 2 / 5) * 5, falta];
+      }
+      // Se quitan repetidos y los que superen lo que falta: con S/200
+      // restantes, "la mitad" es 100 y ya estaba en la lista. Así, si
+      // falta S/50 quedan dos pastillas y no cuatro inventadas.
       var vistos = {}, out = [];
       candidatos.forEach(function (v) {
         if (v > 0 && v <= falta && !vistos[v]) { vistos[v] = true; out.push(v); }

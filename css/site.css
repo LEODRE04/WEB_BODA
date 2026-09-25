@@ -1579,9 +1579,11 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 
 
 /* — pasos numerados del panel de aporte (bloque 13) —
-   El bloque ordena la sección en tres: cuánto → a dónde → de parte de
-   quién. El número ayuda a que se lea como un recorrido y no como un
-   formulario suelto. */
+   Tres pasos: cuánto → de parte de quién → a dónde. El bloque los ponía
+   como cuánto → a dónde → de parte de quién, con el 2 en la columna
+   derecha y el 1 y el 3 en la izquierda: la numeración saltaba de una
+   columna a la otra y volvía. Así la izquierda se lee 1→2 de corrido y
+   la derecha es el 3. */
 .gift-step {
   display: flex; align-items: center; gap: 10px;
   margin: 0 0 12px;
