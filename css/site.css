@@ -1262,19 +1262,29 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
    el celular no existe el pasar el mouse, así que nunca se ensanchaba: el
    invitado veía un círculo verde y tenía que adivinar. Sin animación de
    ancho tampoco hace falta el número mágico de 172px que había que
-   recalcular cada vez que cambiara la etiqueta. */
+   recalcular cada vez que cambiara la etiqueta.
+   Color: verde de la paleta, no el #25d366 de la marca. Ese verde chillón
+   era lo más saturado de toda la invitación y se comía la atención en
+   una página de cremas y salvias. Va en contorno y no relleno porque es
+   una acción secundaria en los dos sitios donde aparece: al lado de
+   "¿Dudas?" y, en el modal, junto a "Descargar mi pase" —que es un
+   .btn-secondary—. Con relleno quedaba más fuerte que el botón de al
+   lado e invertía la jerarquía. El icono sí conserva su forma, que es lo
+   que hace reconocible a WhatsApp. */
 .whatsapp-fab {
   display: inline-flex; align-items: center; gap: 8px;
   min-height: 44px; padding: 0 18px 0 14px;
   border-radius: 999px; text-decoration: none;
-  background: #25d366; color: #fff;
+  background: var(--color-bg); color: var(--color-accent-700);
+  border: 1.5px solid var(--color-accent-400);
   font-size: 14px; font-weight: 600;
-  box-shadow: 0 4px 14px color-mix(in srgb, #25d366 38%, transparent);
-  transition: background-color .15s ease, transform .1s ease;
+  transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
 }
 .whatsapp-fab-icon { flex: none; display: flex; align-items: center; }
-.whatsapp-fab:hover, .whatsapp-fab:focus-visible { background: #1ebe5b; }
-.whatsapp-fab:active { background: #17a54c; transform: scale(.97); }
+.whatsapp-fab:hover, .whatsapp-fab:focus-visible {
+  background: var(--color-accent-100); border-color: var(--color-accent-600);
+}
+.whatsapp-fab:active { background: var(--color-accent-200); transform: scale(.97); }
 
 /* — hojas cayendo (decorativo) — forma dibujada con CSS (óvalo con dos
    esquinas rectas = silueta de hoja/pétalo), sin imágenes. El color es un
