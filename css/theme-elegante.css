@@ -362,3 +362,149 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 /* La manuscrita tiene trazos altos y bajos muy largos: sin algo de aire
    las mayúsculas de una línea chocan con la siguiente. */
 .hero h1, .section-title, .gift-list-band-title, .dresscode-message { line-height: 1.25; }
+
+/* — sello raspable (js/sello-raspable.js) —
+   El sello de lacre se agranda para que quepa un dedo y se dibuja en
+   un canvas que se puede raspar. Todo esto cuelga de .has-scratch,
+   que pone el script: sin JS o sin canvas no aplica nada y el sobre
+   queda como antes, con su sello de CSS y su botón. */
+.envelope { --seal: 96px; }
+.envelope.has-scratch { min-height: 284px; }
+.envelope.has-scratch:not(:has(.envelope-to:not([hidden]))) { min-height: 196px; }
+/* el destinatario baja lo que creció el sello, más su anillo */
+.envelope.has-scratch .envelope-to { padding-top: 144px; }
+/* el sello de CSS se queda (es el respaldo) pero invisible */
+.envelope.has-scratch .envelope-seal { visibility: hidden; }
+
+/* El área que escucha al dedo: el sello más 30px por lado (MARGEN
+   en el JS, que lee este ancho en vez de repetir el número). Mismo
+   centro que el sello de CSS. */
+.seal-scratch {
+  position: absolute; top: 78px; left: 50%; z-index: 2;
+  width: calc(var(--seal) + 60px); height: calc(var(--seal) + 60px);
+  transform: translate(-50%, -50%);
+}
+.seal-scratch canvas, .seal-ring {
+  position: absolute; inset: 0; display: block;
+}
+.seal-wax {
+  touch-action: none; -webkit-user-select: none; user-select: none;
+  cursor: grab;
+  transition: transform .4s cubic-bezier(.3, 1.3, .5, 1), opacity .35s ease;
+}
+.seal-wax:active { cursor: grabbing; }
+.seal-fx, .seal-ring, .seal-ghost { pointer-events: none; }
+
+/* — el anillo de progreso: se llena al llegar al umbral, no al 100% —
+   Pista en arena, avance en verde. Arranca arriba (el -90°) y va en
+   el sentido del reloj, que es como se lee "cuánto falta". */
+.seal-ring { transform: rotate(-90deg); overflow: visible; }
+.seal-ring circle { fill: none; stroke-width: 3; }
+.seal-ring-track { stroke: color-mix(in srgb, var(--color-neutral-600) 45%, transparent); }
+.seal-ring-run {
+  stroke: var(--color-accent-500); stroke-linecap: round;
+  transition: stroke-dashoffset .18s ease-out, stroke .2s ease;
+}
+.seal-scratch.is-ready .seal-ring-run { stroke: var(--color-accent-700); }
+
+/* — el sello "respira" hasta que alguien lo toca —
+   Un halo que late alrededor: lo que dice "esto se toca" antes de
+   leer nada. Se apaga al primer toque. */
+.seal-scratch::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(var(--seal) + 14px); height: calc(var(--seal) + 14px);
+  border-radius: 50%; transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 45%, transparent);
+  animation: seal-pulse 2.2s ease-out infinite;
+  pointer-events: none;
+}
+.seal-scratch.is-touched::before { animation: none; box-shadow: none; }
+@keyframes seal-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 40%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--color-accent) 0%, transparent); }
+}
+
+/* — el dedo fantasma: enseña el gesto en vez de describirlo —
+   Una yema que pasa en zigzag sobre el sello, como raspando, y
+   descansa un momento. Desaparece al primer toque de verdad. */
+.seal-ghost {
+  position: absolute; left: 50%; top: 50%;
+  width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
+  background: color-mix(in srgb, #fff 78%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--color-accent-800) 35%, transparent);
+  box-shadow: 0 3px 8px color-mix(in srgb, #2f4429 25%, transparent);
+  opacity: 0;
+  animation: seal-ghost 3.2s ease-in-out 1s infinite;
+}
+.seal-scratch.is-touched .seal-ghost { display: none; }
+@keyframes seal-ghost {
+  0%   { opacity: 0; transform: translate(-26px, -22px) scale(.9); }
+  10%  { opacity: 1; transform: translate(-26px, -22px) scale(1); }
+  24%  { transform: translate(24px, -10px); }
+  38%  { transform: translate(-24px, 4px); }
+  52%  { opacity: 1; transform: translate(22px, 18px); }
+  62%, 100% { opacity: 0; transform: translate(22px, 18px) scale(.9); }
+}
+
+/* un toque sin arrastrar: el sello se sacude */
+.seal-scratch.is-nudge .seal-wax { animation: seal-nudge .42s ease; }
+@keyframes seal-nudge {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-7deg); }
+  45% { transform: rotate(6deg); }
+  70% { transform: rotate(-3deg); }
+}
+
+/* al terminar, lo que quedaba del lacre se va hacia arriba y se
+   desvanece; las migas grandes las suelta el JS */
+.seal-scratch.is-broken .seal-wax { transform: scale(1.12); opacity: 0; }
+.seal-scratch.is-broken .seal-ring { opacity: 0; transition: opacity .25s ease; }
+.envelope-gate.is-opening .seal-scratch { opacity: 0; transition: opacity .25s ease; }
+
+/* — la instrucción —
+   Donde estaba el botón, y con el mismo peso visual que tenía: es
+   lo único que hay que hacer en esta pantalla, así que no puede ser
+   letra chica gris. Verde, 16px, con un ícono de mano. */
+.seal-hint {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin: 2px auto 10px; max-width: 30ch;
+  font-size: 16px; font-weight: 600; line-height: 1.35;
+  color: var(--color-accent-700); text-wrap: balance;
+}
+.seal-hint-icon { flex: none; }
+.seal-hint.is-ready { color: var(--color-accent-800); }
+.seal-hint.is-nudge { animation: seal-hint-nudge .5s ease; }
+@keyframes seal-hint-nudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+/* El botón de siempre, convertido en salida discreta: para quien no
+   quiera jugar, para teclado y para lectores de pantalla. Texto
+   subrayado en vez de botón lleno, pero con los 44px de alto para
+   que se pueda tocar sin apuntar. */
+.btn.envelope-cta-quiet {
+  display: inline-flex; width: auto; min-height: 44px; padding: 0 12px;
+  background: none; border: 0; box-shadow: none;
+  color: var(--color-text-muted); font-size: 14px; font-weight: 500;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.btn.envelope-cta-quiet:hover { background: none; color: var(--color-accent-700); }
+
+@media (max-width: 480px) {
+  .envelope { --seal: 86px; }
+  .envelope.has-scratch { min-height: 262px; }
+  .envelope.has-scratch:not(:has(.envelope-to:not([hidden]))) { min-height: 178px; }
+  .envelope.has-scratch .envelope-to { padding-top: 136px; }
+  .btn.envelope-cta-quiet { display: inline-flex; width: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-scratch::before, .seal-ghost { animation: none; }
+  .seal-ghost { display: none; }
+  .seal-wax { transition: opacity .2s ease; }
+  .seal-scratch.is-broken .seal-wax { transform: none; }
+  .seal-scratch.is-nudge .seal-wax, .seal-hint.is-nudge { animation: none; }
+}

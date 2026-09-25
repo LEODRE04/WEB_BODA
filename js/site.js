@@ -278,12 +278,21 @@
     var btn = gate.querySelector("#envelope-open-btn");
     if (!btn) return;
     btn.addEventListener("click", function () {
-      if (gate.classList.contains("is-opening")) return; // evita doble click
+      if (gate.classList.contains("is-opening") || gate.dataset.abriendo) return; // evita doble click
+      gate.dataset.abriendo = "1";
       // Si llegó con un link a una sección (o quedó scrolleado de antes),
       // que al abrir el sobre siempre arranque desde arriba.
       window.scrollTo(0, 0);
-      gate.classList.add("is-opening");
       try { sessionStorage.setItem("envelope_opened", "1"); } catch (e) {}
+      // Si se abrió raspando el sello (js/sello-raspable.js), se deja
+      // ver cómo salta el lacre antes de levantar la solapa: sin esta
+      // pausa la solapa se va mientras el sello todavía se deshace.
+      var pausa = gate.classList.contains("seal-broken") ? 420 : 0;
+      setTimeout(abrirSobre, pausa);
+    });
+
+    function abrirSobre() {
+      gate.classList.add("is-opening");
 
       // Tres tiempos, encadenados con los de css/theme-elegante.css:
       //   0ms    se levanta la solapa y la hoja empieza a salir
@@ -313,7 +322,7 @@
       }, 900);
       setTimeout(function () { gate.classList.add("is-open"); }, 1750);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);
-    });
+    }
   }
 
   // — nav móvil —
