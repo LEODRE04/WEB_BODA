@@ -255,7 +255,10 @@
     var toBlock = gate.querySelector("#envelope-to");
     var toName = gate.querySelector("#envelope-to-name");
     var toCount = gate.querySelector("#envelope-to-count");
-    if (codigo && guestLoading) guestLoading.hidden = false;
+    // La línea "Preparando tu invitación…" de antes ya no se muestra: la
+    // reemplaza la carga del sobre (iniciarCarga, más abajo), que dice lo
+    // mismo con un porcentaje y un hilo alrededor del sobre.
+    iniciarCarga(gate, codigo, guestPromise);
     guestPromise.then(function (guest) {
       if (guestLoading) guestLoading.hidden = true;
       if (!guest || !guest.found) return;
@@ -323,6 +326,175 @@
       setTimeout(function () { gate.classList.add("is-open"); }, 1750);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);
     }
+  }
+
+  // — la carga del sobre —
+  // Adaptada de la invitación de referencia "Ana & Luis": el sobre llega
+  // y flota mientras un hilo recorre su borde con un porcentaje y un
+  // mensaje debajo; al terminar se dibuja el filo de la solapa y el sello
+  // se estampa con una onda. Recién ahí se puede raspar.
+  //
+  // La diferencia con la referencia es que ahí la carga es de adorno (un
+  // reloj de 4.8s) y acá espera algo de verdad: el nombre del invitado,
+  // que viene de Apps Script y tarda entre 2 y 40 segundos según si el
+  // script estaba dormido. Por eso el porcentaje no es un reloj sino una
+  // persecución:
+  //   - mientras la API no responde, se acerca al 88% cada vez más lento
+  //     y no pasa de ahí — nunca dice 100% por algo que no llegó;
+  //   - cuando responde, sube hasta el final;
+  //   - hay un mínimo (MIN_MS) para que la animación se alcance a ver
+  //     aunque la respuesta sea instantánea, y un máximo (MAX_MS) para no
+  //     retener a nadie 40 segundos: pasado ese tiempo el sobre se cierra
+  //     igual y el nombre se escribe cuando llegue.
+  // Los mensajes dicen lo que está pasando ("Buscando tu nombre…" solo
+  // mientras se busca de verdad), no una secuencia inventada.
+  function iniciarCarga(gate, codigo, guestPromise) {
+    var sobre = gate.querySelector(".envelope");
+    var caja = gate.querySelector("#envelope-loader");
+    var pct = gate.querySelector("#envelope-loader-pct");
+    var estado = gate.querySelector("#envelope-loader-status");
+    if (!sobre || !caja || !pct || !estado) {
+      gate.classList.add("is-loaded", "is-stamped");
+      return;
+    }
+
+    var quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var MIN_MS = quieto ? 300 : 2600;
+    var MAX_MS = 9000;
+    // "Escribiendo tu nombre…" se queda al menos esto en pantalla: si la
+    // API responde justo al final, sin este piso el mensaje parpadearía.
+    var ESCRIBIR_MS = 900;
+
+    // — el hilo: un rectángulo alrededor del cuerpo del sobre y el filo
+    // de la solapa. Se dibuja en píxeles reales (viewBox = tamaño medido)
+    // y se rehace si el sobre cambia de alto, que pasa cuando llega el
+    // nombre y el destinatario aparece. pathLength=100 hace que el
+    // porcentaje sea directamente el dashoffset.
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "envelope-thread");
+    svg.setAttribute("aria-hidden", "true");
+    var pista = document.createElementNS(NS, "rect");
+    pista.setAttribute("class", "envelope-thread-track");
+    var hilo = document.createElementNS(NS, "rect");
+    hilo.setAttribute("class", "envelope-thread-fill");
+    hilo.setAttribute("pathLength", "100");
+    var filo = document.createElementNS(NS, "path");
+    filo.setAttribute("class", "envelope-thread-flap");
+    filo.setAttribute("pathLength", "100");
+    svg.appendChild(pista); svg.appendChild(hilo); svg.appendChild(filo);
+    sobre.appendChild(svg);
+    var onda = document.createElement("span");
+    onda.className = "seal-ripple";
+    onda.setAttribute("aria-hidden", "true");
+    sobre.appendChild(onda);
+
+    var SOBRE_TOP = 24;  // donde empieza el cuerpo (.envelope::before)
+    var FUERA = 9;       // cuánto se separa el hilo del papel
+    function trazarHilo() {
+      var w = sobre.offsetWidth, h = sobre.offsetHeight - SOBRE_TOP;
+      var sw = w + FUERA * 2, sh = h + FUERA * 2;
+      svg.setAttribute("viewBox", "0 0 " + sw + " " + sh);
+      svg.style.width = sw + "px";
+      svg.style.height = sh + "px";
+      svg.style.left = -FUERA + "px";
+      svg.style.top = SOBRE_TOP - FUERA + "px";
+      [pista, hilo].forEach(function (r) {
+        r.setAttribute("x", 1); r.setAttribute("y", 1);
+        r.setAttribute("width", sw - 2); r.setAttribute("height", sh - 2);
+        r.setAttribute("rx", 22);
+      });
+      var solapa = sobre.querySelector(".envelope-flap");
+      // la punta de la solapa: su clip-path la corta al 92% del alto
+      var punta = solapa ? solapa.offsetHeight * 0.92 : 94;
+      filo.setAttribute("d", "M" + (FUERA + 6) + " " + (FUERA + 4) +
+        " L" + (FUERA + w / 2) + " " + (FUERA + punta) +
+        " L" + (FUERA + w - 6) + " " + (FUERA + 4));
+    }
+    trazarHilo();
+    if (window.ResizeObserver) new ResizeObserver(trazarHilo).observe(sobre);
+
+    caja.hidden = false;
+    gate.classList.add("is-loading");
+
+    var t0 = performance.now();
+    var resuelto = !codigo;
+    var conNombre = false;
+    var tResuelto = t0;
+    var alResolver = function (guest) {
+      resuelto = true;
+      conNombre = !!(guest && guest.found);
+      tResuelto = performance.now();
+    };
+    guestPromise.then(alResolver, function () { alResolver(null); });
+
+    var p = 0;
+    var previo = t0;
+    var terminado = false;
+    var raf = 0;
+    var intervalo = 0;
+    var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+
+    function ponerEstado(texto) {
+      if (estado.getAttribute("data-text") === texto) return;
+      estado.setAttribute("data-text", texto);
+      estado.classList.add("is-swapping");
+      setTimeout(function () {
+        estado.textContent = texto;
+        estado.classList.remove("is-swapping");
+      }, 180);
+    }
+
+    function paso() {
+      if (terminado) return;
+      var ahora = performance.now();
+      var dt = Math.min(ahora - previo, 250);
+      previo = ahora;
+      var el = ahora - t0;
+      var vencido = el > MAX_MS;
+      // hasta dónde puede llegar ahora mismo: el reloj mínimo (con la
+      // curva de la referencia) y, si la API no respondió, el tope del 88%
+      var porReloj = 100 * ease(Math.min(el / MIN_MS, 1));
+      var porApi = resuelto || vencido ? 100 : 88 * (1 - Math.exp(-el / 1800));
+      var objetivo = Math.min(porReloj, porApi);
+      // se acerca al objetivo en vez de saltar a él: cuando la API
+      // responde, el número sube rápido pero se ve subir
+      p += (objetivo - p) * (1 - Math.pow(0.86, dt / 16.67));
+      if (objetivo - p < 0.4) p = objetivo;
+
+      pct.textContent = Math.round(p) + "%";
+      hilo.style.strokeDashoffset = 100 - p;
+
+      var escribiendo = resuelto && conNombre && ahora - tResuelto < ESCRIBIR_MS;
+      if (escribiendo) ponerEstado("Escribiendo tu nombre…");
+      else if (p >= 80 && (resuelto || vencido)) ponerEstado("Cerrando el sobre…");
+      else if (codigo && !resuelto && p >= 22) ponerEstado("Buscando tu nombre…");
+      else if (!codigo && p >= 45) ponerEstado("Doblando la tarjeta…");
+      else ponerEstado("Preparando tu invitación…");
+
+      if (p >= 100 && !escribiendo) return terminar();
+      if (!raf) raf = requestAnimationFrame(function () { raf = 0; paso(); });
+    }
+
+    function terminar() {
+      terminado = true;
+      cancelAnimationFrame(raf);
+      clearInterval(intervalo);
+      pct.textContent = "100%";
+      hilo.style.strokeDashoffset = 0;
+      gate.classList.remove("is-loading");
+      gate.classList.add("is-loaded");
+      // el sello cae un instante después de que se cierra el hilo, como
+      // en la referencia: primero se cierra el sobre, después se sella
+      setTimeout(function () { gate.classList.add("is-stamped"); }, quieto ? 0 : 250);
+    }
+
+    // requestAnimationFrame para que el número y el hilo se muevan suaves,
+    // y además un intervalo: rAF se congela con la pestaña en segundo
+    // plano, y así la carga sigue avanzando igual (paso() calcula todo a
+    // partir del reloj, así que llamarlo de más no cambia nada).
+    intervalo = setInterval(paso, 200);
+    setTimeout(paso, quieto ? 0 : 400);
   }
 
   // — nav móvil —

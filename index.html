@@ -82,6 +82,14 @@
       </div>
     </div>
 
+    <!-- La carga del sobre (iniciarCarga en site.js): porcentaje y qué
+         está pasando. Se va cuando el sello se estampa y deja su lugar a
+         la instrucción de raspar. -->
+    <div class="envelope-loader" id="envelope-loader" aria-live="polite" hidden>
+      <p class="envelope-loader-pct" id="envelope-loader-pct">0%</p>
+      <p class="envelope-loader-status" id="envelope-loader-status">Preparando tu invitación…</p>
+    </div>
+
     <!-- Instrucción del sello raspable (js/sello-raspable.js). Oculta
          hasta que ese script arranca: sin canvas, el sobre se abre con
          el botón de siempre y esta línea no tendría sentido. -->

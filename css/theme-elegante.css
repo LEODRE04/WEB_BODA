@@ -508,3 +508,136 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   .seal-scratch.is-broken .seal-wax { transform: none; }
   .seal-scratch.is-nudge .seal-wax, .seal-hint.is-nudge { animation: none; }
 }
+
+/* — la carga del sobre (iniciarCarga en site.js) —
+   Adaptada de la invitación de referencia "Ana & Luis". El "hilo
+   dorado" de allá acá es arena (--color-neutral-700): el dorado no
+   está en la paleta, y la arena es el mismo papel que hace de
+   dorado en el resto de la página (divisores, bordes). */
+
+/* El sobre llega: sube, se endereza y se asienta con un pequeño
+   rebote. Y mientras carga flota, un poco. La flotación usa
+   `translate` y `rotate` como propiedades sueltas, no `transform`,
+   para no pisarse con la llegada, que sí usa transform. */
+.envelope-gate.is-loading .envelope,
+.envelope-gate.is-loaded .envelope {
+  animation: envelope-arrive 1.1s cubic-bezier(.3, 1.3, .5, 1) both;
+}
+.envelope-gate.is-loading .envelope {
+  animation: envelope-arrive 1.1s cubic-bezier(.3, 1.3, .5, 1) both,
+             envelope-float 3.2s ease-in-out 1.1s infinite;
+}
+@keyframes envelope-arrive {
+  from { opacity: 0; transform: translateY(40px) rotate(-6deg) scale(.92); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes envelope-float {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 0 -6px; rotate: .6deg; }
+}
+
+/* el hilo: lo posiciona y dimensiona el JS en píxeles reales */
+.envelope-thread {
+  position: absolute; z-index: 3; overflow: visible; pointer-events: none;
+  transition: opacity .6s ease;
+}
+.envelope-thread rect, .envelope-thread path { fill: none; }
+.envelope-thread-track {
+  stroke: color-mix(in srgb, var(--color-neutral-600) 40%, transparent); stroke-width: 1;
+}
+.envelope-thread-fill {
+  stroke: var(--color-neutral-700); stroke-width: 1.6; stroke-linecap: round;
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+}
+/* el filo de la solapa se dibuja cuando termina la carga: es el
+   "sobre cerrado" que el sello viene a sellar */
+.envelope-thread-flap {
+  stroke: var(--color-neutral-700); stroke-width: 1.2; stroke-linejoin: round;
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.1s ease .1s;
+}
+.envelope-gate.is-loaded .envelope-thread-flap { stroke-dashoffset: 0; }
+/* Terminada la carga el hilo se queda, más tenue, como un marco. Se va
+   del todo al abrir: el filo de la solapa quedaría flotando en el aire
+   cuando la solapa se levanta. */
+.envelope-gate.is-loaded .envelope-thread { opacity: .55; }
+.envelope-gate.is-opening .envelope-thread { opacity: 0; }
+
+/* — el sello no existe hasta que se estampa — */
+.envelope-gate.is-loading .seal-scratch,
+.envelope-gate.is-loading .envelope-seal,
+.envelope-gate.is-loaded:not(.is-stamped) .seal-scratch,
+.envelope-gate.is-loaded:not(.is-stamped) .envelope-seal {
+  opacity: 0; pointer-events: none;
+}
+/* Cae desde arriba, grande y girado, se aplasta un poco al tocar el
+   papel y se asienta: un sello que se aprieta, no uno que aparece. */
+.envelope-gate.is-stamped .seal-scratch,
+.envelope-gate.is-stamped .envelope-seal {
+  animation: seal-stamp .55s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+@keyframes seal-stamp {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(1.9) rotate(-20deg); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(.92) rotate(3deg); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+}
+/* la onda que deja al apretarlo contra el papel */
+.seal-ripple {
+  position: absolute; top: 78px; left: 50%; z-index: 1;
+  width: var(--seal); height: var(--seal); border-radius: 50%;
+  border: 1px solid var(--color-neutral-700);
+  transform: translate(-50%, -50%); opacity: 0; pointer-events: none;
+}
+.envelope-gate.is-stamped .seal-ripple { animation: seal-ripple 1s ease-out .3s; }
+@keyframes seal-ripple {
+  from { opacity: .8; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, -50%) scale(2.6); }
+}
+
+/* — el nombre se escribe —
+   Cuando la API responde, el destinatario no aparece de golpe: sube
+   un poco y se aclara, en cascada (etiqueta, nombre, pases), como el
+   contenido de la tarjeta de la referencia. */
+.envelope-to:not([hidden]) > * { animation: envelope-to-in .7s ease both; }
+.envelope-to:not([hidden]) > :nth-child(2) { animation-delay: .15s; }
+.envelope-to:not([hidden]) > :nth-child(3) { animation-delay: .3s; }
+@keyframes envelope-to-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* — el texto de la carga: porcentaje y qué está pasando —
+   Donde después va la instrucción de raspar. Mientras carga, la
+   instrucción y el enlace alternativo no se muestran: no hay sello
+   que raspar todavía, y abrir el sobre antes de que llegue el nombre
+   es justo lo que la carga está evitando. */
+.envelope-loader { margin: 0 auto 12px; text-align: center; min-height: 58px; }
+.envelope-gate.is-loaded .envelope-loader { display: none; }
+.envelope-gate.is-loading .seal-hint,
+.envelope-gate.is-loading .envelope-cta { display: none; }
+.envelope-loader-pct {
+  margin: 0; font-size: 15px; letter-spacing: .2em; font-weight: 600;
+  color: var(--color-neutral-800);
+  /* lining: en estilo antiguo el 1 de "10%" se lee como una I */
+  font-variant-numeric: lining-nums;
+}
+.envelope-loader-status {
+  margin: 4px 0 0; font-style: italic; font-size: 17px;
+  color: var(--color-text-soft);
+  transition: opacity .18s ease;
+}
+.envelope-loader-status.is-swapping { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .envelope-gate.is-loading .envelope,
+  .envelope-gate.is-loaded .envelope,
+  .envelope-gate.is-stamped .seal-scratch,
+  .envelope-gate.is-stamped .envelope-seal,
+  .envelope-gate.is-stamped .seal-ripple,
+  .envelope-to:not([hidden]) > * { animation: none; }
+  .envelope-thread-flap { transition: none; }
+}
+/* El hilo va por encima de la solapa (si no, el filo no se vería) pero
+   por DEBAJO del sello: el lacre se apoya sobre la solapa cerrada, y
+   la línea cruzándolo lo aplanaba contra el papel. */
+.seal-scratch, .envelope-seal { z-index: 4; }
