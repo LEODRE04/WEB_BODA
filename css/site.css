@@ -15,7 +15,7 @@ body { background: var(--color-neutral-100); }
 .section-title { font-size: clamp(28px, 4vw, 40px); margin: 12px 0 0; }
 .section-lede {
   margin: 0 0 4px; font-size: 14px; line-height: 1.65;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent); max-width: 44ch;
+  color: var(--color-text-soft); max-width: 44ch;
 }
 
 /* — placeholder de foto: mismo lenguaje visual que "más fotos aquí" / "mapa"
@@ -132,7 +132,7 @@ body { background: var(--color-neutral-100); }
    iba apretado dentro de la franja del saludo. */
 .hero-welcome {
   margin: 18px 0 0; max-width: 40ch; font-size: 14.5px; line-height: 1.65;
-  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  color: var(--color-text-soft);
 }
 
 .hero-eyebrow {
@@ -142,7 +142,7 @@ body { background: var(--color-neutral-100); }
 .hero-amp { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
 .hero-amp span.line { width: 56px; height: 1px; background: var(--color-divider); }
 .hero-amp span.amp { font-family: var(--font-heading); font-size: 24px; color: var(--color-accent); }
-.hero-date { font-size: 15px; letter-spacing: .2em; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+.hero-date { font-size: 15px; letter-spacing: .2em; color: var(--color-text-soft); }
 .hero-venue {
   margin: 22px 0 0; font-size: 13px; line-height: 1.9; letter-spacing: .06em;
   text-transform: uppercase; color: var(--color-accent-700);
@@ -176,7 +176,7 @@ body { background: var(--color-neutral-100); }
 .save-date-side { text-align: center; flex: 0 0 auto; min-width: 118px; }
 .save-date-label {
   display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: 4px;
+  color: var(--color-text-muted); margin-bottom: 4px;
 }
 /* nowrap: "4:00 p.m." partido en dos líneas deja los dos lados con
    distinta altura y todo el bloque parece torcido. */
@@ -194,7 +194,7 @@ body { background: var(--color-neutral-100); }
 .save-date-month { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
 .save-date-note {
   max-width: 46ch; margin: 0 auto 22px; text-align: center; font-size: 14px; line-height: 1.65;
-  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  color: var(--color-text-soft);
 }
 /* — en celular los tres bloques no entran en una fila: la tarjeta deja
    ~258px útiles en una pantalla de 390px y Día + círculo + Hora piden
@@ -239,7 +239,7 @@ body { background: var(--color-neutral-100); }
 /* — .timeline-desc: se quedó del itinerario (ya no existe como sección),
    pero sigue en uso en "Bienvenida" para la descripción de ceremonia y
    recepción. — */
-.timeline-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+.timeline-desc { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-text-soft); }
 
 /* — detalles (cuándo y dónde) — */
 .details { padding: 56px 44px; background: var(--color-neutral-100); }
@@ -270,11 +270,11 @@ body { background: var(--color-neutral-100); }
    podía alcanzarlos — y son justo los que hay que agrandar en celular. */
 .venue-text {
   margin: 0 0 12px; font-size: 14px; line-height: 1.7;
-  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  color: var(--color-text-soft);
 }
 .venue-text-sec {
   margin-bottom: 14px; font-size: 13.5px; line-height: 1.6;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  color: var(--color-text-muted);
 }
 
 /* — datos para transferir (bloque 12b de claude.ai/design) —
@@ -341,7 +341,7 @@ body { background: var(--color-neutral-100); }
 .pay-row-body { flex: 1 1 auto; min-width: 0; }
 .pay-row-label {
   display: block; font-size: 12.5px;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  color: var(--color-text-muted);
 }
 /* Los dígitos van separados por espacios en el HTML (no hay nada que
    los agrupe por CSS), y data-copy conserva el número sin espacios. */
@@ -383,7 +383,7 @@ body { background: var(--color-neutral-100); }
    de André Leon" mientras las cuentas están ocultas no significa nada. */
 .pay-note {
   margin: 12px 0 14px; font-size: 13.5px; text-align: center;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  color: var(--color-text-muted);
 }
 .gift-contribute-howto .pay-note { margin: 14px 0 0; }
 
@@ -417,7 +417,7 @@ body { background: var(--color-neutral-100); }
 }
 .transferencia-texto > p {
   margin: 3px 0 0; font-size: 13.5px; line-height: 1.6;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  color: var(--color-text-soft);
 }
 .transferencia-titulo {
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);
@@ -430,7 +430,7 @@ body { background: var(--color-neutral-100); }
 }
 .transferencia-fecha {
   margin: 4px 0 0 !important; font-size: 12.5px !important;
-  color: color-mix(in srgb, var(--color-text) 50%, transparent) !important;
+  color: var(--color-text-muted) !important;
 }
 .transferencia-card .field { margin-top: 14px; }
 /* Rótulo a la izquierda y la marca (obligatorio / opcional) a la
@@ -460,7 +460,7 @@ body { background: var(--color-neutral-100); }
 .transferencia-card textarea.input::placeholder {
   font-family: var(--font-heading); font-style: italic; font-weight: 400;
   font-size: 14.5px;
-  color: color-mix(in srgb, var(--color-text) 40%, transparent);
+  color: var(--color-text-muted);
 }
 .transferencia-card textarea.input:hover {
   border-color: color-mix(in srgb, var(--color-accent-2) 55%, transparent);
@@ -491,12 +491,12 @@ body { background: var(--color-neutral-100); }
 .field-tag.is-req { background: var(--color-accent-100); color: var(--color-accent-800); }
 .field-tag.is-opt {
   background: var(--color-neutral-400);
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 .transferencia-nota {
   margin: 8px 0 0; font-size: 12.5px; text-align: center;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
 /* Era una línea de texto rojizo de 13px al pie del formulario: con el
    teclado abierto quedaba fuera de pantalla y no se notaba que faltaba
@@ -534,7 +534,7 @@ body { background: var(--color-neutral-100); }
 }
 .gift-list-band-kicker {
   font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-bg) 78%, transparent);
+  color: var(--color-bg);
 }
 .gift-list-band-title {
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);
@@ -542,7 +542,7 @@ body { background: var(--color-neutral-100); }
 }
 .gift-list-band-text p {
   margin: 0; font-size: 15px; line-height: 1.65; max-width: 52ch;
-  color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  color: var(--color-bg);
 }
 .gift-list-band-action {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -553,7 +553,7 @@ body { background: var(--color-neutral-100); }
 .gift-list-band-btn:hover { background: var(--color-neutral-200); color: var(--color-accent-800); }
 .gift-list-band-note {
   font-size: 12.5px; text-align: center; max-width: 22ch;
-  color: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  color: var(--color-bg);
 }
 @media (max-width: 700px) {
   .gift-list-band {
@@ -593,7 +593,7 @@ body { background: var(--color-neutral-100); }
    (monto/nombre/mensaje + cómo pagar + subir constancia). — */
 .gift-grid-status {
   grid-column: 1 / -1; text-align: center; font-size: 13.5px; margin: 20px 0;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
 .gift-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -625,7 +625,7 @@ body { background: var(--color-neutral-100); }
 .gift-card-name { font-size: 15.5px; font-weight: 600; }
 .gift-card-desc {
   margin: 0; font-size: 13px; line-height: 1.5;
-  color: color-mix(in srgb, var(--color-text) 66%, transparent);
+  color: var(--color-text-muted);
 }
 .gift-card-photo {
   height: 90px; border-radius: 16px; margin: 6px 0 2px; overflow: hidden;
@@ -653,7 +653,7 @@ body { background: var(--color-neutral-100); }
 .gift-progress-bar span { display: block; height: 100%; background: var(--color-accent); border-radius: 999px; }
 .gift-progress-label {
   margin: 5px 0 0; font-size: 11.5px;
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  color: var(--color-text-muted);
 }
 
 /* — aviso al hacer clic en un regalo ya completo (mostrarNoDisponible en
@@ -680,7 +680,7 @@ body { background: var(--color-neutral-100); }
 }
 .gift-unavailable-body p {
   margin: 0 0 12px; font-size: 13.5px; line-height: 1.6;
-  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  color: var(--color-text-soft);
 }
 .gift-unavailable .gift-progress { margin: 0 0 12px; }
 .gift-unavailable .gift-progress-bar span { background: var(--color-accent-2-600); }
@@ -753,7 +753,7 @@ body { background: var(--color-neutral-100); }
   transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
 }
 .gift-upload svg { flex: none; width: 17px; height: 17px; }
-.gift-upload-opt { color: color-mix(in srgb, var(--color-text) 45%, transparent); font-size: 13.5px; }
+.gift-upload-opt { color: var(--color-text-muted); font-size: 13.5px; }
 .gift-upload:hover { border-color: var(--color-accent-600); background: var(--color-accent-100); }
 .gift-upload:active { transform: scale(.98); }
 .gift-upload.has-file {
@@ -779,7 +779,7 @@ body { background: var(--color-neutral-100); }
 .gift-monto-prefix {
   position: absolute; left: 15px; pointer-events: none;
   font: 14px ui-monospace, Menlo, monospace;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
 .gift-monto-num { width: 100%; padding-left: 40px; font-variant-numeric: lining-nums; }
 .gift-monto-num::-webkit-outer-spin-button,
@@ -817,7 +817,7 @@ body { background: var(--color-neutral-100); }
 }
 .gift-monto-otro {
   display: block; margin-bottom: 5px; font-size: 12px;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  color: var(--color-text-soft);
 }
 /* — aviso de "completas el regalo" —
    El bloque 13 lo baja de banner verde oscuro a una línea con un check.
@@ -845,7 +845,7 @@ body { background: var(--color-neutral-100); }
 }
 .gift-intro-steps { display: flex; flex-direction: column; gap: 14px; margin: 18px 0; }
 .gift-intro-step { display: flex; gap: 14px; align-items: flex-start; }
-.gift-intro-step p { margin: 0; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.gift-intro-step p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--color-text-soft); }
 .gift-intro-num {
   width: 30px; height: 30px; border-radius: 999px; flex: none;
   display: flex; align-items: center; justify-content: center;
@@ -867,7 +867,7 @@ body { background: var(--color-neutral-100); }
 .gift-thanks-close {
   position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; z-index: 1;
   border: none; border-radius: 999px; background: transparent; cursor: pointer;
-  font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  font-size: 13px; color: var(--color-text-muted);
 }
 .gift-thanks-close:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); }
 .gift-thanks-dialog { width: min(460px, 100%); padding: 0; overflow: hidden; text-align: center; gap: 0; }
@@ -965,7 +965,7 @@ body { background: var(--color-neutral-100); }
 .dresscode-note {
   display: flex; align-items: center; justify-content: center; gap: 16px;
   margin: 30px auto 0; font-size: 14px;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  color: var(--color-text-soft);
 }
 .dresscode-note::before, .dresscode-note::after {
   content: ""; height: 1px; flex: 0 1 120px; background: var(--color-divider);
@@ -1033,7 +1033,7 @@ body { background: var(--color-neutral-100); }
   .rsvp-actions .btn { width: 100%; }
   .rsvp-actions .rsvp-note { text-align: center; }
 }
-.rsvp-note { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.rsvp-note { font-size: 12px; color: var(--color-text-muted); }
 .rsvp-success {
   display: none; margin-top: 14px; padding: 14px 16px; border-radius: 20px;
   background: var(--color-accent-2-100); color: var(--color-accent-2-800); font-size: 13.5px; line-height: 1.6;
@@ -1069,7 +1069,7 @@ body { background: var(--color-neutral-100); }
 .rsvp-saved-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; padding: 20px 0; }
 .rsvp-saved-grid span {
   display: block; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
 .rsvp-saved-grid strong { display: block; margin-top: 4px; font-size: 15px; font-weight: 600; }
 
@@ -1087,7 +1087,7 @@ body { background: var(--color-neutral-100); }
 .rsvp-thanks-close {
   position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; z-index: 1;
   border: none; border-radius: 999px; background: transparent; cursor: pointer;
-  font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  font-size: 13px; color: var(--color-text-muted);
 }
 .rsvp-thanks-close:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); }
 
@@ -1116,7 +1116,7 @@ body { background: var(--color-neutral-100); }
 }
 .rsvp-thanks-recap span {
   display: block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
 .rsvp-thanks-recap strong { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 600; }
 
@@ -1150,7 +1150,7 @@ body { background: var(--color-neutral-100); }
 .faq-item[open] .q::after { transform: rotate(-135deg); margin-top: 3px; }
 .faq-item .a {
   margin: 0; padding: 0 20px 16px; font-size: 14px; line-height: 1.6;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  color: var(--color-text-soft);
 }
 
 /* — footer / cuenta regresiva — */
@@ -1199,7 +1199,7 @@ body { background: var(--color-neutral-100); }
   max-width: 560px; margin: 0 auto; background: var(--color-bg);
   border-radius: 32px; padding: 36px 32px; box-shadow: var(--shadow-sm);
 }
-.prayer-card p { margin: 0 0 4px; font-size: 15px; line-height: 1.7; color: color-mix(in srgb, var(--color-text) 82%, transparent); }
+.prayer-card p { margin: 0 0 4px; font-size: 15px; line-height: 1.7; color: var(--color-text-soft); }
 .prayer-signature { margin-top: 18px !important; font-family: var(--font-heading); font-size: 17px; color: var(--color-accent-700); }
 
 /* — botón flotante de música: círculo con ícono de pausa/play que se
@@ -1636,4 +1636,29 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
 @media (max-width: 720px) {
   .gift-contribute-head { display: block; }
   .gift-contribute-head .gift-progress { max-width: none; margin-top: 12px; }
+}
+
+
+/* — segunda tanda de tamaños en celular —
+   La primera subió los párrafos de lectura. Quedaron fuera las etiquetas,
+   antetítulos y notas, que son las que peor lo pasan: van en mayúsculas
+   con mucho espaciado entre letras, y a 10-12.5px en un teléfono cuestan
+   de leer incluso con el contraste ya corregido. */
+@media (max-width: 640px) {
+  .section-kicker, .hero-eyebrow, .details-label,
+  .save-date-label, .pay-bank-tag, .gift-list-band-kicker { font-size: 12.5px; }
+  .hero-greeting-hola { font-size: 12px; }
+  .hero-greeting-pases { font-size: 11.5px; }
+  .field-tag { font-size: 11.5px; }
+  .save-date-month { font-size: 12px; }
+  .pay-row-label { font-size: 14px; }
+  .hero-venue { font-size: 15px; }
+  .gift-monto-otro { font-size: 13.5px; }
+  .transferencia-nota, .gift-list-band-note { font-size: 14px; }
+  .transferencia-fecha { font-size: 13.5px; }
+  /* Nada por debajo de 12px en un teléfono: las etiquetas de la cuenta
+     regresiva estaban en 10px y la marca "por confirmar" en 11. */
+  .countdown-lbl { font-size: 12px; }
+  .tag { font-size: 12px; }
+  .hero-greeting-pases { font-size: 12px; }
 }

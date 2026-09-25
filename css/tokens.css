@@ -5,6 +5,20 @@
   --color-bg: #f5ead8;
   --color-surface: #ebddc5;
   --color-text: #201e1d;
+
+  /* — dos tonos para el texto secundario —
+     Antes había once opacidades distintas repartidas por el CSS (40, 45,
+     50, 55, 60, 62, 66, 70, 75, 78, 82%) y las bajas no se leían: medido
+     sobre blanco, el 55% daba 2.85:1 y el 70% daba 4.10:1, cuando el
+     mínimo legible es 4.5:1. Sobre los fondos crema y arena bajaba aún
+     más. Ahora son dos, las dos por encima del mínimo:
+       soft  88%  ->  6.7:1 blanco / 6.2:1 crema / 5.9:1 arena
+       muted 80%  ->  5.3:1 blanco / 5.0:1 crema / 4.8:1 arena
+     Se conserva la jerarquía (párrafo más presente que etiqueta) pero sin
+     que ninguno caiga por debajo de lo legible. Al estar en un token, si
+     hay que subirlos otra vez se toca acá y no en 37 sitios. */
+  --color-text-soft: color-mix(in srgb, var(--color-text) 88%, transparent);
+  --color-text-muted: color-mix(in srgb, var(--color-text) 80%, transparent);
   --color-accent: #c67139;
   --color-accent-2: #7a8a5e;
   --color-divider: color-mix(in srgb, #201e1d 16%, transparent);
@@ -106,9 +120,9 @@ img { display: block; max-width: 100%; }
 figure { margin: 0; }
 figcaption {
   font-size: 11px; margin-top: var(--space-1);
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  color: var(--color-text-muted);
 }
-.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.text-muted { color: var(--color-text-muted); }
 :focus { outline: none; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 ::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
@@ -149,7 +163,7 @@ figcaption {
 /* — forms — */
 .field > label {
   display: block; font-size: 12px; margin-bottom: 5px;
-  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  color: var(--color-text-soft);
 }
 .input {
   width: 100%; min-height: 36px; padding: 6px 10px; font: inherit;
@@ -157,7 +171,7 @@ figcaption {
   background: var(--color-surface);
   border: 1px solid var(--color-divider); border-radius: var(--radius-md);
 }
-.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:hover { border-color: var(--color-text-muted); }
 .input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
 textarea.input { min-height: 90px; resize: vertical; }
 .radio { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
@@ -200,7 +214,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 .card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
 .card-meta {
   display: flex; align-items: center; gap: 6px; font-size: 11px;
-  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  color: var(--color-text-muted);
 }
 .elev-sm { box-shadow: var(--shadow-sm); }
 .elev-md { box-shadow: var(--shadow-md); }
@@ -234,7 +248,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 .table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table th {
   text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  color: var(--color-text-muted);
   padding: var(--space-2); border-bottom: 1px solid var(--color-divider);
 }
 .table td {
