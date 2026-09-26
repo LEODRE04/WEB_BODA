@@ -656,11 +656,11 @@ function convertirFechasTexto(sheet, columnas) {
 // Columnas "estado" y "recordatorio" en Invitados.
 //
 // ESTADO: la hoja real ya tiene su propia columna "estado" (una fórmula
-// por fila que da confirmado / rechazado / leido / sin abrir). Si existe,
+// por fila que da confirmado / rechazado / leído / sin abrir). Si existe,
 // se usa TAL CUAL y no se toca. Solo si no hay ninguna se crea una, con
 // esas mismas cuatro etiquetas para que todo hable igual.
 //
-// RECORDATORIO: para "sin abrir" y "leido", un enlace que abre WhatsApp
+// RECORDATORIO: para "sin abrir" y "leído", un enlace que abre WhatsApp
 // con el mensaje ya escrito, con su nombre y su link personal. La hoja
 // no tiene teléfonos, así que WhatsApp pregunta a qué contacto mandarlo.
 // Va en la columna "recordatorio" si ya existe, o en la primera columna
@@ -671,7 +671,10 @@ function convertirFechasTexto(sheet, columnas) {
 // sola a todas las filas, así que un invitado agregado después ya sale
 // con su estado sin copiar nada. Se escriben en sintaxis inglesa
 // (comas) y pasan por F, que las adapta al idioma de la hoja.
-var ESTADOS = { si: "confirmado", no: "rechazado", leido: "leido", sinAbrir: "sin abrir" };
+// Exactamente como las escribe la fórmula de la hoja real, tilde incluida:
+// con "leido" sin tilde, el Resumen contaba 0 leídos y esos invitados no
+// recibían enlace de recordatorio.
+var ESTADOS = { si: "confirmado", no: "rechazado", leido: "leído", sinAbrir: "sin abrir" };
 
 // Por el texto del encabezado, o por la fórmula que lo genera: una
 // columna nuestra que quedó con error muestra "#ERROR!" en vez de su
