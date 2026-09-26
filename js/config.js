@@ -26,6 +26,11 @@ window.WEDDING = {
     get directionsUrl() {
       return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(this.mapSearchQuery);
     },
+    // Waze, además de Google Maps: son las dos apps de navegación que más
+    // se usan en Lima. navigate=yes abre directo la ruta en el celular.
+    get wazeUrl() {
+      return "https://waze.com/ul?q=" + encodeURIComponent(this.mapSearchQuery) + "&navigate=yes";
+    },
   },
 
   // Local aparte para la recepción (distinto de la iglesia). Se muestra
@@ -43,6 +48,9 @@ window.WEDDING = {
     },
     get directionsUrl() {
       return this.mapSearchQuery ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(this.mapSearchQuery) : null;
+    },
+    get wazeUrl() {
+      return this.mapSearchQuery ? "https://waze.com/ul?q=" + encodeURIComponent(this.mapSearchQuery) + "&navigate=yes" : null;
     },
   },
 

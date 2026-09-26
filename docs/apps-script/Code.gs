@@ -95,6 +95,10 @@ var CARPETA_COMPROBANTES = "Comprobantes de regalos — boda";
 // doPost: cualquier fallo inesperado sale igual como {"error": "..."}.
 
 var LOCK_ESPERA_MS = 15000;
+// Cómo se muestran las fechas que escribe el script (Respuestas y
+// Aportes): solo el día. El valor guardado sigue siendo una fecha
+// completa, así que se puede ordenar y filtrar.
+var FORMATO_FECHA = "dd/mm/yyyy";
 var CACHE_REGALOS_SEG = 30;
 
 function doGet(e) {
@@ -307,16 +311,24 @@ function upsertRespuesta(codigo, data) {
     var existing = findRespuestaExistente(sheet, codigo, data.nombre);
 
     var row = RESPUESTA_COLUMNAS.map(function (col) { return celda(data[col], MAX_NOMBRE); });
-    var ahora = new Date().toISOString();
+    // Un Date y no un texto ISO: antes se guardaba "2026-09-26T18:04:11Z",
+    // que la hoja trata como texto (no se puede ordenar ni filtrar por
+    // fecha) y que además está en UTC, cinco horas adelantado a Lima.
+    var ahora = new Date();
     row[RESPUESTA_COLUMNAS.indexOf("enviado_en")] = ahora;
 
+    var fila;
     if (existing) {
       row[RESPUESTA_COLUMNAS.indexOf("enviado_en")] = existing.data.enviado_en; // conserva la fecha original
       row[RESPUESTA_COLUMNAS.indexOf("actualizado_en")] = ahora;
-      sheet.getRange(existing.rowIndex, 1, 1, row.length).setValues([row]);
+      fila = existing.rowIndex;
+      sheet.getRange(fila, 1, 1, row.length).setValues([row]);
     } else {
       sheet.appendRow(row);
+      fila = sheet.getLastRow();
     }
+    // Solo la fecha, sin hora: es lo que les sirve para leer la hoja.
+    sheet.getRange(fila, RESPUESTA_COLUMNAS.indexOf("enviado_en") + 1, 1, 2).setNumberFormat(FORMATO_FECHA);
   } finally {
     lock.releaseLock();
   }
@@ -471,14 +483,16 @@ function handleAporte(data) {
   var lock = LockService.getScriptLock();
   lock.waitLock(LOCK_ESPERA_MS);
   try {
-    requireSheet(SHEET_APORTES).appendRow([
+    var hojaAportes = requireSheet(SHEET_APORTES);
+    hojaAportes.appendRow([
       celda(regaloId),
       celda(nombre, MAX_NOMBRE),
       esDeposito ? 0 : monto,
       celda(String(data.mensaje || ""), MAX_MENSAJE),
       comprobanteUrl,
-      new Date().toISOString(),
+      new Date(), // fecha real, no texto ISO (ver upsertRespuesta)
     ]);
+    hojaAportes.getRange(hojaAportes.getLastRow(), APORTE_COLUMNAS.length).setNumberFormat(FORMATO_FECHA);
   } finally {
     lock.releaseLock();
   }
@@ -550,4 +564,136 @@ function asegurarCarpetaPrivada(folder, props) {
 
 function jsonOut(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ══ prepararHoja — se corre UNA vez, a mano, desde el editor ══════════
+// Extensiones > Apps Script > elegir "prepararHoja" arriba > Ejecutar.
+// No hace falta volver a desplegar para esto. Se puede correr de nuevo
+// sin problema: rehace lo mismo, no duplica nada.
+//
+// Hace cuatro cosas:
+//   1. Pone la zona horaria de la hoja en Lima, para que las fechas no
+//      salgan corridas un día cuando alguien responde de noche.
+//   2. Convierte a fecha real las fechas viejas que quedaron como texto
+//      ISO en Respuestas y Aportes (las de antes de este cambio).
+//   3. Agrega a Invitados dos columnas calculadas, "estado" y
+//      "recordatorio" (ver columnasDeSeguimiento).
+//   4. Crea (o rehace) la pestaña "Resumen" con los totales.
+//
+// Todo son fórmulas de la hoja, no valores: se actualizan solas con cada
+// respuesta nueva, sin volver a correr nada.
+var SHEET_RESUMEN = "Resumen";
+var URL_INVITACION = "https://leodre04.github.io/WEB_BODA/";
+
+function prepararHoja() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ss.setSpreadsheetTimeZone("America/Lima");
+
+  convertirFechasTexto(requireSheet(SHEET_RESPUESTAS), [5, 6]);
+  var aportes = getSheet(SHEET_APORTES);
+  if (aportes) convertirFechasTexto(aportes, [APORTE_COLUMNAS.length]);
+
+  columnasDeSeguimiento(requireSheet(SHEET_INVITADOS));
+  hojaResumen(ss);
+}
+
+function convertirFechasTexto(sheet, columnas) {
+  var ultima = sheet.getLastRow();
+  if (ultima < 2) return;
+  columnas.forEach(function (col) {
+    var rango = sheet.getRange(2, col, ultima - 1, 1);
+    var v = rango.getValues().map(function (r) {
+      var x = r[0];
+      if (typeof x === "string" && /^\d{4}-\d{2}-\d{2}T/.test(x)) {
+        var d = new Date(x);
+        if (!isNaN(d.getTime())) return [d];
+      }
+      return [x];
+    });
+    rango.setValues(v);
+    rango.setNumberFormat(FORMATO_FECHA);
+  });
+}
+
+// "estado" (H) y "recordatorio" (I), justo después de las tres de
+// apertura (E-G). Cada una es UNA fórmula en la fila del encabezado que
+// se extiende sola a todas las filas, así que un invitado que agreguen
+// más tarde ya sale con su estado sin copiar nada.
+//
+//   estado:       Confirmó / No asiste / Leído / Sin abrir
+//                 (Leído = abrió el link pero todavía no respondió)
+//   recordatorio: solo para "Sin abrir" y "Leído", un enlace que abre
+//                 WhatsApp con el mensaje ya escrito, con su nombre y su
+//                 link personal. La hoja no tiene teléfonos, así que
+//                 WhatsApp pregunta a qué contacto mandarlo.
+//
+// Las fórmulas se escriben con la sintaxis en inglés (comas), que es la
+// que acepta setFormula sin importar el idioma de la hoja.
+function columnasDeSeguimiento(sheet) {
+  var colEstado = APERTURA_COL + 3;     // H
+  var colRecordatorio = colEstado + 1;  // I
+  // Si en H o I ya hay algo que no es nuestro (notas, teléfonos…), se
+  // para acá en vez de borrarlo.
+  var encabezados = sheet.getMaxColumns() >= colRecordatorio
+    ? sheet.getRange(1, colEstado, 1, 2).getValues()[0] : ["", ""];
+  var libres = (encabezados[0] === "" || encabezados[0] === "estado") &&
+    (encabezados[1] === "" || encabezados[1] === "recordatorio");
+  if (!libres) {
+    throw new Error("Las columnas H e I de Invitados ya tienen datos. Muévanlos a otra columna y vuelvan a correr prepararHoja.");
+  }
+  if (sheet.getMaxColumns() < colRecordatorio) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), colRecordatorio - sheet.getMaxColumns());
+  }
+  // Las fórmulas necesitan las filas de abajo vacías para extenderse.
+  var ultima = Math.max(sheet.getMaxRows(), 2);
+  sheet.getRange(2, colEstado, ultima - 1, 2).clearContent();
+
+  var asistencia = 'IFERROR(VLOOKUP(A2:A, {Respuestas!A2:A, Respuestas!D2:D}, 2, FALSE), "")';
+  sheet.getRange(1, colEstado).setFormula(
+    '=ARRAYFORMULA({"estado"; IF(A2:A = "", "", ' +
+      'IF(' + asistencia + ' = "si", "Confirmó", ' +
+      'IF(' + asistencia + ' = "no", "No asiste", ' +
+      'IF(E2:E <> "", "Leído", "Sin abrir"))))})'
+  );
+
+  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 30 de octubre. ' +
+    'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
+  sheet.getRange(1, colRecordatorio).setFormula(
+    '=ARRAYFORMULA({"recordatorio"; IF((H2:H = "Sin abrir") + (H2:H = "Leído"), ' +
+      'HYPERLINK("https://wa.me/?text=" & ENCODEURL(' + mensaje + '), "Enviar recordatorio"), "")})'
+  );
+  sheet.getRange(1, colEstado, 1, 2).setFontWeight("bold");
+}
+
+function hojaResumen(ss) {
+  var sheet = ss.getSheetByName(SHEET_RESUMEN) || ss.insertSheet(SHEET_RESUMEN, 0);
+  sheet.clear();
+  var filas = [
+    ["Confirmaciones", ""],
+    ["Invitaciones enviadas", '=COUNTA(Invitados!A2:A)'],
+    ["Pases en total", '=COUNTA(Invitados!A2:A) + SUM(Invitados!C2:C)'],
+    ["Confirmaron", '=COUNTIF(Invitados!H2:H, "Confirmó")'],
+    ["No asisten", '=COUNTIF(Invitados!H2:H, "No asiste")'],
+    ["Leyeron y no respondieron", '=COUNTIF(Invitados!H2:H, "Leído")'],
+    ["Sin abrir el link", '=COUNTIF(Invitados!H2:H, "Sin abrir")'],
+    ["Respondieron (%)", '=IFERROR((B4 + B5) / B2, 0)'],
+    ["Personas que vienen", '=SUMIF(Respuestas!D2:D, "si", Respuestas!C2:C)'],
+    ["Días para el cierre (30 oct)", '=MAX(0, DATE(2026, 10, 30) - TODAY())'],
+    ["", ""],
+    ["Regalos", ""],
+    ["Aportado a regalos (S/)", '=SUMIF(Aportes!A2:A, "<>deposito", Aportes!C2:C)'],
+    ["Aportes a regalos", '=COUNTIFS(Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>")'],
+    ["Avisos de «Ya transferí»", '=COUNTIF(Aportes!A2:A, "deposito")'],
+  ];
+  // Etiquetas con setValues y cálculos con setFormulas: así las fórmulas
+  // entran como fórmulas y no dependen de cómo interprete el texto la hoja.
+  sheet.getRange(1, 1, filas.length, 1).setValues(filas.map(function (f) { return [f[0]]; }));
+  sheet.getRange(1, 2, filas.length, 1).setFormulas(filas.map(function (f) { return [f[1]]; }));
+  sheet.getRange("B8").setNumberFormat("0%");
+  sheet.getRange("B13").setNumberFormat("#,##0");
+  [1, 12].forEach(function (f) { sheet.getRange(f, 1).setFontWeight("bold").setFontSize(12); });
+  sheet.setColumnWidth(1, 240);
+  sheet.setColumnWidth(2, 110);
+  sheet.getRange(1, 2, filas.length, 1).setHorizontalAlignment("right");
 }

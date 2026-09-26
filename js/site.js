@@ -764,18 +764,27 @@
         dir.removeAttribute("aria-disabled");
       }
     });
+    document.querySelectorAll("[data-waze-url]").forEach(function (waze) {
+      var v = venueConfigFor(waze.getAttribute("data-waze-url"));
+      if (v && v.wazeUrl) {
+        waze.href = v.wazeUrl;
+        waze.removeAttribute("aria-disabled");
+      }
+    });
     document.querySelectorAll("[data-maps-embed]").forEach(function (embed) {
       var v = venueConfigFor(embed.getAttribute("data-maps-embed"));
       if (v && v.mapEmbedSrc) {
         var iframe = document.createElement("iframe");
         iframe.src = v.mapEmbedSrc;
-        // Sin loading="lazy" a propósito: esta página solo tiene 1-2 mapas
-        // (no una lista larga), así que no hay nada que ganar retrasando la
-        // carga — y sí se pierde, porque "lazy" espera a que el mapa esté
-        // cerca de la pantalla para recién pedirlo, entonces se ve cargar
-        // en vivo justo cuando el invitado llega a esa sección. Con carga
-        // eager (default) el mapa ya pidió sus tiles desde que abrió la
-        // página, y para cuando el invitado baja hasta acá ya está listo.
+        // loading="lazy": cada mapa de Google trae bastante JavaScript, y
+        // con carga inmediata los dos competían con la foto de portada y
+        // la música en datos móviles, apenas se abría el sobre. Antes se
+        // evitaba "lazy" para que el mapa no se viera cargar en vivo, pero
+        // el navegador empieza a pedirlo bastante antes de que llegue a la
+        // pantalla (del orden de una o dos pantallas de distancia), así que
+        // en la práctica ya está listo cuando el invitado baja hasta acá.
+        iframe.loading = "lazy";
+        iframe.title = "Mapa de " + (embed.getAttribute("data-maps-embed") === "recepcion" ? "la recepción" : "la ceremonia");
         iframe.referrerPolicy = "no-referrer-when-downgrade";
         embed.innerHTML = "";
         embed.appendChild(iframe);

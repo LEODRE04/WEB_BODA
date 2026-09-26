@@ -31,9 +31,10 @@
     initGiftIntro();
   }
 
-  // — modal "Cómo funciona la lista": se muestra una vez al entrar; si
-  // marcan "No mostrar de nuevo" se recuerda en este dispositivo
-  // (localStorage), igual que el toggle de música en site.js. —
+  // — modal "Cómo funciona la lista": se muestra la primera vez y nunca
+  // más en este dispositivo (localStorage). Antes solo se recordaba si
+  // marcaban "No mostrar de nuevo", y casi nadie lo marca: salía en cada
+  // visita, tapando la lista que venían a ver. —
   function initGiftIntro() {
     var modal = document.querySelector("#gift-intro");
     if (!modal) return;
@@ -43,14 +44,11 @@
       // localStorage no disponible (modo privado, etc.) — se muestra igual.
     }
     var closeBtn = modal.querySelector("#gift-intro-close");
-    var dontShow = modal.querySelector("#gift-intro-dontshow");
 
     function close() {
       modal.classList.remove("is-open");
       setTimeout(function () { modal.hidden = true; }, 200);
-      if (dontShow && dontShow.checked) {
-        try { localStorage.setItem("gift_intro_dismissed", "1"); } catch (e) {}
-      }
+      try { localStorage.setItem("gift_intro_dismissed", "1"); } catch (e) {}
     }
 
     abrirDialogo(modal);
@@ -348,7 +346,24 @@
           var img = document.createElement("img");
           img.src = g.foto_url;
           img.alt = "";
-          photoWrap.appendChild(img);
+          img.loading = "lazy";
+          img.decoding = "async";
+          // Las fotos propias (img/regalo-*.jpg) tienen una versión WebP
+          // al lado que pesa en total menos de la mitad. La hoja sigue
+          // diciendo .jpg — así no hay que tocarla — y el navegador elige:
+          // si lee WebP baja esa, si no, el JPG de siempre.
+          var webp = /^img\/[^?#]+\.jpe?g$/i.test(g.foto_url) ? g.foto_url.replace(/\.jpe?g$/i, ".webp") : "";
+          if (webp) {
+            var pic = document.createElement("picture");
+            var src = document.createElement("source");
+            src.type = "image/webp";
+            src.srcset = webp;
+            pic.appendChild(src);
+            pic.appendChild(img);
+            photoWrap.appendChild(pic);
+          } else {
+            photoWrap.appendChild(img);
+          }
         } else {
           photoWrap.className = "gift-card-photo is-placeholder";
           var placeholder = document.createElement("span");
@@ -630,11 +645,15 @@
       checkComplete();
     });
 
-    // De menor a mayor precio — así la lista arranca con lo más
-    // accesible de aportar y no depende del orden en que se cargaron
-    // en la hoja de cálculo.
+    // Primero lo que todavía se puede regalar, después lo completo; y
+    // dentro de cada grupo, de menor a mayor precio. Antes era solo por
+    // precio, y como los regalos baratos son los primeros en completarse,
+    // la lista arrancaba justo con lo que ya no se podía elegir.
     function ordenarPorPrecio(lista) {
-      return lista.slice().sort(function (a, b) { return a.precio - b.precio; });
+      var completo = function (g) { return g.precio > 0 && g.recaudado >= g.precio ? 1 : 0; };
+      return lista.slice().sort(function (a, b) {
+        return completo(a) - completo(b) || a.precio - b.precio;
+      });
     }
 
     // Un reintento automático, y solo uno. La causa habitual del fallo es

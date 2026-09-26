@@ -26,6 +26,11 @@
 <meta name="twitter:title" content="André & Krisli — 9 de enero de 2027">
 <meta name="twitter:description" content="Invitación de boda de André y Krisli.">
 <meta name="twitter:image" content="https://leodre04.github.io/WEB_BODA/img/p3.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
+     se pedía y no lo usa ninguna regla. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/site.css">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
@@ -108,6 +113,11 @@
      pausar/reanudar. Parte del tema "elegante dorado" — se puede quitar
      este bloque + el de site.js sin afectar nada más. -->
 <audio id="bg-music" loop preload="none">
+  <!-- AAC a 112 kbps (1,4 MB) primero; el MP3 original (256 kbps, 3 MB)
+       queda solo de respaldo para un navegador que no lea AAC. A esa
+       calidad no se oye diferencia en el parlante de un celular, y es
+       la mitad de datos antes de que suene. -->
+  <source src="audio/musica-fondo.m4a" type="audio/mp4">
   <source src="audio/musica-fondo.mp3" type="audio/mpeg">
 </audio>
 <button type="button" class="music-toggle" id="music-toggle" aria-label="Pausar música" aria-pressed="false" hidden>
@@ -157,16 +167,21 @@
         </p>
       </div>
       <div class="hero-eyebrow">Acompáñanos en nuestra boda</div>
-      <h1>André</h1>
-      <div class="hero-amp"><span class="line"></span><span class="amp">&amp;</span><span class="line"></span></div>
-      <h1>Krisli</h1>
+      <!-- Un solo h1 con los dos nombres (antes eran dos h1): para un
+           lector de pantalla o un buscador la página tiene un título,
+           "André & Krisli", no dos. Las líneas del & son adorno. -->
+      <h1 class="hero-names">
+        <span class="hero-name">André</span>
+        <span class="hero-amp"><span class="line" aria-hidden="true"></span><span class="amp">&amp;</span><span class="line" aria-hidden="true"></span></span>
+        <span class="hero-name">Krisli</span>
+      </h1>
       <div class="hero-date">09 · 01 · 2027</div>
       <p class="hero-venue">4:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
       <p class="hero-welcome" data-guest-welcome hidden></p>
       <div class="hero-cta"><a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a></div>
     </div>
     <div class="photo">
-      <img src="img/p3.jpg" alt="André y Krisli">
+      <picture><source srcset="img/p3.webp" type="image/webp"><img src="img/p3.jpg" alt="André y Krisli"></picture>
       <span class="photo-label">Foto de portada — coloca img/p3.jpg</span>
     </div>
   </section>
@@ -211,7 +226,7 @@
     <div class="envelope-card floral-frame">
       <div class="welcome-inner">
         <div class="photo">
-          <img src="img/p1.jpg" alt="André y Krisli">
+          <picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture>
           <span class="photo-label">Foto — coloca img/p1.jpg</span>
         </div>
         <div>
@@ -220,11 +235,11 @@
           <p class="section-lede" style="max-width:48ch">Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.</p>
           <div class="welcome-grid">
             <div>
-              <div class="welcome-item"><span class="dot accent"></span><div class="details-label">La ceremonia</div></div>
+              <div class="welcome-item"><span class="dot accent" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/></svg></span><div class="details-label">La ceremonia</div></div>
               <p class="timeline-desc">Sábado 9 de enero de 2027, 4:00 p.m. Iglesia Vida Nueva Rinconada.</p>
             </div>
             <div data-reception-only>
-              <div class="welcome-item"><span class="dot sage"></span><div class="details-label sage">La recepción</div></div>
+              <div class="welcome-item"><span class="dot sage" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span><div class="details-label sage">La recepción</div></div>
               <p class="timeline-desc">En un local aparte, después de la ceremonia. Av. La Molina 1935, La Molina.</p>
             </div>
           </div>
@@ -238,7 +253,7 @@
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker">Cuándo y dónde</div>
-        <h2 class="section-title" style="font-size:38px">Los datos que necesitas</h2>
+        <h2 class="section-title">Los datos que necesitas</h2>
       </div>
       <div class="details-grid">
 
@@ -253,7 +268,7 @@
             <p class="venue-text venue-text-sec">Hay estacionamiento dentro del recinto. En taxi o app, pide que te dejen en la puerta principal.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <a class="btn btn-primary" data-maps-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Google Maps</a>
-              <a class="btn btn-secondary" data-directions-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Cómo llegar</a>
+              <a class="btn btn-secondary" data-waze-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Waze</a>
             </div>
           </div>
         </div>
@@ -268,7 +283,7 @@
             <p class="venue-text">Después de la ceremonia.<br>Av. La Molina 1935, La Molina — Lima.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <a class="btn btn-primary" data-maps-url="recepcion" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Google Maps</a>
-              <a class="btn btn-secondary" data-directions-url="recepcion" href="#" aria-disabled="true" target="_blank" rel="noopener">Cómo llegar</a>
+              <a class="btn btn-secondary" data-waze-url="recepcion" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Waze</a>
             </div>
           </div>
         </div>
@@ -286,7 +301,7 @@
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
-        <h2 class="section-title" style="font-size:38px">Tu presencia es el regalo</h2>
+        <h2 class="section-title">Tu presencia es el regalo</h2>
         <p class="section-lede" style="margin:10px auto 0;text-align:center">Si además quieres acompañarnos con un detalle, estos son nuestros datos.</p>
       </div>
       <div class="gifts-grid">
@@ -493,7 +508,7 @@
       <div class="rsvp-grid">
       <div>
         <div class="section-kicker">Confirmación</div>
-        <h2 class="section-title" id="rsvp-title" style="margin:12px 0 14px">¿Nos acompañas?</h2>
+        <h2 class="section-title section-title-tight" id="rsvp-title">¿Nos acompañas?</h2>
         <p id="rsvp-lede" style="margin:0 0 10px;font-size:15.5px;line-height:1.7;color:var(--color-text-soft)">Responde antes del <strong>30 de octubre de 2026</strong>. Cada invitación es personal.</p>
         <div style="margin:0 0 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <span style="font-size:13.5px;color:var(--color-text-muted)">¿Dudas?</span>
@@ -527,7 +542,7 @@
           <button class="btn btn-primary" type="submit" id="rsvp-submit">Confirmar</button>
           <span class="rsvp-note">Puedes editar tu respuesta hasta el 30 de octubre.</span>
         </div>
-        <p class="rsvp-success" role="status">Gracias por confirmar. Guardamos tu respuesta en este dispositivo — cuando esté lista la confirmación en línea definitiva, te la reenviaremos igual por si acaso.</p>
+        <p class="rsvp-success" role="status">Recibimos tu respuesta. Gracias por confirmar.</p>
       </form>
 
       <!-- Reemplaza al formulario una vez que ya respondió (initRsvpForm,
@@ -562,29 +577,71 @@
     <div class="envelope-card floral-frame">
       <div class="faq-head">
         <div class="section-kicker">Preguntas y respuestas</div>
-        <h2 class="section-title" style="font-size:38px">Lo que suelen preguntarnos</h2>
+        <h2 class="section-title">Lo que suelen preguntarnos</h2>
       </div>
       <!-- Acordeón (<details>/<summary>), no tarjetas abiertas: con las
-           cuatro respuestas desplegadas esta sección ocupaba casi dos
-           pantallas de celular. Plegadas se ven las cuatro preguntas de
-           un vistazo. <details> ya trae el abrir/cerrar y el soporte de
-           teclado y lectores de pantalla, así que no necesita JS. -->
+           respuestas desplegadas esta sección ocupaba varias pantallas de
+           celular. Plegadas se ven todas las preguntas de un vistazo.
+           <details> ya trae el abrir/cerrar y el soporte de teclado y
+           lectores de pantalla, así que no necesita JS.
+
+           DATOS POR CONFIRMAR (propuestos, marcados con "DUMMY" abajo):
+           hora de fin de la recepción, fotos en la ceremonia, mesa para
+           regalos físicos, distancia iglesia–recepción y el aviso de
+           alergias. Cámbienlos por los reales antes de compartir más
+           links. Las que dicen data-reception-only solo las ven los
+           invitados con recepción. -->
       <div class="faq-grid">
+        <details class="faq-item">
+          <summary class="q">¿A qué hora debo llegar?</summary>
+          <!-- Cuadra con "Te esperamos desde las 2:30" (Reserva la fecha)
+               y con "30 minutos antes" (el pase). -->
+          <p class="a">Las puertas abren a las 2:30 p.m. y la ceremonia empieza puntual a las 4:00 p.m. Te recomendamos llegar a más tardar a las 3:30 p.m. para ubicarte con calma.</p>
+        </details>
         <details class="faq-item">
           <summary class="q">¿Puedo llevar niños?</summary>
           <p class="a">La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.</p>
-        </details>
-        <details class="faq-item">
-          <summary class="q">¿Hasta cuándo puedo confirmar?</summary>
-          <p class="a">Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 30 de octubre de 2026. Después ya no podremos agregar cubiertos.</p>
         </details>
         <details class="faq-item">
           <summary class="q">¿Puedo llevar acompañante?</summary>
           <p class="a">Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.</p>
         </details>
         <details class="faq-item">
+          <summary class="q">¿Hasta cuándo puedo confirmar?</summary>
+          <p class="a">Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 30 de octubre de 2026. Después ya no podremos agregar cubiertos.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">Confirmé, pero al final no podré ir. ¿Qué hago?</summary>
+          <p class="a">Hasta el 30 de octubre puedes cambiar tu respuesta tú mismo desde esta misma invitación, en «¿Nos acompañas?». Después de esa fecha, escríbenos por WhatsApp para liberar tu lugar.</p>
+        </details>
+        <details class="faq-item">
           <summary class="q">¿Hay estacionamiento?</summary>
-          <p class="a">Sí, alrededor del recinto y contaremos con personal de seguridad. Llega con 20 minutos de anticipación.</p>
+          <p class="a">Sí, alrededor del recinto y contaremos con personal de seguridad.</p>
+        </details>
+        <details class="faq-item" data-reception-only>
+          <summary class="q">¿Hay movilidad de la iglesia a la recepción?</summary>
+          <!-- DUMMY: distancia y tiempo -->
+          <p class="a">No tendremos movilidad propia. La recepción queda a unos 15 minutos en auto de la iglesia; en «Los datos que necesitas» tienes los dos lugares para abrirlos en Google Maps o Waze.</p>
+        </details>
+        <details class="faq-item" data-reception-only>
+          <summary class="q">¿Hasta qué hora es la celebración?</summary>
+          <!-- DUMMY: hora de cierre -->
+          <p class="a">La recepción termina alrededor de las 11:00 p.m.</p>
+        </details>
+        <details class="faq-item" data-reception-only>
+          <summary class="q">Tengo una alergia o restricción en la comida. ¿A quién aviso?</summary>
+          <!-- DUMMY: canal y plazo -->
+          <p class="a">Escríbenos por WhatsApp antes del 30 de octubre y se lo pasamos al servicio de comida.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">¿Puedo tomar fotos durante la ceremonia?</summary>
+          <!-- DUMMY: política de fotos -->
+          <p class="a">Te pedimos vivir la ceremonia sin celulares: tendremos fotógrafo y compartiremos las fotos con todos. Después de la ceremonia, toma todas las que quieras.</p>
+        </details>
+        <details class="faq-item">
+          <summary class="q">¿Dónde dejo mi regalo?</summary>
+          <!-- DUMMY: la mesa para regalos físicos -->
+          <p class="a">Si quieres hacernos un regalo, lo más práctico para nosotros es un aporte por Yape o transferencia (lo tienes en <a href="#regalos">Mesa de regalos</a>). Si prefieres traer algo, habrá una mesa para regalos a la entrada.</p>
         </details>
       </div>
     </div>
@@ -594,7 +651,7 @@
   <section id="oracion" class="prayer">
     <div class="prayer-card floral-frame">
       <div class="section-kicker">Un pedido especial</div>
-      <h2 class="section-title" style="font-size:32px;margin:12px 0 14px">Oren por nosotros</h2>
+      <h2 class="section-title section-title-tight">Oren por nosotros</h2>
       <p>Te pedimos, con mucho cariño, que puedas ir orando por este día tan especial y por la nueva etapa que comenzamos juntos.</p>
       <p class="prayer-signature">Con mucho amor,<br>André &amp; Krisli</p>
     </div>

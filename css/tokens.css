@@ -1,5 +1,9 @@
 /* Organic — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
-@import url('https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+/* Las fuentes (Parisienne y Cormorant Garamond) se cargan con <link> en
+   el <head> de cada página, no con @import acá: un @import dentro de un
+   CSS obliga al navegador a bajar primero este archivo, recién ahí
+   descubrir el de Google Fonts, y recién ahí las fuentes — tres viajes
+   en fila antes de poder dibujar el texto, que en datos móviles se nota. */
 
 :root {
   --color-bg: #f5ead8;
@@ -87,7 +91,19 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  /* Cifras de caja alta en TODA la página. Cormorant trae por defecto
+     cifras de estilo antiguo, y en ellas el 1 es igual a una I y el 0 a
+     una o: "09 · 01 · 2027" se leía "o9 · oI · 2o27". Se había ido
+     arreglando caso por caso (pase, cuentas, reloj) y siempre quedaba
+     alguno; así se arregla de raíz. Donde además hace falta ancho fijo
+     (cuenta regresiva, números de cuenta) esas reglas siguen pidiendo
+     tabular-nums por su cuenta. */
+  font-variant-numeric: lining-nums;
 }
+/* Los campos de formulario no heredan la variante del texto: el
+   navegador les pone su propia fuente de control. Sin esto, el "1" del
+   campo de asistentes seguía saliendo como una I. */
+input, textarea, select, button { font-variant-numeric: inherit; }
 h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); }
 
 .washed{filter:saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94)}

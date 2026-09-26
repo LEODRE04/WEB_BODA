@@ -12,6 +12,11 @@
 <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
+     se pedía y no lo usa ninguna regla. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/theme-elegante.css">
@@ -36,7 +41,7 @@
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
-        <h2 class="section-title" style="font-size:38px">Elige el que más te guste</h2>
+        <h2 class="section-title">Elige el que más te guste</h2>
         <p class="section-lede" style="margin:10px auto 0;text-align:center">Tu presencia ya es el regalo. Si además quieres darnos algo, armamos esta lista de cosas que de verdad usaremos — puedes aportar completo o una parte.</p>
       </div>
 
@@ -200,9 +205,8 @@
       <div class="gift-intro-step sage"><span class="gift-intro-num">4</span><p>Puedes dejarles un mensaje junto con tu aporte; los novios lo reciben junto con el regalo.</p></div>
     </div>
     <div class="gift-intro-note">Tu presencia ya es el regalo. Si prefieres no aportar nada, no pasa nada: nos alegra igual que estés con nosotros.</div>
-    <div class="dialog-actions" style="align-items:center">
+    <div class="dialog-actions" style="justify-content:center">
       <button type="button" class="btn btn-primary" id="gift-intro-close" style="font-size:14px">Ver la lista de regalos</button>
-      <label class="radio" style="font-size:12.5px;color:var(--color-text-muted);margin-left:auto"><input type="checkbox" id="gift-intro-dontshow"><span class="dot"></span>No mostrar de nuevo</label>
     </div>
   </div>
 </div>
@@ -214,7 +218,7 @@
 <div class="dialog-backdrop gift-thanks" id="gift-thanks" hidden>
   <div class="dialog gift-thanks-dialog">
     <button type="button" class="gift-thanks-close" id="gift-thanks-close" aria-label="Cerrar">✕</button>
-    <div class="gift-thanks-photo"><img src="img/p1.jpg" alt="André y Krisli"></div>
+    <div class="gift-thanks-photo"><picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture></div>
     <div class="gift-thanks-content">
       <div class="gift-thanks-icon" aria-hidden="true">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>

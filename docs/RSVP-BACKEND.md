@@ -248,3 +248,19 @@ sigue siendo JSON válido y ambos backends lo parsean igual.
 - **Notificación al confirmar** (opcional) — se puede agregar
   `MailApp.sendEmail(...)` al final de `upsertRespuesta` en el Apps Script
   para recibir un correo cada vez que alguien confirma.
+
+## Estado, recordatorios y Resumen (`prepararHoja`)
+
+Se corre **una vez**, a mano, después de pegar la versión nueva de `Code.gs`:
+Extensiones › Apps Script › elegir `prepararHoja` en el desplegable de arriba › **Ejecutar**.
+No hace falta volver a desplegar para esto (sí para el resto de cambios de `Code.gs`).
+
+Qué hace (se puede correr de nuevo sin duplicar nada):
+
+- Pone la zona horaria de la hoja en `America/Lima`.
+- Convierte a fecha real (`dd/mm/yyyy`) las fechas viejas guardadas como texto ISO en Respuestas y Aportes.
+- Agrega a **Invitados** dos columnas calculadas: **H · estado** (Confirmó / No asiste / Leído / Sin abrir)
+  y **I · recordatorio** (enlace de WhatsApp con el mensaje y el link personal, solo para Sin abrir y Leído).
+  Si H o I ya tienen otros datos, se detiene sin tocar nada.
+- Crea la pestaña **Resumen** con los totales: confirmaciones, pases, personas que vienen,
+  días para el cierre y lo aportado a regalos.
