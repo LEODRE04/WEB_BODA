@@ -265,3 +265,18 @@ Qué hace (se puede correr de nuevo sin duplicar nada):
   todo lo que haya.
 - Crea la pestaña **Resumen** con los totales: confirmaciones, pases, personas que vienen,
   días para el cierre y lo aportado a regalos.
+
+## Confirmar solo con link personal
+
+Desde esta versión, `doPost` rechaza las confirmaciones sin `codigo` (y la página ya no muestra el
+formulario sin link: ofrece pedirlo por WhatsApp). Antes se aceptaba cualquier nombre, y así entraron
+filas de prueba como "ANDRE" o "asd".
+
+## Velocidad: caché de invitados y ping
+
+- La lista de Invitados se guarda en caché 10 minutos (`CACHE_INVITADOS_SEG`). Un cambio de nombre o
+  de pases en la hoja se ve en la página en como mucho 10 minutos; un invitado recién agregado se
+  encuentra al instante (si no está en la caché, se busca en la hoja).
+- `.github/workflows/mantener-api-despierta.yml` visita la API cada 10 minutos, de 7:00 a 00:00 hora
+  de Lima, para que el invitado no pague el arranque en frío. Se puede lanzar a mano desde la pestaña
+  **Actions** del repositorio (botón "Run workflow") y ahí se ve cuánto tardó cada visita.

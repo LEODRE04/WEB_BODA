@@ -346,7 +346,7 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 .hero-amp span.amp,
 .section-title,
 .gift-list-band-title,
-.dresscode-message,
+.dresscode-title,
 .site-footer .names,
 .prayer-signature,
 .pase-heading,
@@ -361,7 +361,7 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 }
 /* La manuscrita tiene trazos altos y bajos muy largos: sin algo de aire
    las mayúsculas de una línea chocan con la siguiente. */
-.section-title, .gift-list-band-title, .dresscode-message { line-height: 1.25; }
+.section-title, .gift-list-band-title, .dresscode-title { line-height: 1.25; }
 
 /* — sello raspable (js/sello-raspable.js) —
    El sello de lacre se agranda para que quepa un dedo y se dibuja en

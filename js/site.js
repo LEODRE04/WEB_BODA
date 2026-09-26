@@ -914,17 +914,41 @@
     // qué), y si ya había respondido antes, si va o no (para editarla). Si
     // el código no existe, o si la API no responde (todavía no hay backend
     // desplegado), el formulario sigue funcionando abierto, como antes.
-    if (codigo) {
+    // Sin link personal (o con uno que no existe) no se confirma: se
+    // muestra un aviso para pedir el link por WhatsApp en lugar del
+    // formulario. El backend rechaza igual esas respuestas; esto es para
+    // que el invitado no llene algo que no se va a guardar.
+    var sinLink = document.querySelector("#rsvp-sin-link");
+    function bloquearSinLink(texto) {
+      if (!sinLink) return;
+      form.hidden = true;
+      if (texto) {
+        var p = sinLink.querySelector("#rsvp-sin-link-text");
+        if (p) p.textContent = texto;
+      }
+      sinLink.hidden = false;
+    }
+    var fields = form.querySelector("#rsvp-fields");
+
+    if (!codigo) {
+      bloquearSinLink();
+    } else {
       codigoInput.value = codigo;
       guestPromise.then(function (guest) {
-        if (!guest) return; // sin respuesta de la API: formulario abierto normal
+        // Sin respuesta de la API: no sabemos el nombre, así que quedan
+        // los campos a la vista para escribirlo. El backend igual toma el
+        // nombre de la hoja al guardar.
+        if (!guest) return;
         if (!guest.found) {
-          showBanner("No reconocemos este link de invitación, pero puedes confirmar igual.", true);
+          bloquearSinLink("No reconocemos este link de invitación. Escríbenos por WhatsApp y te enviamos el correcto.");
           return;
         }
         nombreInput.value = guest.nombre;
         nombreInput.readOnly = true;
-        asistentesInput.value = 1 + (Number(guest.acompanantes_permitidos) || 0);
+        var pases = 1 + (Number(guest.acompanantes_permitidos) || 0);
+        asistentesInput.value = pases;
+        if (fields) fields.hidden = true;
+        var paraQuien = "Para: " + guest.nombre + " · " + pases + (pases === 1 ? " pase" : " pases");
 
         if (guest.respuesta) {
           // Solo "si"/"no": el valor viene de la hoja y va dentro de un
@@ -939,13 +963,13 @@
           // formulario (basado en un mockup de claude.ai/design) — "Editar
           // mi respuesta" en ese resumen vuelve a mostrar el formulario.
           if (savedState) savedState.show(guest.respuesta);
-        } else {
-          showBanner("Confirmando para: " + guest.nombre);
         }
+        // El banner va siempre, también al editar una respuesta: es lo
+        // único que dice para quién es la confirmación ahora que los dos
+        // campos no se ven.
+        showBanner(paraQuien);
       });
     }
-    // Sin código: el formulario queda abierto y editable, como antes
-    // (nombre y número de asistentes normales, sin precargar).
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();

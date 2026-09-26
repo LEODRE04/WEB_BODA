@@ -181,6 +181,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self._handle_aporte(data)
 
         codigo = (data.get("codigo") or "").strip()
+        # Igual que Code.gs: sin link personal no se confirma.
+        if not codigo:
+            return self._json(200, {"error": "Para confirmar necesitas tu link personal de invitación. Escríbenos por WhatsApp y te lo enviamos."})
         if codigo:
             guests = load_guests()
             if codigo not in guests:

@@ -45,6 +45,15 @@
         <p class="section-lede" style="margin:10px auto 0;text-align:center">Tu presencia ya es el regalo. Si además quieres darnos algo, armamos esta lista de cosas que de verdad usaremos — puedes aportar completo o una parte.</p>
       </div>
 
+      <!-- Filtro (initGiftRegistry): arranca en "Disponibles" para que en
+           el celular no haya que pasar por los regalos ya completos. Solo
+           aparece cuando hay de los dos tipos. -->
+      <div class="gift-filter" id="gift-filter" role="group" aria-label="Mostrar regalos" hidden>
+        <button type="button" class="gift-filter-btn" data-filtro="disponibles" aria-pressed="true">Disponibles <span class="gift-filter-n"></span></button>
+        <button type="button" class="gift-filter-btn" data-filtro="completos" aria-pressed="false">Completos <span class="gift-filter-n"></span></button>
+        <button type="button" class="gift-filter-btn" data-filtro="todos" aria-pressed="false">Todos</button>
+      </div>
+
       <div class="gift-grid" id="gift-grid" hidden>
         <p class="gift-grid-status">Cargando la lista de regalos…</p>
       </div>

@@ -114,7 +114,7 @@ function doGet(e) {
     var guest = findGuest(codigo);
     if (!guest) return jsonOut({ found: false });
 
-    registrarApertura(codigo);
+    registrarApertura(codigo, guest.fila);
 
     var respuesta = findRespuesta(codigo);
     return jsonOut({
@@ -157,24 +157,27 @@ function doPost(e) {
     var codigo = String(data.codigo || "").trim();
     var nombre = String(data.nombre).trim().slice(0, MAX_NOMBRE);
     var num = parseInt(data.num_asistentes, 10);
-    if (codigo) {
-      var guest = findGuest(codigo);
-      if (!guest) return jsonOut({ error: "código de invitado no reconocido" });
-      // num_asistentes es de solo lectura en el formulario — esto es más una
-      // red de seguridad que una validación real, por si alguien lo edita a
-      // mano en el navegador.
-      var esperado = 1 + guest.acompanantes_permitidos;
-      if (isNaN(num) || num < 0) num = asistencia === "si" ? esperado : 0;
-      if (num > esperado) {
-        return jsonOut({ error: "supera los asistentes de tu invitación (" + esperado + ")" });
-      }
-      // Con código, el nombre es el de la hoja de Invitados, no el que
-      // mande el navegador.
-      nombre = String(guest.nombre).trim();
-    } else {
-      if (isNaN(num) || num < 0) num = asistencia === "si" ? 1 : 0;
-      if (num > 10) num = 10;
+    // Sin link personal no se confirma. Antes se aceptaba cualquier nombre
+    // (hasta 10 personas) y así entraron filas como "ANDRE" o "asd" que no
+    // corresponden a ningún invitado. La página ya no muestra el
+    // formulario sin código; esto cierra la puerta también para quien
+    // llame a la API directo. No es reintentable: reintentar no lo arregla.
+    if (!codigo) {
+      return jsonOut({ error: "Para confirmar necesitas tu link personal de invitación. Escríbenos por WhatsApp y te lo enviamos." });
     }
+    var guest = findGuest(codigo);
+    if (!guest) return jsonOut({ error: "código de invitado no reconocido" });
+    // num_asistentes es de solo lectura en el formulario — esto es más una
+    // red de seguridad que una validación real, por si alguien lo edita a
+    // mano en el navegador.
+    var esperado = 1 + guest.acompanantes_permitidos;
+    if (isNaN(num) || num < 0) num = asistencia === "si" ? esperado : 0;
+    if (num > esperado) {
+      return jsonOut({ error: "supera los asistentes de tu invitación (" + esperado + ")" });
+    }
+    // Con código, el nombre es el de la hoja de Invitados, no el que
+    // mande el navegador.
+    nombre = String(guest.nombre).trim();
 
     // Se arma la fila con los campos permitidos y nada más: antes se
     // copiaba el objeto del navegador entero, y con él las fechas
@@ -235,17 +238,59 @@ function buscarFilaPorClave(sheet, clave) {
   return 0;
 }
 
+// — invitados en caché —
+// Cada visita con ?codigo= buscaba al invitado leyendo la columna A de
+// Invitados, y después registrarApertura la volvía a leer para ubicar la
+// fila. La lista casi no cambia, así que se guarda entera en caché (unos
+// pocos KB para ~170 invitados) con su número de fila: la mayoría de las
+// visitas ya no leen la hoja para encontrar a nadie.
+//
+// Si ustedes editan un nombre o los pases en la hoja, la página lo verá
+// en como mucho CACHE_INVITADOS_SEG. Un código que no está en la caché
+// (un invitado recién agregado) se busca igual en la hoja, así que nunca
+// se le dice "no reconocemos tu link" a alguien que sí está.
+var CACHE_INVITADOS_SEG = 600;
+
+function mapaInvitados() {
+  var cache = CacheService.getScriptCache();
+  try {
+    var hit = cache.get("invitados");
+    if (hit) return JSON.parse(hit);
+  } catch (err) {}
+  var sheet = requireSheet(SHEET_INVITADOS);
+  var ultima = sheet.getLastRow();
+  var mapa = {};
+  if (ultima >= 2) {
+    var filas = sheet.getRange(2, 1, ultima - 1, 4).getValues();
+    for (var i = 0; i < filas.length; i++) {
+      var c = String(filas[i][0]).trim();
+      if (c && !mapa[c]) mapa[c] = [i + 2, filas[i][1], Number(filas[i][2] || 0), String(filas[i][3] || "").trim()];
+    }
+  }
+  try { cache.put("invitados", JSON.stringify(mapa), CACHE_INVITADOS_SEG); } catch (err) {}
+  return mapa;
+}
+
+function invitadoDesdeFila(codigo, fila, nombre, acomp, tipo) {
+  return {
+    codigo: codigo,
+    fila: fila,
+    nombre: nombre,
+    acompanantes_permitidos: Number(acomp || 0),
+    tipo_invitacion: String(tipo || "completa").trim() || "completa",
+  };
+}
+
 function findGuest(codigo) {
+  var g = mapaInvitados()[codigo];
+  if (g) return invitadoDesdeFila(codigo, g[0], g[1], g[2], g[3]);
+  // No está en la caché: puede ser un invitado agregado hace un rato.
   var sheet = requireSheet(SHEET_INVITADOS);
   var fila = buscarFilaPorClave(sheet, codigo);
   if (!fila) return null;
+  try { CacheService.getScriptCache().remove("invitados"); } catch (err) {}
   var v = sheet.getRange(fila, 1, 1, 4).getValues()[0];
-  return {
-    codigo: v[0],
-    nombre: v[1],
-    acompanantes_permitidos: Number(v[2] || 0),
-    tipo_invitacion: String(v[3] || "completa").trim() || "completa",
-  };
+  return invitadoDesdeFila(v[0], fila, v[1], v[2], v[3]);
 }
 
 // — "¿ya abrió el link?" —
@@ -267,13 +312,19 @@ function findGuest(codigo) {
 // el mismo código abriendo dos veces en el mismo instante, y ahí lo peor
 // que pasa es que se pierda un +1 del contador — no vale la pena
 // serializar todas las cargas de página por eso.
-function registrarApertura(codigo) {
+function registrarApertura(codigo, filaConocida) {
   try {
     var sheet = requireSheet(SHEET_INVITADOS);
     // Hoja todavía sin las columnas nuevas: no es un error, simplemente
     // aún no las agregaron. Se sale en silencio.
     if (sheet.getMaxColumns() < APERTURA_COL + 2) return;
-    var fila = buscarFilaPorClave(sheet, codigo);
+    // La fila viene de la caché. Se comprueba que siga siendo la de ese
+    // código antes de escribir (si insertaron o reordenaron filas en los
+    // últimos minutos, la apertura caería en otro invitado); si no
+    // coincide, se busca como antes.
+    var fila = filaConocida || 0;
+    if (fila && String(sheet.getRange(fila, 1).getValue()).trim() !== codigo) fila = 0;
+    if (!fila) fila = buscarFilaPorClave(sheet, codigo);
     if (!fila) return;
     var rango = sheet.getRange(fila, APERTURA_COL, 1, 3);
     var v = rango.getValues()[0];

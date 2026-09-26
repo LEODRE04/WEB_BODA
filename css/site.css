@@ -621,6 +621,24 @@ body { background: var(--color-neutral-100); }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 14px; margin: 0 0 30px;
 }
+/* Filtro de la mesa de regalos: tres pastillas, la elegida en verde. */
+/* Las tres entran en una fila en un celular de 360px: con 16px de relleno
+   "Todos" bajaba sola a una segunda línea. */
+.gift-filter { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 0 0 18px; }
+.gift-filter-btn {
+  min-height: 40px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--color-divider); background: var(--color-bg);
+  font-family: inherit; font-size: 14.5px; font-weight: 600; color: var(--color-text-soft);
+  white-space: nowrap;
+  cursor: pointer; transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.gift-filter-btn:hover { border-color: var(--color-accent-300); }
+.gift-filter-btn[aria-pressed="true"] {
+  background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg);
+}
+.gift-filter-n { font-weight: 500; opacity: .8; }
+@media (pointer: coarse) { .gift-filter-btn { min-height: 44px; } }
+
 .gift-card {
   background: var(--color-bg); border-radius: 24px; padding: 18px 18px 16px;
   border: 2px solid transparent; text-align: left; cursor: pointer;
@@ -985,11 +1003,16 @@ body { background: var(--color-neutral-100); }
   fill: none; stroke: color-mix(in srgb, #fff 16%, transparent);
   stroke-width: 1.2; stroke-linecap: round;
 }
-.dresscode-message {
-  margin: 0; max-width: 24ch;
+.dresscode-message { margin: 0; max-width: 30ch; }
+.dresscode-title {
+  margin: 0;
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: clamp(25px, 3.2vw, 38px); line-height: 1.24;
+  font-size: clamp(32px, 4.2vw, 42px); line-height: 1.2;
   color: var(--color-text); text-wrap: balance;
+}
+.dresscode-text {
+  margin: 10px 0 0; font-size: 16.5px; line-height: 1.6;
+  color: var(--color-text-soft); text-wrap: pretty;
 }
 /* Las dos rayitas a los lados del cierre: flex: 0 1 120px para que se
    encojan solas en pantallas angostas en vez de forzar scroll. */
@@ -1076,6 +1099,21 @@ body { background: var(--color-neutral-100); }
   background: var(--color-accent-2-100); color: var(--color-accent-2-800);
 }
 .rsvp-guest-banner.is-warning { background: var(--color-accent-100); color: var(--color-accent-800); }
+/* Con link personal, el banner reemplaza a los campos de nombre y pases,
+   así que pasa a ser la línea principal del formulario: más grande. */
+.rsvp-guest-banner { font-size: 15.5px; font-weight: 600; }
+
+/* Aviso en lugar del formulario cuando se entra sin link personal. Misma
+   caja que el formulario, para que no parezca un error de la página. */
+.rsvp-sin-link {
+  background: var(--color-neutral-100); border-radius: 32px; padding: 28px 30px;
+  box-shadow: var(--shadow-md); text-align: center;
+}
+.rsvp-sin-link-title {
+  margin: 0 0 8px; font-family: var(--font-heading); font-size: 21px; font-weight: 600;
+  color: var(--color-text);
+}
+.rsvp-sin-link-text { margin: 0 0 18px; font-size: 15.5px; line-height: 1.65; color: var(--color-text-soft); }
 @media (max-width: 860px) {
   .rsvp-grid { grid-template-columns: 1fr; }
   .rsvp-form .row { grid-template-columns: 1fr; }

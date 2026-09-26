@@ -295,8 +295,44 @@
       if (guest && guest.found && guest.nombre && !nombreInput.value) nombreInput.value = guest.nombre;
     });
 
+    // — filtro Disponibles / Completos / Todos —
+    // Con 12 regalos en una columna, la mesa medía unas ocho pantallas de
+    // celular, y la mitad eran regalos que ya no se pueden elegir. Arranca
+    // en "Disponibles". Si no queda ninguno disponible, muestra todos.
+    var filtroEl = document.querySelector("#gift-filter");
+    var filtro = "disponibles";
+    if (filtroEl) {
+      filtroEl.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-filtro]");
+        if (!b) return;
+        filtro = b.getAttribute("data-filtro");
+        renderGrid();
+      });
+    }
+    function esCompleto(g) { return g.precio > 0 && g.recaudado >= g.precio; }
+    function pintarFiltro() {
+      if (!filtroEl) return;
+      var nComp = regalos.filter(esCompleto).length;
+      var nDisp = regalos.length - nComp;
+      if (!nDisp && filtro === "disponibles") filtro = "todos";
+      if (!nComp && filtro === "completos") filtro = "todos";
+      // Con un solo tipo, el filtro no filtra nada: se esconde.
+      filtroEl.hidden = !(nComp && nDisp);
+      filtroEl.querySelectorAll("[data-filtro]").forEach(function (b) {
+        var f = b.getAttribute("data-filtro");
+        b.setAttribute("aria-pressed", String(f === filtro));
+        var n = b.querySelector(".gift-filter-n");
+        if (n) n.textContent = f === "disponibles" ? nDisp : nComp;
+      });
+    }
+    function pasaFiltro(g) {
+      if (filtro === "todos") return true;
+      return filtro === "completos" ? esCompleto(g) : !esCompleto(g);
+    }
+
     function renderGrid() {
       grid.innerHTML = "";
+      pintarFiltro();
 
       // El regalo sin completar con más aportado hasta ahora se marca
       // como "el más elegido" — un empujoncito simple, sin más lógica
@@ -309,6 +345,7 @@
 
       regalos.forEach(function (g) {
         var completo = g.precio > 0 && g.recaudado >= g.precio;
+        if (!pasaFiltro(g)) return;
 
         var card = document.createElement("button");
         card.type = "button";

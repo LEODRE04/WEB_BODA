@@ -233,16 +233,10 @@
           <div class="section-kicker">Bienvenidos a nuestra boda</div>
           <h2 class="section-title">Queremos celebrar contigo</h2>
           <p class="section-lede" style="max-width:48ch">Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.</p>
-          <div class="welcome-grid">
-            <div>
-              <div class="welcome-item"><span class="dot accent" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/></svg></span><div class="details-label">La ceremonia</div></div>
-              <p class="timeline-desc">Sábado 9 de enero de 2027, 4:00 p.m. Iglesia Vida Nueva Rinconada.</p>
-            </div>
-            <div data-reception-only>
-              <div class="welcome-item"><span class="dot sage" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span><div class="details-label sage">La recepción</div></div>
-              <p class="timeline-desc">En un local aparte, después de la ceremonia. Av. La Molina 1935, La Molina.</p>
-            </div>
-          </div>
+          <!-- Aquí iba una lista con la ceremonia y la recepción (día, hora,
+               lugar). Se quitó: esos datos ya están en la portada, en
+               «Reserva la fecha» y en «Los datos que necesitas», y era la
+               cuarta vez que se repetían. -->
         </div>
       </div>
     </div>
@@ -465,7 +459,13 @@
           <path class="dc-fold-d" d="M52,86 Q46,124 40,164 M60,86 L60,168 M68,86 Q74,124 80,164"/>
           <path class="dc-dress-sh" d="M22,162 Q37,169 51,165 Q60,170 69,165 Q83,169 98,162 Q60,173 22,162Z"/>
         </svg>
-        <h2 class="dresscode-message">Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante.</h2>
+        <!-- Titular corto en manuscrita y el pedido en letra normal. Antes
+             la frase entera iba en manuscrita a 25px, y una oración larga
+             en esa letra cuesta leerla en el celular. -->
+        <div class="dresscode-message">
+          <h2 class="dresscode-title">Semi elegante o elegante</h2>
+          <p class="dresscode-text">Puedes ir como te sientas más cómodo; solo te pedimos mantener un look semi elegante o elegante.</p>
+        </div>
         <svg class="dresscode-figure dresscode-figure-suit" viewBox="0 0 120 210" aria-hidden="true" focusable="false">
           <!-- maniquí: pie, poste y cuello -->
           <rect class="dc-stand" x="57" y="190" width="6" height="11" rx="1"/>
@@ -524,7 +524,12 @@
         <input type="hidden" name="codigo" id="rsvp-codigo" value="">
         <p class="rsvp-guest-banner" id="rsvp-guest-banner" hidden></p>
 
-        <div class="row">
+        <!-- Con link personal estos dos campos no se muestran: nombre y
+             pases ya vienen de la invitación y no se pueden cambiar, así
+             que se resumen en la línea de arriba ("Para: … · N pases").
+             Siguen en el formulario porque son los que se envían. Solo se
+             ven si la API no respondió y no sabemos el nombre. -->
+        <div class="row" id="rsvp-fields">
           <div class="field"><label for="rsvp-nombre">Nombre y apellido</label><input class="input" id="rsvp-nombre" name="nombre" required></div>
           <div class="field"><label for="rsvp-asistentes">Número de asistentes</label><input class="input" id="rsvp-asistentes" name="num_asistentes" value="1" readonly></div>
         </div>
@@ -544,6 +549,15 @@
         </div>
         <p class="rsvp-success" role="status">Recibimos tu respuesta. Gracias por confirmar.</p>
       </form>
+
+      <!-- Sin link personal no se puede confirmar (initRsvpForm): cada
+           invitación tiene nombre y pases propios, y un formulario abierto
+           dejaba que cualquiera anotara un nombre cualquiera. -->
+      <div class="rsvp-sin-link" id="rsvp-sin-link" hidden>
+        <p class="rsvp-sin-link-title">Confirma desde tu link personal</p>
+        <p class="rsvp-sin-link-text" id="rsvp-sin-link-text">Para confirmar, abre el link que te enviamos por WhatsApp. ¿No lo encuentras? Escríbenos y te lo reenviamos.</p>
+        <a class="btn btn-primary" data-whatsapp hidden href="#" target="_blank" rel="noopener">Pedir mi link por WhatsApp</a>
+      </div>
 
       <!-- Reemplaza al formulario una vez que ya respondió (initRsvpForm,
            en js/site.js) — mismo criterio que el modal de agradecimiento:
