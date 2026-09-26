@@ -595,8 +595,44 @@ function prepararHoja() {
   var aportes = getSheet(SHEET_APORTES);
   if (aportes) convertirFechasTexto(aportes, [APORTE_COLUMNAS.length]);
 
-  var colEstado = columnasDeSeguimiento(requireSheet(SHEET_INVITADOS));
-  hojaResumen(ss, colEstado);
+  var F = adaptadorDeFormulas(ss);
+  var colEstado = columnasDeSeguimiento(requireSheet(SHEET_INVITADOS), F);
+  hojaResumen(ss, colEstado, F);
+}
+
+// ── el separador de las fórmulas depende del idioma de la hoja ─────────
+// setFormula NO usa siempre la sintaxis inglesa: en una hoja en español
+// (coma decimal) los argumentos van con ";" y las columnas de un {array}
+// con "\". Escritas con comas, salían todas "#ERROR!" (error de
+// análisis). En vez de adivinar por el código de idioma, se prueba: se
+// escribe =SUM(1,2) en una celda y se mira si da 3.
+//
+// Las fórmulas de este archivo se escriben en inglés (con comas) y
+// adaptadorDeFormulas devuelve la función que las traduce si hace falta.
+// Solo cambia las comas que están FUERA de un texto entre comillas: el
+// mensaje del recordatorio lleva comas que tienen que quedar como comas.
+function adaptadorDeFormulas(ss) {
+  var hoja = ss.getSheetByName(SHEET_RESUMEN) || ss.insertSheet(SHEET_RESUMEN, 0);
+  var celdaPrueba = hoja.getRange(1, 1);
+  celdaPrueba.setFormula("=SUM(1,2)");
+  SpreadsheetApp.flush();
+  var inglesa = celdaPrueba.getDisplayValue() === "3";
+  celdaPrueba.clearContent();
+  if (inglesa) return function (f) { return f; };
+  return function (f) {
+    var out = "", enTexto = false, pila = [];
+    for (var i = 0; i < f.length; i++) {
+      var c = f.charAt(i);
+      if (c === '"') { enTexto = !enTexto; out += c; continue; }
+      if (!enTexto) {
+        if (c === "(" || c === "{") pila.push(c);
+        else if (c === ")" || c === "}") pila.pop();
+        else if (c === ",") { out += pila[pila.length - 1] === "{" ? "\\" : ";"; continue; }
+      }
+      out += c;
+    }
+    return out;
+  };
 }
 
 function convertirFechasTexto(sheet, columnas) {
@@ -634,58 +670,92 @@ function convertirFechasTexto(sheet, columnas) {
 // Cada fórmula nueva es UNA sola en la fila del encabezado y se extiende
 // sola a todas las filas, así que un invitado agregado después ya sale
 // con su estado sin copiar nada. Se escriben en sintaxis inglesa
-// (comas), que es la que acepta setFormula en cualquier idioma de hoja.
+// (comas) y pasan por F, que las adapta al idioma de la hoja.
 var ESTADOS = { si: "confirmado", no: "rechazado", leido: "leido", sinAbrir: "sin abrir" };
 
+// Por el texto del encabezado, o por la fórmula que lo genera: una
+// columna nuestra que quedó con error muestra "#ERROR!" en vez de su
+// nombre, y sin mirar la fórmula se crearía otra al lado en cada intento.
 function columnaPorEncabezado(sheet, nombre) {
   var ultima = sheet.getLastColumn();
   if (ultima < 1) return 0;
-  var enc = sheet.getRange(1, 1, 1, ultima).getValues()[0];
+  var rango = sheet.getRange(1, 1, 1, ultima);
+  var enc = rango.getValues()[0];
+  var formulas = rango.getFormulas()[0];
   for (var i = 0; i < enc.length; i++) {
     if (String(enc[i]).trim().toLowerCase() === nombre) return i + 1;
+    if (formulas[i] && formulas[i].indexOf('{"' + nombre + '"') !== -1) return i + 1;
   }
   return 0;
+}
+
+// Letras de columna que aparecen en las fórmulas de la fila 2 ($L$2,
+// J2, Respuestas!A2:A…). Las referencias a otras pestañas se ignoran:
+// solo importa no pisar columnas de esta misma hoja.
+function columnasReferenciadas(sheet) {
+  var usadas = {};
+  var ultima = sheet.getLastColumn();
+  if (ultima < 1 || sheet.getMaxRows() < 2) return usadas;
+  sheet.getRange(2, 1, 1, ultima).getFormulas()[0].forEach(function (f) {
+    if (!f) return;
+    var sinOtrasHojas = f.replace(/(?:'[^']+'|[A-Za-zÀ-ÿ_][\wÀ-ÿ]*)!\$?[A-Z]{1,2}\$?\d*(?::\$?[A-Z]{1,2}\$?\d*)?/g, "");
+    var re = /\$?([A-Z]{1,2})\$?\d+/g, m;
+    while ((m = re.exec(sinOtrasHojas))) usadas[m[1]] = true;
+  });
+  return usadas;
 }
 
 function letraDeColumna(sheet, col) {
   return sheet.getRange(1, col).getA1Notation().replace(/\d+/g, "");
 }
 
-function columnasDeSeguimiento(sheet) {
+function columnasDeSeguimiento(sheet, F) {
   var colEstado = columnaPorEncabezado(sheet, "estado");
   if (!colEstado) {
     colEstado = sheet.getLastColumn() + 1;
     if (sheet.getMaxColumns() < colEstado) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
     var asistencia = 'IFERROR(VLOOKUP(A2:A, {Respuestas!A2:A, Respuestas!D2:D}, 2, FALSE), "")';
-    sheet.getRange(1, colEstado).setFormula(
+    sheet.getRange(1, colEstado).setFormula(F(
       '=ARRAYFORMULA({"estado"; IF(A2:A = "", "", ' +
         'IF(' + asistencia + ' = "si", "' + ESTADOS.si + '", ' +
         'IF(' + asistencia + ' = "no", "' + ESTADOS.no + '", ' +
         'IF(E2:E <> "", "' + ESTADOS.leido + '", "' + ESTADOS.sinAbrir + '"))))})'
-    );
+    ));
   }
   var E = letraDeColumna(sheet, colEstado);
 
+  // Columnas que usan las fórmulas de la hoja (mirando la fila 2): esas
+  // no se pueden ocupar aunque estén vacías. En la hoja real, K arma los
+  // links con =$J$2&A2&$L$2, así que L tiene que quedar vacía — si el
+  // recordatorio cayera ahí, se pegaría al final de todos esos links.
+  var usadas = columnasReferenciadas(sheet);
   var colRec = columnaPorEncabezado(sheet, "recordatorio");
+  if (colRec && usadas[letraDeColumna(sheet, colRec)]) {
+    // Quedó en una columna prestada (pasó en un intento anterior): se
+    // saca de ahí y se ubica de nuevo abajo.
+    sheet.getRange(1, colRec, sheet.getMaxRows(), 1).clearContent();
+    colRec = 0;
+  }
   if (!colRec) {
     colRec = sheet.getLastColumn() + 1;
-    if (sheet.getMaxColumns() < colRec) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
+    while (usadas[letraDeColumna(sheet, Math.min(colRec, sheet.getMaxColumns()))] && colRec <= sheet.getMaxColumns()) colRec++;
+    if (sheet.getMaxColumns() < colRec) sheet.insertColumnsAfter(sheet.getMaxColumns(), colRec - sheet.getMaxColumns());
   }
   // Las filas de abajo tienen que estar vacías para que la fórmula se
   // extienda; esta columna es nuestra, así que se puede limpiar.
   sheet.getRange(2, colRec, Math.max(sheet.getMaxRows() - 1, 1), 1).clearContent();
   var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 30 de octubre. ' +
     'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
-  sheet.getRange(1, colRec).setFormula(
+  sheet.getRange(1, colRec).setFormula(F(
     '=ARRAYFORMULA({"recordatorio"; IF((' + E + '2:' + E + ' = "' + ESTADOS.sinAbrir + '") + (' +
       E + '2:' + E + ' = "' + ESTADOS.leido + '"), ' +
       'HYPERLINK("https://wa.me/?text=" & ENCODEURL(' + mensaje + '), "Enviar recordatorio"), "")})'
-  );
+  ));
   sheet.getRange(1, colRec).setFontWeight("bold");
   return E;
 }
 
-function hojaResumen(ss, E) {
+function hojaResumen(ss, E, F) {
   var est = "Invitados!" + E + "2:" + E;
   var sheet = ss.getSheetByName(SHEET_RESUMEN) || ss.insertSheet(SHEET_RESUMEN, 0);
   sheet.clear();
@@ -711,7 +781,7 @@ function hojaResumen(ss, E) {
   // Etiquetas con setValues y cálculos con setFormulas: así las fórmulas
   // entran como fórmulas y no dependen de cómo interprete el texto la hoja.
   sheet.getRange(1, 1, filas.length, 1).setValues(filas.map(function (f) { return [f[0]]; }));
-  sheet.getRange(1, 2, filas.length, 1).setFormulas(filas.map(function (f) { return [f[1]]; }));
+  sheet.getRange(1, 2, filas.length, 1).setFormulas(filas.map(function (f) { return [F(f[1])]; }));
   sheet.getRange("B8").setNumberFormat("0%");
   sheet.getRange("B13").setNumberFormat("#,##0");
   [1, 12].forEach(function (f) { sheet.getRange(f, 1).setFontWeight("bold").setFontSize(12); });
