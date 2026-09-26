@@ -577,8 +577,9 @@ function jsonOut(obj) {
 //      salgan corridas un día cuando alguien responde de noche.
 //   2. Convierte a fecha real las fechas viejas que quedaron como texto
 //      ISO en Respuestas y Aportes (las de antes de este cambio).
-//   3. Agrega a Invitados dos columnas calculadas, "estado" y
-//      "recordatorio" (ver columnasDeSeguimiento).
+//   3. En Invitados usa la columna "estado" que ya existe (o la crea si
+//      no hay) y agrega "recordatorio" en la primera columna libre (ver
+//      columnasDeSeguimiento).
 //   4. Crea (o rehace) la pestaña "Resumen" con los totales.
 //
 // Todo son fórmulas de la hoja, no valores: se actualizan solas con cada
@@ -594,8 +595,8 @@ function prepararHoja() {
   var aportes = getSheet(SHEET_APORTES);
   if (aportes) convertirFechasTexto(aportes, [APORTE_COLUMNAS.length]);
 
-  columnasDeSeguimiento(requireSheet(SHEET_INVITADOS));
-  hojaResumen(ss);
+  var colEstado = columnasDeSeguimiento(requireSheet(SHEET_INVITADOS));
+  hojaResumen(ss, colEstado);
 }
 
 function convertirFechasTexto(sheet, columnas) {
@@ -616,69 +617,90 @@ function convertirFechasTexto(sheet, columnas) {
   });
 }
 
-// "estado" (H) y "recordatorio" (I), justo después de las tres de
-// apertura (E-G). Cada una es UNA fórmula en la fila del encabezado que
-// se extiende sola a todas las filas, así que un invitado que agreguen
-// más tarde ya sale con su estado sin copiar nada.
+// Columnas "estado" y "recordatorio" en Invitados.
 //
-//   estado:       Confirmó / No asiste / Leído / Sin abrir
-//                 (Leído = abrió el link pero todavía no respondió)
-//   recordatorio: solo para "Sin abrir" y "Leído", un enlace que abre
-//                 WhatsApp con el mensaje ya escrito, con su nombre y su
-//                 link personal. La hoja no tiene teléfonos, así que
-//                 WhatsApp pregunta a qué contacto mandarlo.
+// ESTADO: la hoja real ya tiene su propia columna "estado" (una fórmula
+// por fila que da confirmado / rechazado / leido / sin abrir). Si existe,
+// se usa TAL CUAL y no se toca. Solo si no hay ninguna se crea una, con
+// esas mismas cuatro etiquetas para que todo hable igual.
 //
-// Las fórmulas se escriben con la sintaxis en inglés (comas), que es la
-// que acepta setFormula sin importar el idioma de la hoja.
-function columnasDeSeguimiento(sheet) {
-  var colEstado = APERTURA_COL + 3;     // H
-  var colRecordatorio = colEstado + 1;  // I
-  // Si en H o I ya hay algo que no es nuestro (notas, teléfonos…), se
-  // para acá en vez de borrarlo.
-  var encabezados = sheet.getMaxColumns() >= colRecordatorio
-    ? sheet.getRange(1, colEstado, 1, 2).getValues()[0] : ["", ""];
-  var libres = (encabezados[0] === "" || encabezados[0] === "estado") &&
-    (encabezados[1] === "" || encabezados[1] === "recordatorio");
-  if (!libres) {
-    throw new Error("Las columnas H e I de Invitados ya tienen datos. Muévanlos a otra columna y vuelvan a correr prepararHoja.");
-  }
-  if (sheet.getMaxColumns() < colRecordatorio) {
-    sheet.insertColumnsAfter(sheet.getMaxColumns(), colRecordatorio - sheet.getMaxColumns());
-  }
-  // Las fórmulas necesitan las filas de abajo vacías para extenderse.
-  var ultima = Math.max(sheet.getMaxRows(), 2);
-  sheet.getRange(2, colEstado, ultima - 1, 2).clearContent();
+// RECORDATORIO: para "sin abrir" y "leido", un enlace que abre WhatsApp
+// con el mensaje ya escrito, con su nombre y su link personal. La hoja
+// no tiene teléfonos, así que WhatsApp pregunta a qué contacto mandarlo.
+// Va en la columna "recordatorio" si ya existe, o en la primera columna
+// libre DESPUÉS de todo lo que haya (nunca encima de otra cosa: la hoja
+// real tiene enlaces armados en J, K y L con encabezados vacíos).
+//
+// Cada fórmula nueva es UNA sola en la fila del encabezado y se extiende
+// sola a todas las filas, así que un invitado agregado después ya sale
+// con su estado sin copiar nada. Se escriben en sintaxis inglesa
+// (comas), que es la que acepta setFormula en cualquier idioma de hoja.
+var ESTADOS = { si: "confirmado", no: "rechazado", leido: "leido", sinAbrir: "sin abrir" };
 
-  var asistencia = 'IFERROR(VLOOKUP(A2:A, {Respuestas!A2:A, Respuestas!D2:D}, 2, FALSE), "")';
-  sheet.getRange(1, colEstado).setFormula(
-    '=ARRAYFORMULA({"estado"; IF(A2:A = "", "", ' +
-      'IF(' + asistencia + ' = "si", "Confirmó", ' +
-      'IF(' + asistencia + ' = "no", "No asiste", ' +
-      'IF(E2:E <> "", "Leído", "Sin abrir"))))})'
-  );
-
-  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 30 de octubre. ' +
-    'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
-  sheet.getRange(1, colRecordatorio).setFormula(
-    '=ARRAYFORMULA({"recordatorio"; IF((H2:H = "Sin abrir") + (H2:H = "Leído"), ' +
-      'HYPERLINK("https://wa.me/?text=" & ENCODEURL(' + mensaje + '), "Enviar recordatorio"), "")})'
-  );
-  sheet.getRange(1, colEstado, 1, 2).setFontWeight("bold");
+function columnaPorEncabezado(sheet, nombre) {
+  var ultima = sheet.getLastColumn();
+  if (ultima < 1) return 0;
+  var enc = sheet.getRange(1, 1, 1, ultima).getValues()[0];
+  for (var i = 0; i < enc.length; i++) {
+    if (String(enc[i]).trim().toLowerCase() === nombre) return i + 1;
+  }
+  return 0;
 }
 
-function hojaResumen(ss) {
+function letraDeColumna(sheet, col) {
+  return sheet.getRange(1, col).getA1Notation().replace(/\d+/g, "");
+}
+
+function columnasDeSeguimiento(sheet) {
+  var colEstado = columnaPorEncabezado(sheet, "estado");
+  if (!colEstado) {
+    colEstado = sheet.getLastColumn() + 1;
+    if (sheet.getMaxColumns() < colEstado) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
+    var asistencia = 'IFERROR(VLOOKUP(A2:A, {Respuestas!A2:A, Respuestas!D2:D}, 2, FALSE), "")';
+    sheet.getRange(1, colEstado).setFormula(
+      '=ARRAYFORMULA({"estado"; IF(A2:A = "", "", ' +
+        'IF(' + asistencia + ' = "si", "' + ESTADOS.si + '", ' +
+        'IF(' + asistencia + ' = "no", "' + ESTADOS.no + '", ' +
+        'IF(E2:E <> "", "' + ESTADOS.leido + '", "' + ESTADOS.sinAbrir + '"))))})'
+    );
+  }
+  var E = letraDeColumna(sheet, colEstado);
+
+  var colRec = columnaPorEncabezado(sheet, "recordatorio");
+  if (!colRec) {
+    colRec = sheet.getLastColumn() + 1;
+    if (sheet.getMaxColumns() < colRec) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
+  }
+  // Las filas de abajo tienen que estar vacías para que la fórmula se
+  // extienda; esta columna es nuestra, así que se puede limpiar.
+  sheet.getRange(2, colRec, Math.max(sheet.getMaxRows() - 1, 1), 1).clearContent();
+  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 30 de octubre. ' +
+    'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
+  sheet.getRange(1, colRec).setFormula(
+    '=ARRAYFORMULA({"recordatorio"; IF((' + E + '2:' + E + ' = "' + ESTADOS.sinAbrir + '") + (' +
+      E + '2:' + E + ' = "' + ESTADOS.leido + '"), ' +
+      'HYPERLINK("https://wa.me/?text=" & ENCODEURL(' + mensaje + '), "Enviar recordatorio"), "")})'
+  );
+  sheet.getRange(1, colRec).setFontWeight("bold");
+  return E;
+}
+
+function hojaResumen(ss, E) {
+  var est = "Invitados!" + E + "2:" + E;
   var sheet = ss.getSheetByName(SHEET_RESUMEN) || ss.insertSheet(SHEET_RESUMEN, 0);
   sheet.clear();
   var filas = [
     ["Confirmaciones", ""],
     ["Invitaciones enviadas", '=COUNTA(Invitados!A2:A)'],
     ["Pases en total", '=COUNTA(Invitados!A2:A) + SUM(Invitados!C2:C)'],
-    ["Confirmaron", '=COUNTIF(Invitados!H2:H, "Confirmó")'],
-    ["No asisten", '=COUNTIF(Invitados!H2:H, "No asiste")'],
-    ["Leyeron y no respondieron", '=COUNTIF(Invitados!H2:H, "Leído")'],
-    ["Sin abrir el link", '=COUNTIF(Invitados!H2:H, "Sin abrir")'],
+    ["Confirmaron", '=COUNTIF(' + est + ', "' + ESTADOS.si + '")'],
+    ["No asisten", '=COUNTIF(' + est + ', "' + ESTADOS.no + '")'],
+    ["Leyeron y no respondieron", '=COUNTIF(' + est + ', "' + ESTADOS.leido + '")'],
+    ["Sin abrir el link", '=COUNTIF(' + est + ', "' + ESTADOS.sinAbrir + '")'],
     ["Respondieron (%)", '=IFERROR((B4 + B5) / B2, 0)'],
-    ["Personas que vienen", '=SUMIF(Respuestas!D2:D, "si", Respuestas!C2:C)'],
+    // Solo las respuestas con código: las que llegan sin link (pruebas,
+    // o alguien que escribió cualquier nombre) no cuentan como gente real.
+    ["Personas que vienen", '=SUMIFS(Respuestas!C2:C, Respuestas!D2:D, "si", Respuestas!A2:A, "<>")'],
     ["Días para el cierre (30 oct)", '=MAX(0, DATE(2026, 10, 30) - TODAY())'],
     ["", ""],
     ["Regalos", ""],

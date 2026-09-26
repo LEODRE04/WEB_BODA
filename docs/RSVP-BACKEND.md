@@ -259,8 +259,9 @@ Qué hace (se puede correr de nuevo sin duplicar nada):
 
 - Pone la zona horaria de la hoja en `America/Lima`.
 - Convierte a fecha real (`dd/mm/yyyy`) las fechas viejas guardadas como texto ISO en Respuestas y Aportes.
-- Agrega a **Invitados** dos columnas calculadas: **H · estado** (Confirmó / No asiste / Leído / Sin abrir)
-  y **I · recordatorio** (enlace de WhatsApp con el mensaje y el link personal, solo para Sin abrir y Leído).
-  Si H o I ya tienen otros datos, se detiene sin tocar nada.
+- En **Invitados** usa la columna **estado** que ya existe (confirmado / rechazado / leido / sin abrir) sin
+  tocarla —o la crea con esas etiquetas si no hay— y agrega **recordatorio** (enlace de WhatsApp con el
+  mensaje y el link personal, solo para "sin abrir" y "leido") en la primera columna libre, después de
+  todo lo que haya.
 - Crea la pestaña **Resumen** con los totales: confirmaciones, pases, personas que vienen,
   días para el cierre y lo aportado a regalos.
