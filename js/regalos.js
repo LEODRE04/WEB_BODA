@@ -204,9 +204,37 @@
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
+  // — "puede tardar unos segundos" —
+  // Con el backend dormido, un envío puede quedarse varios segundos en
+  // "Enviando…" sin ninguna otra señal, y a los 4-5 s la gente vuelve a
+  // tocar o cierra la página. Si pasan 4 s, aparece una línea debajo del
+  // botón que lo explica. Devuelve la función que la quita.
+  function avisoEnvioLento(btn) {
+    var nota = null;
+    var timer = setTimeout(function () {
+      nota = document.createElement("p");
+      nota.className = "envio-lento";
+      nota.setAttribute("role", "status");
+      nota.textContent = "Puede tardar unos segundos; no cierres la página.";
+      btn.insertAdjacentElement("afterend", nota);
+    }, 4000);
+    return function () {
+      clearTimeout(timer);
+      if (nota) nota.remove();
+    };
+  }
+
+  // La barra tiene dos tramos: lo verificado por los novios (lleno) y lo
+  // avisado pero todavía sin verificar (rayado, "por confirmar"). Solo lo
+  // verificado cuenta para "completo" y para cuánto falta: un aviso con un
+  // monto inventado ya no deja un regalo como completo para todos. Lo por
+  // confirmar se muestra igual, para que nadie aporte dos veces lo mismo
+  // sin saber que alguien ya avisó.
   function progressNode(g) {
+    var pendiente = Math.max(0, Number(g.pendiente) || 0);
     var falta = Math.max(0, g.precio - g.recaudado);
     var pct = g.precio > 0 ? Math.min(100, Math.round((g.recaudado / g.precio) * 100)) : 0;
+    var pctPend = g.precio > 0 ? Math.min(100 - pct, Math.round((pendiente / g.precio) * 100)) : 0;
     var wrap = document.createElement("div");
     wrap.className = "gift-progress";
     var bar = document.createElement("div");
@@ -214,11 +242,18 @@
     var fill = document.createElement("span");
     fill.style.width = pct + "%";
     bar.appendChild(fill);
+    if (pctPend > 0 && falta > 0) {
+      var pend = document.createElement("span");
+      pend.className = "is-pending";
+      pend.style.width = pctPend + "%";
+      bar.appendChild(pend);
+    }
     var label = document.createElement("p");
     label.className = "gift-progress-label";
     label.textContent = falta <= 0
       ? "Ya está completo — ¡gracias!"
-      : money(g.recaudado) + " reunidos de " + money(g.precio);
+      : money(g.recaudado) + " reunidos de " + money(g.precio) +
+        (pendiente > 0 ? " · " + money(pendiente) + " por confirmar" : "");
     wrap.appendChild(bar);
     wrap.appendChild(label);
     return wrap;
@@ -796,6 +831,7 @@
       var originalLabel = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = "Enviando…";
+      var quitarAviso = avisoEnvioLento(submitBtn);
 
       // Subir la captura puede tardar bastante más que un POST normal, así
       // que este pide más margen que el timeout por defecto.
@@ -823,9 +859,9 @@
         })
         .then(function (body) {
           if (body && body.error) throw new Error(body.error);
-          // Avance optimista (recaudado + este aporte) para el modal de
-          // agradecimiento — cargarRegalos() abajo trae el valor real en
-          // cuanto responde el backend, pero eso puede tardar un segundo.
+          // Avance optimista (este aporte como "por confirmar") para el
+          // modal de agradecimiento — cargarRegalos() abajo trae el valor
+          // real en cuanto responde el backend.
           if (thanksModal && g) thanksModal.open(g, monto, mensaje, nombre);
           cargarRegalos(); // refresca el avance para todos los regalos
         })
@@ -836,6 +872,7 @@
           errorEl.hidden = false;
         })
         .finally(function () {
+          quitarAviso();
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
         });
@@ -874,9 +911,15 @@
       regaloEl.textContent = g.nombre;
       montoEl.textContent = money(monto);
 
-      var recaudadoOptimista = Math.min(g.precio, g.recaudado + monto);
+      // El aporte recién avisado entra como "por confirmar" hasta que los
+      // novios lo verifiquen, así que se suma a lo pendiente, no a lo
+      // reunido — igual que lo va a mostrar la lista al recargar.
       progressBarEl.innerHTML = "";
-      progressBarEl.appendChild(progressNode({ precio: g.precio, recaudado: recaudadoOptimista }));
+      progressBarEl.appendChild(progressNode({
+        precio: g.precio,
+        recaudado: g.recaudado,
+        pendiente: (Number(g.pendiente) || 0) + monto,
+      }));
 
       if (mensaje) {
         msgEl.textContent = "«" + mensaje + "»";

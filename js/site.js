@@ -73,6 +73,7 @@
     initGuestGreeting(codigo, guestPromise);
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
+    initRsvpBar(codigo, guestPromise);
     initGiftListLink(codigo);
     initTransferencia(guestPromise);
   }
@@ -326,6 +327,70 @@
       setTimeout(function () { gate.classList.add("is-open"); }, 1750);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);
     }
+  }
+
+  // — barra fija "Confirmar" (solo celular; el CSS la oculta en pantallas
+  // anchas, donde el menú ya tiene el botón) —
+  // Aparece solo si el invitado tiene link válido y todavía no respondió,
+  // y se esconde mientras está a la vista el formulario o el botón
+  // "Confirmar asistencia" de la portada: nunca hay dos "Confirmar" en
+  // pantalla a la vez. Al responder desaparece para siempre.
+  function initRsvpBar(codigo, guestPromise) {
+    var bar = document.querySelector("#rsvp-bar");
+    if (!bar || !codigo) return;
+    var plazo = bar.querySelector("#rsvp-bar-deadline");
+    if (plazo && W.rsvp && W.rsvp.editUntilLabel) plazo.textContent = "Responde antes del " + W.rsvp.editUntilLabel;
+
+    var respondio = false;
+    var puede = false;
+    var aLaVista = {};
+    function pintar() {
+      var algunoVisible = Object.keys(aLaVista).some(function (k) { return aLaVista[k]; });
+      var mostrar = puede && !respondio && !algunoVisible;
+      bar.hidden = !mostrar;
+      document.body.classList.toggle("has-rsvp-bar", mostrar);
+    }
+
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { aLaVista[e.target.id || "cta"] = e.isIntersecting; });
+        pintar();
+      });
+      ["#rsvp", ".hero-cta"].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) io.observe(el);
+      });
+    }
+
+    document.addEventListener("rsvp:respondido", function () { respondio = true; pintar(); });
+    guestPromise.then(function (guest) {
+      // Sin respuesta de la API igual se puede confirmar (el formulario
+      // pide el nombre), así que la barra sale; con un link que no existe
+      // o una respuesta ya guardada, no.
+      if (guest && (!guest.found || guest.respuesta)) return;
+      puede = true;
+      pintar();
+    });
+  }
+
+  // — "puede tardar unos segundos" —
+  // Con el backend dormido, un envío puede quedarse varios segundos en
+  // "Enviando…" sin ninguna otra señal, y a los 4-5 s la gente vuelve a
+  // tocar o cierra la página. Si pasan 4 s, aparece una línea debajo del
+  // botón que lo explica. Devuelve la función que la quita.
+  function avisoEnvioLento(btn) {
+    var nota = null;
+    var timer = setTimeout(function () {
+      nota = document.createElement("p");
+      nota.className = "envio-lento";
+      nota.setAttribute("role", "status");
+      nota.textContent = "Puede tardar unos segundos; no cierres la página.";
+      btn.insertAdjacentElement("afterend", nota);
+    }, 4000);
+    return function () {
+      clearTimeout(timer);
+      if (nota) nota.remove();
+    };
   }
 
   // — la carga del sobre —
@@ -901,6 +966,7 @@
     // hubiera funcionado a la primera.
     reintentarRSVPPendiente(function (data) {
       if (savedState) savedState.show(data);
+      document.dispatchEvent(new CustomEvent("rsvp:respondido"));
     });
 
     function showBanner(text, isWarning) {
@@ -999,6 +1065,7 @@
       var originalLabel = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = "Enviando…";
+      var quitarAviso = avisoEnvioLento(submitBtn);
 
       submitRSVP(data)
         .then(function (res) {
@@ -1016,6 +1083,7 @@
             submitBtn.textContent = originalLabel;
             return;
           }
+          document.dispatchEvent(new CustomEvent("rsvp:respondido"));
           var success = form.querySelector(".rsvp-success");
           if (success) success.classList.add("show");
           if (thanksModal) thanksModal.open(data.asistencia === "si", data);
@@ -1029,6 +1097,7 @@
           submitBtn.textContent = originalLabel;
         })
         .finally(function () {
+          quitarAviso();
           submitBtn.disabled = false;
         });
     });
@@ -1264,6 +1333,7 @@
       errorEl.hidden = true;
       enviarBtn.disabled = true;
       enviarBtn.textContent = "Enviando…";
+      var quitarAviso = avisoEnvioLento(enviarBtn);
 
       var url = (W.rsvp && W.rsvp.apiUrl) || "";
       fetchConTimeout(url, {
@@ -1295,6 +1365,7 @@
           errorEl.hidden = false;
         })
         .then(function () {
+          quitarAviso();
           enviarBtn.disabled = false;
           enviarBtn.textContent = etiquetaEnvio;
         });

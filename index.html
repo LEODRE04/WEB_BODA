@@ -716,6 +716,19 @@
   </div>
 </div>
 
+<!-- Barra fija "Confirmar" (initRsvpBar en site.js), solo en celular y
+     solo mientras falta responder: en el teléfono el menú no muestra el
+     botón "Confirmar asistencia" y el formulario queda a 7 pantallas del
+     inicio. Se esconde sola cuando se ve el formulario o el botón de la
+     portada, y para siempre en cuanto el invitado responde. -->
+<div class="rsvp-bar" id="rsvp-bar" hidden>
+  <div class="rsvp-bar-text">
+    <strong>¿Nos acompañas?</strong>
+    <span id="rsvp-bar-deadline">Responde antes del 30 de octubre</span>
+  </div>
+  <a class="btn btn-primary" href="#rsvp">Confirmar</a>
+</div>
+
 <footer class="site-footer">
   <div class="names">André &amp; Krisli</div>
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>

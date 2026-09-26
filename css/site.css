@@ -700,6 +700,16 @@ body { background: var(--color-neutral-100); }
   height: 6px; border-radius: 999px; background: var(--color-neutral-300); overflow: hidden;
 }
 .gift-progress-bar span { display: block; height: 100%; background: var(--color-accent); border-radius: 999px; }
+/* Dos tramos seguidos: lo verificado (lleno) y lo "por confirmar"
+   (rayado, más claro). display:flex en la barra para que el segundo
+   empiece donde termina el primero. */
+.gift-progress-bar { display: flex; }
+.gift-progress-bar span.is-pending {
+  background: repeating-linear-gradient(135deg,
+    var(--color-accent-300) 0 4px, var(--color-accent-200) 4px 8px);
+}
+.gift-progress-bar span:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.gift-progress-bar span + span { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .gift-progress-label {
   margin: 5px 0 0; font-size: 11.5px;
   color: var(--color-text-muted);
@@ -1733,4 +1743,84 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .countdown-lbl { font-size: 12px; }
   .tag { font-size: 12px; }
   .hero-greeting-pases { font-size: 12px; }
+}
+
+/* Línea de "puede tardar unos segundos" bajo un botón de envío que lleva
+   más de 4 s esperando (avisoEnvioLento en site.js y regalos.js). */
+.envio-lento {
+  flex-basis: 100%; margin: 8px 0 0; text-align: center;
+  font-size: 14px; font-style: italic; color: var(--color-text-soft);
+}
+
+/* — barra fija "Confirmar" (celular) —
+   Ancho completo, pegada abajo, sobre todo lo demás salvo el sobre de
+   apertura y los diálogos. Mientras está, el botón de música sube para no
+   quedar debajo, y la página gana relleno abajo para que la barra no tape
+   el final del pie. */
+.rsvp-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+  box-shadow: 0 -6px 18px color-mix(in srgb, #2f4429 10%, transparent);
+  animation: rsvp-bar-in .3s ease both;
+}
+.rsvp-bar-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.rsvp-bar-text strong { font-family: var(--font-heading); font-size: 17px; font-weight: 600; color: var(--color-text); }
+.rsvp-bar-text span { font-size: 13.5px; color: var(--color-text-soft); }
+.rsvp-bar .btn { flex: none; min-height: 44px; padding: 0 22px; font-size: 15px; }
+@keyframes rsvp-bar-in { from { transform: translateY(100%); } to { transform: none; } }
+body.has-rsvp-bar { padding-bottom: 72px; }
+body.has-rsvp-bar .music-toggle { bottom: 88px; }
+@media (min-width: 861px) {
+  .rsvp-bar { display: none !important; }
+  body.has-rsvp-bar { padding-bottom: 0; }
+  body.has-rsvp-bar .music-toggle { bottom: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .rsvp-bar { animation: none; } }
+
+/* — celular: secciones a todo el ancho —
+   En pantallas anchas cada sección es una tarjeta blanca flotante con
+   flores en las esquinas. En un teléfono eso eran ocho tarjetas iguales
+   seguidas, cada una con márgenes a los lados y sombra: un rectángulo
+   dentro de otro, y 44px de ancho perdidos. Acá las tarjetas se disuelven
+   en su sección, que ocupa todo el ancho, y las secciones alternan blanco
+   y crema para que se siga notando dónde empieza cada una.
+
+   Las flores quedan solo en tres (la primera, vestimenta y la última):
+   repetidas ocho veces dejaban de ser un adorno y pasaban a ser ruido.
+   Las tarjetas de adentro (lugares, preguntas, formulario) siguen siendo
+   tarjetas blancas: sobre crema se leen mejor que antes. */
+@media (max-width: 640px) {
+  .envelope-card, .prayer-card {
+    max-width: none; background: transparent; border-radius: 0; box-shadow: none; padding: 0;
+  }
+  .dresscode-section .envelope-card { background: transparent; padding: 0; }
+  .rsvp .envelope-card { padding-top: 0; }
+
+  .save-date { background: var(--color-surface); }
+  .welcome { background: var(--color-bg); }
+  .details { background: var(--color-surface); }
+  .gifts { background: var(--color-bg); }
+  .dresscode-section { background: var(--color-surface); }
+  .rsvp { background: var(--color-bg); }
+  .faq { background: var(--color-surface); }
+  .prayer { background: var(--color-bg); }
+
+  /* Donde quedan flores, el título baja hasta debajo de ellas: centrado,
+     "Código de vestimenta" es casi tan ancho como el hueco entre los dos
+     ramos y los rozaba. */
+  .save-date .envelope-card, .dresscode-section .envelope-card, .prayer-card { padding-top: 58px; }
+  .save-date, .dresscode-section, .prayer { padding-top: 34px; }
+
+  /* Los recuadros de la cuenta regresiva eran crema sobre la tarjeta
+     blanca; ahora la sección es crema, así que pasan a blanco. */
+  .save-date .countdown-box { background: var(--color-bg); }
+
+  .welcome .floral-frame::before, .welcome .floral-frame::after,
+  .details .floral-frame::before, .details .floral-frame::after,
+  .gifts .floral-frame::before, .gifts .floral-frame::after,
+  .rsvp .floral-frame::before, .rsvp .floral-frame::after,
+  .faq .floral-frame::before, .faq .floral-frame::after { display: none; }
 }
