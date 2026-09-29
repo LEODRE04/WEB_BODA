@@ -678,4 +678,10 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   /* la nota bajo "Ver la lista de regalos" iba en una columna angosta
      de tres líneas */
   .gift-list-band-note { max-width: none; text-wrap: balance; }
+  /* La firma del final va en manuscrita, que no entra en el ajuste de
+     arriba, y se había quedado en 17px: al lado del texto ya agrandado
+     era lo único que costaba leer. */
+  /* .prayer-card .prayer-signature y no solo la clase: la regla de los
+     párrafos de la tarjeta (.prayer-card p) es más específica y ganaba. */
+  .prayer-card .prayer-signature { font-size: 25px; line-height: 1.35; }
 }
