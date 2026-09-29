@@ -381,6 +381,13 @@
               <p>Le avisaremos a André y Krisli de tu detalle.</p>
               <p class="transferencia-fecha" id="transferencia-fecha"></p>
 
+              <!-- Solo sin link personal (initTransferencia lo muestra): sin
+                   esto el aviso llegaba sin nombre y no se sabía de quién era. -->
+              <div class="field" id="transferencia-nombre-field" hidden>
+                <label for="transferencia-nombre">Tu nombre <span class="field-tag is-req">obligatorio</span></label>
+                <input class="input" id="transferencia-nombre" autocomplete="name" placeholder="Nombre y apellido">
+              </div>
+
               <div class="field">
                 <label for="transferencia-mensaje">Mensaje para los novios <span class="field-tag is-req">obligatorio</span></label>
                 <textarea class="input" id="transferencia-mensaje" rows="3" placeholder="Unas palabras para ellos…" aria-describedby="transferencia-error" required></textarea>
@@ -654,7 +661,7 @@
      .dialog-backdrop/.dialog, ya definidos en tokens.css pero sin usar en
      ninguna otra parte del sitio. -->
 <div class="dialog-backdrop rsvp-thanks" id="rsvp-thanks" hidden>
-  <div class="dialog rsvp-thanks-dialog">
+  <div class="dialog rsvp-thanks-dialog" role="dialog" aria-modal="true" aria-label="Respuesta recibida">
     <button type="button" class="rsvp-thanks-close" id="rsvp-thanks-close" aria-label="Cerrar">✕</button>
 
     <div class="rsvp-thanks-content">

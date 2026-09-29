@@ -78,12 +78,13 @@ window.WeddingPase = (function () {
     // da "4:00 p. m.") — se le quita antes de armar la oración para no
     // terminar con dos puntos seguidos ("p. m..").
     var horaSinPunto = hora.replace(/\.+$/, "");
+    // La llegada dice lo mismo que el recuadro "Llegada 2:30 p.m." del pase
+    // y que la pregunta frecuente. Antes decía "Llega 30 minutos antes"
+    // (3:30) justo debajo de un "Llegada 2:30 p.m.". La línea de guardar
+    // el celular se quitó junto con esa pregunta frecuente.
     return [
-      "Llega 30 minutos antes; la ceremonia empieza puntual a las " + horaSinPunto + ".",
+      "Las puertas abren a las 2:30 p.m.; la ceremonia empieza puntual a las " + horaSinPunto + ".",
       "Hay estacionamiento alrededor del recinto, con personal de seguridad.",
-      soloCeremonia
-        ? "Durante la ceremonia te pedimos guardar el celular."
-        : "Durante la ceremonia te pedimos guardar el celular. En la recepción, todas las fotos que quieras.",
       "La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.",
       soloCeremonia
         ? "Este pase es personal y es válido para la ceremonia."

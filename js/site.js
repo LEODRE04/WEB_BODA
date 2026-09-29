@@ -39,6 +39,10 @@
     var mostrar = function () { modal.classList.add("is-open"); };
     requestAnimationFrame(mostrar);
     setTimeout(mostrar, 50);
+    // El foco pasa al botón principal del diálogo: con teclado o lector de
+    // pantalla, antes se quedaba detrás, en la página tapada.
+    var principal = modal.querySelector(".dialog-actions .btn-primary") || modal.querySelector("button");
+    if (principal) setTimeout(function () { try { principal.focus({ preventScroll: true }); } catch (e) {} }, 60);
   }
 
   ready(init);
@@ -1238,13 +1242,22 @@
     var etiquetaEnvio = enviarBtn.textContent;
 
     var nombreInvitado = "";
+    var nombreField = card.querySelector("#transferencia-nombre-field");
+    var nombreInput = card.querySelector("#transferencia-nombre");
+    function pedirNombre() { if (nombreField) nombreField.hidden = false; }
     if (guestPromise) {
       guestPromise.then(function (guest) {
         if (guest && guest.nombre) {
           nombreInvitado = guest.nombre;
           tituloEl.textContent = "¡Gracias, " + nombreInvitado.split(" ")[0] + "!";
+        } else {
+          // Sin link personal (o sin respuesta de la API) no sabemos quién
+          // es: se le pide el nombre para que el aviso no llegue anónimo.
+          pedirNombre();
         }
-      });
+      }, pedirNombre);
+    } else {
+      pedirNombre();
     }
 
     // En cuanto escribe algo, el campo deja de marcarse como error.
@@ -1316,6 +1329,14 @@
     });
 
     enviarBtn.addEventListener("click", function () {
+      var nombreAviso = nombreInvitado || (nombreInput ? nombreInput.value.trim() : "");
+      if (!nombreAviso && nombreField && !nombreField.hidden) {
+        enfocarCampoFaltante(nombreInput);
+        errorEl.textContent = "Escribe tu nombre para que sepan de quién es el regalo.";
+        errorEl.hidden = false;
+        nombreInput.focus();
+        return;
+      }
       var mensaje = mensajeEl.value.trim();
       if (!mensaje) {
         enfocarCampoFaltante(mensajeEl);
@@ -1337,16 +1358,23 @@
         body: JSON.stringify({
           tipo: "aporte",
           regalo_id: "deposito",
-          nombre: nombreInvitado,
+          nombre: nombreAviso,
           monto: 0,
           mensaje: mensaje,
           comprobante_base64: constanciaDataUrl || "",
-          comprobante_nombre: (nombreInvitado || "invitado").replace(/\s+/g, "-").toLowerCase(),
+          comprobante_nombre: (nombreAviso || "invitado").replace(/\s+/g, "-").toLowerCase(),
         }),
       }, 45000)
         .then(function (r) { return r.json().catch(function () { throw new Error("respuesta inesperada"); }); })
         .then(function (data) {
-          if (data && data.error) throw new Error(data.error);
+          if (data && data.error) {
+            // Un rechazo del servidor (imagen muy pesada, etc.) no es un
+            // problema de conexión: se muestra su motivo en vez de pedir
+            // que reintente algo que va a volver a fallar igual.
+            var errServidor = new Error(data.error);
+            errServidor.servidor = true;
+            throw errServidor;
+          }
           acuseEl.textContent = "Ya se lo hicimos saber a André y Krisli" +
             (constanciaDataUrl ? ", con tu constancia adjunta." : ".") +
             " Gracias de corazón.";
@@ -1355,7 +1383,9 @@
         })
         .catch(function (err) {
           console.error("No se pudo enviar el aviso de transferencia:", err);
-          errorEl.textContent = "No pudimos enviarlo — parece un problema de conexión. " +
+          errorEl.textContent = (err && err.servidor)
+            ? "No pudimos enviarlo: " + err.message + "."
+            : "No pudimos enviarlo — parece un problema de conexión. " +
             "Prueba de nuevo en un momento; tu transferencia ya llegó igual, esto es solo el aviso.";
           errorEl.hidden = false;
         })

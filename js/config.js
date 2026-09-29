@@ -80,8 +80,8 @@ window.WEDDING = {
   // acá vive aparte porque el pase en PDF (js/pase.js) usa el title como
   // etiqueta corta. Si cambia uno, cambiar el otro.
   dressCode: {
-    title: "Semi elegante",
+    title: "Semi elegante o elegante",
     description:
-      "Puedes ir como te sientas más cómodo, solo te pedimos mantener un look semi elegante o elegante. Y con cariño, reservemos el blanco para la novia.",
+      "Queremos que estés cómodo, así que puedes elegir entre un look semi elegante o elegante. Y, con cariño, reservemos el blanco para la novia.",
   },
 };

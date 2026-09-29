@@ -69,6 +69,10 @@
     var mostrar = function () { modal.classList.add("is-open"); };
     requestAnimationFrame(mostrar);
     setTimeout(mostrar, 50);
+    // El foco pasa al botón principal del diálogo: con teclado o lector de
+    // pantalla, antes se quedaba detrás, en la página tapada.
+    var principal = modal.querySelector(".dialog-actions .btn-primary") || modal.querySelector("button");
+    if (principal) setTimeout(function () { try { principal.focus({ preventScroll: true }); } catch (e) {} }, 60);
   }
 
   // Sin timeout, un backend colgado deja "Enviando…" para siempre.
@@ -349,8 +353,13 @@
       if (!filtroEl) return;
       var nComp = regalos.filter(esCompleto).length;
       var nDisp = regalos.length - nComp;
-      if (!nDisp && filtro === "disponibles") filtro = "todos";
-      if (!nComp && filtro === "completos") filtro = "todos";
+      // Solo con la lista ya cargada: con la lista vacía (mientras carga o
+      // si falló) esto cambiaba el filtro a "Todos" para siempre, y tras
+      // "Reintentar" los completos volvían a salir primero.
+      if (regalos.length) {
+        if (!nDisp && filtro === "disponibles") filtro = "todos";
+        if (!nComp && filtro === "completos") filtro = "todos";
+      }
       // Con un solo tipo, el filtro no filtra nada: se esconde.
       filtroEl.hidden = !(nComp && nDisp);
       filtroEl.querySelectorAll("[data-filtro]").forEach(function (b) {
@@ -860,9 +869,14 @@
           cargarRegalos(); // refresca el avance para todos los regalos
         })
         .catch(function (err) {
+          // Un fallo de red llega como TypeError con el texto del navegador
+          // en inglés ("Failed to fetch" en Chrome, "Load failed" en
+          // Safari): se traduce a algo que el invitado entienda.
           errorEl.textContent = (err && err.name === "AbortError")
             ? "Se demoró demasiado en responder. Revisa tu conexión y vuelve a intentar."
-            : (err && err.message) || "No se pudo enviar tu aporte. Intenta de nuevo.";
+            : (err instanceof TypeError)
+              ? "No pudimos conectarnos. Revisa tu conexión y vuelve a intentar; tu aporte todavía no se envió."
+              : (err && err.message) || "No se pudo enviar tu aporte. Intenta de nuevo.";
           errorEl.hidden = false;
         })
         .finally(function () {

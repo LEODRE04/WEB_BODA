@@ -201,12 +201,12 @@
      puede desactivar con "No mostrar de nuevo", guardado en este
      dispositivo). Basado en un mockup de claude.ai/design. -->
 <div class="dialog-backdrop gift-intro" id="gift-intro" hidden>
-  <div class="dialog gift-intro-dialog">
+  <div class="dialog gift-intro-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-intro-title">
     <div class="gift-intro-icon" aria-hidden="true">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
     </div>
     <div class="section-kicker">Antes de elegir</div>
-    <div class="dialog-title">Cómo funciona la lista</div>
+    <div class="dialog-title" id="gift-intro-title">Cómo funciona la lista</div>
     <div class="gift-intro-steps">
       <div class="gift-intro-step"><span class="gift-intro-num">1</span><div><strong class="gift-intro-step-title">Elige un regalo</strong><p>Elige el que más te guste. Todos están disponibles hasta completar su monto y no hay un orden de elección ni un mínimo de aporte.</p></div></div>
       <div class="gift-intro-step"><span class="gift-intro-num">2</span><div><strong class="gift-intro-step-title">Aporta lo que prefieras</strong><p>No es necesario cubrir el monto completo. Puedes aportar la cantidad que desees.</p></div></div>
@@ -224,7 +224,7 @@
      claude.ai/design, adaptado a lo que el backend realmente guarda (sin
      "método de pago", que ese mockup sí traía). -->
 <div class="dialog-backdrop gift-thanks" id="gift-thanks" hidden>
-  <div class="dialog gift-thanks-dialog">
+  <div class="dialog gift-thanks-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-thanks-title">
     <button type="button" class="gift-thanks-close" id="gift-thanks-close" aria-label="Cerrar">✕</button>
     <div class="gift-thanks-photo"><picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture></div>
     <div class="gift-thanks-content">
