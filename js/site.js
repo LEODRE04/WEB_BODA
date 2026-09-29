@@ -995,6 +995,49 @@
     }
     var fields = form.querySelector("#rsvp-fields");
 
+    // — ¿Cuántos van? — un botón por número, de 1 al total de pases. El
+    // elegido va al campo num_asistentes (oculto), que es el que se envía;
+    // el backend ya acepta cualquier número hasta el de la invitación.
+    var cuantos = form.querySelector("#rsvp-cuantos");
+    var totalPases = 1;
+    function marcarCuantos(n) {
+      asistentesInput.value = n;
+      cuantos.querySelectorAll("[data-n]").forEach(function (b) {
+        var si = Number(b.getAttribute("data-n")) === n;
+        b.classList.toggle("is-active", si);
+        b.setAttribute("aria-checked", String(si));
+      });
+      var nota = cuantos.querySelector("#rsvp-cuantos-nota");
+      if (nota) nota.textContent = n === totalPases
+        ? "Van todos los de tu invitación."
+        : "Tu invitación es para " + totalPases + "; confirmas " + n + (n === 1 ? " persona." : " personas.");
+    }
+    function mostrarCuantos() {
+      var si = form.querySelector('input[name="asistencia"][value="si"]');
+      cuantos.hidden = !(totalPases > 1 && si && si.checked);
+    }
+    function prepararCuantos(pases, elegido) {
+      if (!cuantos || pases < 2) return;
+      totalPases = pases;
+      var opts = cuantos.querySelector(".rsvp-cuantos-opts");
+      opts.innerHTML = "";
+      for (var n = 1; n <= pases; n++) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "rsvp-cuantos-btn";
+        b.setAttribute("role", "radio");
+        b.setAttribute("data-n", n);
+        b.textContent = n;
+        b.addEventListener("click", function (e) { marcarCuantos(Number(e.currentTarget.getAttribute("data-n"))); });
+        opts.appendChild(b);
+      }
+      marcarCuantos(elegido);
+      mostrarCuantos();
+    }
+    form.querySelectorAll('input[name="asistencia"]').forEach(function (r) {
+      r.addEventListener("change", mostrarCuantos);
+    });
+
     if (!codigo) {
       bloquearSinLink();
     } else {
@@ -1012,6 +1055,9 @@
         nombreInput.readOnly = true;
         var pases = 1 + (Number(guest.acompanantes_permitidos) || 0);
         asistentesInput.value = pases;
+        var previo = guest.respuesta && guest.respuesta.asistencia === "si"
+          ? parseInt(guest.respuesta.num_asistentes, 10) : 0;
+        prepararCuantos(pases, previo > 0 && previo <= pases ? previo : pases);
         if (fields) fields.hidden = true;
         var paraQuien = "Para: " + guest.nombre + " · " + pases + (pases === 1 ? " pase" : " pases");
 
@@ -1022,6 +1068,7 @@
           if (guest.respuesta.asistencia === "si" || guest.respuesta.asistencia === "no") {
             var radio = form.querySelector('input[name="asistencia"][value="' + guest.respuesta.asistencia + '"]');
             if (radio) radio.checked = true;
+            mostrarCuantos(); // marcar por código no dispara "change"
           }
           submitBtn.textContent = "Actualizar";
           // Ya respondió antes: se muestra el resumen guardado en vez del
@@ -1182,6 +1229,8 @@
       asistentesWrap.hidden = !attending;
       if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
       if (paseBtn) paseBtn.hidden = !attending;
+      var regalosEl = block.querySelector("#rsvp-saved-regalos");
+      if (regalosEl) regalosEl.hidden = !attending;
       noteEl.textContent = attending
         ? "Puedes editar tu respuesta hasta el " + editUntil + "."
         : "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";

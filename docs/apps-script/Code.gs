@@ -928,3 +928,162 @@ function hojaResumen(ss, E, F) {
   sheet.setColumnWidth(2, 110);
   sheet.getRange(1, 2, filas.length, 1).setHorizontalAlignment("right");
 }
+
+
+// ══ Resumen por correo cada 3 días ══════════════════════════════════
+// Un correo a las 8 p.m. (hora de Lima) cada RESUMEN_CADA_DIAS días, para
+// el dueño de la hoja y quienes pueden editarla. Trae:
+//   - las confirmaciones NUEVAS desde el último resumen, nombre por
+//     nombre, y los que avisaron que no van;
+//   - totales de confirmación: confirmados, personas, no asisten y
+//     pendientes (este último solo como número);
+//   - regalos: montos totales verificados y por verificar, lo nuevo desde
+//     el último resumen, y los avisos de "Ya transferí".
+//
+// Para activarlo: Extensiones > Apps Script > elegir "activarResumen" >
+// Ejecutar (una vez; pide permiso para enviar correos). Para probarlo sin
+// esperar: "probarResumen" lo manda ya y no mueve la fecha del último
+// resumen. "desactivarResumen" lo apaga. No hace falta volver a desplegar.
+var RESUMEN_CADA_DIAS = 3;
+var RESUMEN_HORA = 20;
+var PROP_ULTIMO_RESUMEN = "ultimo_resumen";
+var FECHA_CIERRE = new Date(2026, 9, 30); // 30 de octubre de 2026
+var MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+  "agosto", "setiembre", "octubre", "noviembre", "diciembre"];
+
+function activarResumen() {
+  desactivarResumen();
+  ScriptApp.newTrigger("enviarResumen").timeBased()
+    .everyDays(RESUMEN_CADA_DIAS).atHour(RESUMEN_HORA).inTimezone("America/Lima").create();
+}
+
+function desactivarResumen() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === "enviarResumen") ScriptApp.deleteTrigger(t);
+  });
+}
+
+function enviarResumen() { mandarResumen(true); }
+function probarResumen() { mandarResumen(false); }
+
+function fechaDe(v) {
+  if (v instanceof Date) return v.getTime();
+  var t = Date.parse(v);
+  return isNaN(t) ? 0 : t;
+}
+
+function fechaLarga(d) {
+  var p = Utilities.formatDate(d, "America/Lima", "d/M/yyyy").split("/");
+  return p[0] + " de " + MESES[Number(p[1]) - 1];
+}
+
+function escaparHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+
+function mandarResumen(moverFecha) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var props = PropertiesService.getScriptProperties();
+  var desde = Number(props.getProperty(PROP_ULTIMO_RESUMEN)) || 0;
+  var ahora = new Date();
+
+  // — confirmaciones (solo las que tienen código: las de prueba sin link
+  // no son invitados) —
+  var resp = requireSheet(SHEET_RESPUESTAS);
+  var filasResp = resp.getLastRow() >= 2 ? resp.getRange(2, 1, resp.getLastRow() - 1, 6).getValues() : [];
+  var respondieron = {};
+  var nuevosSi = [], nuevosNo = [];
+  var confirmados = 0, personas = 0, noAsisten = 0;
+  filasResp.forEach(function (r) {
+    var codigo = String(r[0]).trim();
+    if (!codigo) return;
+    respondieron[codigo] = true;
+    var asistencia = String(r[3]).trim();
+    var num = Number(r[2]) || 0;
+    if (asistencia === "si") { confirmados++; personas += num; }
+    else if (asistencia === "no") noAsisten++;
+    if (Math.max(fechaDe(r[4]), fechaDe(r[5])) > desde) {
+      if (asistencia === "si") nuevosSi.push({ nombre: r[1], num: num });
+      else if (asistencia === "no") nuevosNo.push({ nombre: r[1] });
+    }
+  });
+
+  var inv = requireSheet(SHEET_INVITADOS);
+  var filasInv = inv.getLastRow() >= 2 ? inv.getRange(2, 1, inv.getLastRow() - 1, APERTURA_COL).getValues() : [];
+  var invitaciones = 0, pendientes = 0, leyeron = 0;
+  filasInv.forEach(function (r) {
+    var codigo = String(r[0]).trim();
+    if (!codigo) return;
+    invitaciones++;
+    if (respondieron[codigo]) return;
+    pendientes++;
+    if (r[APERTURA_COL - 1] !== "" && r[APERTURA_COL - 1] != null) leyeron++;
+  });
+
+  // — regalos —
+  var ap = getSheet(SHEET_APORTES);
+  var verificado = 0, porVerificar = 0, nPorVerificar = 0, nuevoMonto = 0, nuevosAportes = 0;
+  var avisosNuevos = 0, avisosTotal = 0;
+  if (ap && ap.getLastRow() >= 2) {
+    var conCasilla = conVerificacion(ap);
+    var filasAp = ap.getRange(2, 1, ap.getLastRow() - 1, Math.max(APORTE_COL_FECHA, conCasilla ? APORTE_COL_VERIFICADO : 0)).getValues();
+    filasAp.forEach(function (r) {
+      var id = String(r[0]).trim();
+      if (!id) return;
+      var nuevo = fechaDe(r[APORTE_COL_FECHA - 1]) > desde;
+      if (id === APORTE_DEPOSITO) { avisosTotal++; if (nuevo) avisosNuevos++; return; }
+      var monto = Number(r[2]) || 0;
+      var ok = !conCasilla || r[APORTE_COL_VERIFICADO - 1] === true;
+      if (ok) verificado += monto; else { porVerificar += monto; nPorVerificar++; }
+      if (nuevo) { nuevosAportes++; nuevoMonto += monto; }
+    });
+  }
+
+  var dias = Math.max(0, Math.ceil((FECHA_CIERRE.getTime() - ahora.getTime()) / 86400000));
+  var soles = function (n) { return "S/ " + Math.round(n).toLocaleString("es-PE"); };
+  var desdeTxt = desde ? "desde el " + fechaLarga(new Date(desde)) : "hasta hoy";
+
+  var listaSi = nuevosSi.length
+    ? "<ul>" + nuevosSi.map(function (p) {
+        return "<li>" + escaparHtml(p.nombre) + " — " + p.num + (p.num === 1 ? " persona" : " personas") + "</li>";
+      }).join("") + "</ul>"
+    : "<p style=\"color:#777\">Nadie nuevo.</p>";
+  var listaNo = nuevosNo.length
+    ? "<p><b>Avisaron que no van:</b> " + nuevosNo.map(function (p) { return escaparHtml(p.nombre); }).join(", ") + "</p>"
+    : "";
+
+  var html =
+    "<div style=\"font-family:Georgia,serif;color:#364c2f;max-width:560px\">" +
+    "<h2 style=\"margin:0 0 4px\">Resumen de la boda</h2>" +
+    "<p style=\"margin:0 0 18px;color:#777\">" + fechaLarga(ahora) + " · faltan " + dias + " días para el cierre del 30 de octubre</p>" +
+    "<h3 style=\"margin:0 0 6px\">Confirmaron " + desdeTxt + " (" + nuevosSi.length + ")</h3>" + listaSi + listaNo +
+    "<h3 style=\"margin:18px 0 6px\">Totales</h3>" +
+    "<p style=\"margin:0\">Confirmados: <b>" + confirmados + "</b> invitaciones · <b>" + personas + "</b> personas<br>" +
+    "No asisten: <b>" + noAsisten + "</b><br>" +
+    "Pendientes: <b>" + pendientes + "</b> de " + invitaciones + " (" + leyeron + " leyeron el link, " + (pendientes - leyeron) + " no lo abrieron)</p>" +
+    "<h3 style=\"margin:18px 0 6px\">Regalos</h3>" +
+    "<p style=\"margin:0\">Total verificado: <b>" + soles(verificado) + "</b><br>" +
+    "Por verificar: <b>" + soles(porVerificar) + "</b>" + (nPorVerificar ? " (" + nPorVerificar + (nPorVerificar === 1 ? " aporte" : " aportes") + "; márquenlos en Aportes, columna G)" : "") + "<br>" +
+    "Nuevo " + desdeTxt + ": <b>" + soles(nuevoMonto) + "</b> en " + nuevosAportes + (nuevosAportes === 1 ? " aporte" : " aportes") + "<br>" +
+    "Avisos de «Ya transferí»: " + avisosNuevos + (avisosNuevos === 1 ? " nuevo, " : " nuevos, ") + avisosTotal + " en total</p>" +
+    "<p style=\"margin:22px 0 0;color:#777;font-size:13px\">La hoja completa: <a href=\"" + ss.getUrl() + "\">" + escaparHtml(ss.getName()) + "</a></p>" +
+    "</div>";
+
+  var destinos = {};
+  try { destinos[Session.getEffectiveUser().getEmail()] = true; } catch (e) {}
+  try { ss.getEditors().forEach(function (u) { if (u.getEmail()) destinos[u.getEmail()] = true; }); } catch (e) {}
+  var para = Object.keys(destinos).filter(Boolean).join(",");
+  if (!para) throw new Error("No encontré a quién mandar el resumen.");
+
+  MailApp.sendEmail({
+    to: para,
+    subject: "Boda A&K · resumen del " + fechaLarga(ahora) + " · " + confirmados + " confirmados, " + pendientes + " pendientes",
+    htmlBody: html,
+    body: "Resumen de la boda (" + fechaLarga(ahora) + "). Confirmados: " + confirmados + " (" + personas +
+      " personas). No asisten: " + noAsisten + ". Pendientes: " + pendientes + ". Regalos verificados: " +
+      soles(verificado) + ", por verificar: " + soles(porVerificar) + ".",
+  });
+  if (moverFecha) props.setProperty(PROP_ULTIMO_RESUMEN, String(ahora.getTime()));
+}

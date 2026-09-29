@@ -38,11 +38,6 @@
   function initGiftIntro() {
     var modal = document.querySelector("#gift-intro");
     if (!modal) return;
-    try {
-      if (localStorage.getItem("gift_intro_dismissed") === "1") return;
-    } catch (e) {
-      // localStorage no disponible (modo privado, etc.) — se muestra igual.
-    }
     var closeBtn = modal.querySelector("#gift-intro-close");
 
     function close() {
@@ -51,7 +46,15 @@
       try { localStorage.setItem("gift_intro_dismissed", "1"); } catch (e) {}
     }
 
-    abrirDialogo(modal);
+    // "¿Cómo funciona la lista?" la vuelve a abrir cuando se quiera.
+    var howto = document.querySelector("#gift-howto-link");
+    if (howto) howto.addEventListener("click", function () { abrirDialogo(modal); });
+
+    var yaVisto = false;
+    try { yaVisto = localStorage.getItem("gift_intro_dismissed") === "1"; } catch (e) {
+      // localStorage no disponible (modo privado, etc.) — se muestra igual.
+    }
+    if (!yaVisto) abrirDialogo(modal);
     closeBtn.addEventListener("click", close);
     modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
     document.addEventListener("keydown", function (e) {

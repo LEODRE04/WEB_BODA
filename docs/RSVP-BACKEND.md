@@ -280,3 +280,16 @@ filas de prueba como "ANDRE" o "asd".
 - `.github/workflows/mantener-api-despierta.yml` visita la API cada 10 minutos, de 7:00 a 00:00 hora
   de Lima, para que el invitado no pague el arranque en frío. Se puede lanzar a mano desde la pestaña
   **Actions** del repositorio (botón "Run workflow") y ahí se ve cuánto tardó cada visita.
+
+## Resumen por correo (cada 3 días)
+
+`enviarResumen` manda un correo a las 8 p.m. (hora de Lima) cada 3 días al dueño de la hoja y a
+quienes pueden editarla: confirmaciones nuevas desde el último resumen (nombre por nombre, y quiénes
+avisaron que no van), totales (confirmados, personas, no asisten, pendientes como número) y regalos
+(total verificado, por verificar, lo nuevo y los avisos de "Ya transferí").
+
+- **Activar:** Apps Script › elegir `activarResumen` › Ejecutar (una vez; pide permiso para enviar
+  correos). No hace falta volver a desplegar.
+- **Probar ya:** `probarResumen` lo manda en el momento sin mover la fecha del último resumen.
+- **Apagar:** `desactivarResumen`.
+- Cada cuántos días y a qué hora: `RESUMEN_CADA_DIAS` y `RESUMEN_HORA` al inicio de esa sección.

@@ -553,6 +553,15 @@
           </div>
         </div>
 
+        <!-- ¿Cuántos van? (initRsvpForm): solo si la invitación tiene más
+             de un pase y marcó "Sí". Antes el número era fijo: una familia
+             con 3 pases donde iban 2 no tenía cómo decirlo. -->
+        <div class="field rsvp-cuantos" id="rsvp-cuantos" hidden>
+          <label id="rsvp-cuantos-label">¿Cuántos van?</label>
+          <div class="rsvp-cuantos-opts" role="radiogroup" aria-labelledby="rsvp-cuantos-label"></div>
+          <p class="rsvp-cuantos-nota" id="rsvp-cuantos-nota"></p>
+        </div>
+
         <p class="rsvp-error" role="alert" hidden></p>
         <div class="rsvp-actions">
           <button class="btn btn-primary" type="submit" id="rsvp-submit">Confirmar</button>
@@ -592,6 +601,8 @@
           <button type="button" class="btn btn-ghost" id="rsvp-saved-edit" style="font-size:13.5px">Editar mi respuesta</button>
         </div>
         <p class="rsvp-note" id="rsvp-saved-note" style="margin-top:14px"></p>
+        <!-- Solo si confirmó que va: una línea, sin insistir. -->
+        <p class="rsvp-saved-regalos" id="rsvp-saved-regalos" hidden>¿Quieres acompañarnos con un regalo? <a href="#regalos">Ver la mesa de regalos</a></p>
       </div>
     </div>
     </div>
@@ -610,8 +621,7 @@
            <details> ya trae el abrir/cerrar y el soporte de teclado y
            lectores de pantalla, así que no necesita JS.
 
-           DATO POR CONFIRMAR (marcado con "DUMMY" abajo): la mesa para
-           regalos físicos. -->
+           -->
       <div class="faq-grid">
         <details class="faq-item">
           <summary class="q">¿A qué hora debo llegar?</summary>
@@ -637,8 +647,7 @@
         </details>
         <details class="faq-item">
           <summary class="q">¿Dónde dejo mi regalo?</summary>
-          <!-- DUMMY: la mesa para regalos físicos -->
-          <p class="a">Si quieres hacernos un regalo, lo más práctico para nosotros es un aporte por Yape o transferencia (lo tienes en <a href="#regalos">Mesa de regalos</a>). Si prefieres traer algo, habrá una mesa para regalos a la entrada.</p>
+          <p class="a">Si quieres hacernos un regalo, lo más práctico para nosotros es un aporte por Yape o transferencia (lo tienes en <a href="#regalos">Mesa de regalos</a>). El día de la boda no habrá mesa para regalos físicos.</p>
         </details>
       </div>
     </div>
