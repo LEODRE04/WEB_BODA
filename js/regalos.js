@@ -231,6 +231,33 @@
     };
   }
 
+  // — mensajes de error, con el mismo formato en toda la web —
+  // Qué falló (en negrita), por qué en una frase y qué hacer. Se arma con
+  // nodos y no con innerHTML porque el detalle puede venir del servidor.
+  var ERROR_CONEXION = "Parece que hay un problema de conexión. Inténtalo nuevamente en unos momentos.";
+  // Los mensajes del servidor vienen en minúscula y algunos son técnicos:
+  // los más comunes se dicen en lenguaje de invitado; el resto, con
+  // mayúscula inicial y punto final.
+  function detalleServidor(msg) {
+    msg = String(msg || "").trim();
+    if (!msg) return ERROR_CONEXION;
+    var m = msg.match(/supera los asistentes de tu invitación \((\d+)\)/);
+    if (m) return "Tu invitación es para " + m[1] + (m[1] === "1" ? " persona." : " personas.");
+    if (/código de invitado no reconocido/.test(msg)) return "No reconocemos tu link de invitación. Escríbenos por WhatsApp y te enviamos el correcto.";
+    if (/imagen es demasiado pesada/.test(msg)) return "La imagen de la constancia pesa demasiado. Prueba con una captura de pantalla.";
+    if (/constancia tiene que ser una imagen/.test(msg)) return "La constancia tiene que ser una imagen (una foto o una captura de pantalla).";
+    msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+    return /[.!?]$/.test(msg) ? msg : msg + ".";
+  }
+  function mostrarError(el, titulo, detalle) {
+    el.innerHTML = "";
+    var b = document.createElement("strong");
+    b.textContent = titulo;
+    el.appendChild(b);
+    el.appendChild(document.createTextNode(" " + (detalle || ERROR_CONEXION)));
+    el.hidden = false;
+  }
+
   // La barra tiene dos tramos: lo verificado por los novios (lleno) y lo
   // avisado pero todavía sin verificar (rayado, "por confirmar"). Solo lo
   // verificado cuenta para "completo" y para cuánto falta: un aviso con un
@@ -497,9 +524,10 @@
       // sin recargar la página.
       emptyEl.innerHTML = "";
       if (errorDeCarga) {
-        emptyEl.appendChild(document.createTextNode(
-          "No pudimos cargar la lista de regalos — puede ser la conexión. "
-        ));
+        var titulo = document.createElement("strong");
+        titulo.textContent = "No pudimos cargar la lista de regalos.";
+        emptyEl.appendChild(titulo);
+        emptyEl.appendChild(document.createTextNode(" " + ERROR_CONEXION + " "));
         var reintentar = document.createElement("button");
         reintentar.type = "button";
         reintentar.className = "btn btn-ghost";
@@ -886,11 +914,17 @@
           // "Unexpected token <" que no le dice nada a nadie. Se traduce
           // acá a algo accionable.
           return r.json().catch(function () {
-            throw new Error("El servidor no respondió como esperábamos. Intenta de nuevo en un momento.");
+            var noJson = new Error("respuesta inesperada");
+            noJson.conexion = true;
+            throw noJson;
           });
         })
         .then(function (body) {
-          if (body && body.error) throw new Error(body.error);
+          if (body && body.error) {
+            var errServidor = new Error(body.error);
+            errServidor.servidor = true;
+            throw errServidor;
+          }
           // Avance optimista (este aporte como "por confirmar") para el
           // modal de agradecimiento — cargarRegalos() abajo trae el valor
           // real en cuanto responde el backend.
@@ -898,15 +932,10 @@
           cargarRegalos(); // refresca el avance para todos los regalos
         })
         .catch(function (err) {
-          // Un fallo de red llega como TypeError con el texto del navegador
-          // en inglés ("Failed to fetch" en Chrome, "Load failed" en
-          // Safari): se traduce a algo que el invitado entienda.
-          errorEl.textContent = (err && err.name === "AbortError")
-            ? "Se demoró demasiado en responder. Revisa tu conexión y vuelve a intentar."
-            : (err instanceof TypeError)
-              ? "No pudimos conectarnos. Revisa tu conexión y vuelve a intentar; tu aporte todavía no se envió."
-              : (err && err.message) || "No se pudo enviar tu aporte. Intenta de nuevo.";
-          errorEl.hidden = false;
+          // Un rechazo del servidor dice su motivo; cualquier otra cosa
+          // (sin red, tiempo agotado, una página de error en vez de JSON) es
+          // un problema de conexión, con el texto de siempre.
+          mostrarError(errorEl, "No pudimos enviar tu aporte.", err && err.servidor ? detalleServidor(err.message) : null);
         })
         .finally(function () {
           quitarAviso();

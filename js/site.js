@@ -380,6 +380,33 @@
     });
   }
 
+  // — mensajes de error, con el mismo formato en toda la web —
+  // Qué falló (en negrita), por qué en una frase y qué hacer. Se arma con
+  // nodos y no con innerHTML porque el detalle puede venir del servidor.
+  var ERROR_CONEXION = "Parece que hay un problema de conexión. Inténtalo nuevamente en unos momentos.";
+  // Los mensajes del servidor vienen en minúscula y algunos son técnicos:
+  // los más comunes se dicen en lenguaje de invitado; el resto, con
+  // mayúscula inicial y punto final.
+  function detalleServidor(msg) {
+    msg = String(msg || "").trim();
+    if (!msg) return ERROR_CONEXION;
+    var m = msg.match(/supera los asistentes de tu invitación \((\d+)\)/);
+    if (m) return "Tu invitación es para " + m[1] + (m[1] === "1" ? " persona." : " personas.");
+    if (/código de invitado no reconocido/.test(msg)) return "No reconocemos tu link de invitación. Escríbenos por WhatsApp y te enviamos el correcto.";
+    if (/imagen es demasiado pesada/.test(msg)) return "La imagen de la constancia pesa demasiado. Prueba con una captura de pantalla.";
+    if (/constancia tiene que ser una imagen/.test(msg)) return "La constancia tiene que ser una imagen (una foto o una captura de pantalla).";
+    msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+    return /[.!?]$/.test(msg) ? msg : msg + ".";
+  }
+  function mostrarError(el, titulo, detalle) {
+    el.innerHTML = "";
+    var b = document.createElement("strong");
+    b.textContent = titulo;
+    el.appendChild(b);
+    el.appendChild(document.createTextNode(" " + (detalle || ERROR_CONEXION)));
+    el.hidden = false;
+  }
+
   // — "puede tardar unos segundos" —
   // Con el backend dormido, un envío puede quedarse varios segundos en
   // "Enviando…" sin ninguna otra señal, y a los 4-5 s la gente vuelve a
@@ -1122,10 +1149,7 @@
             // decirle al invitado que ya está cuando los novios todavía
             // no tienen su respuesta. Se deja el formulario tal cual para
             // que pueda reintentar cuando le vuelva la señal.
-            errorEl.innerHTML = "No pudimos guardar tu confirmación — parece un problema de conexión. " +
-              "La dejamos anotada en este dispositivo y lo reintentamos solos, pero si puedes, " +
-              "vuelve a tocar <strong>Confirmar</strong> en un momento.";
-            errorEl.hidden = false;
+            mostrarError(errorEl, "No pudimos guardar tu confirmación.");
             submitBtn.textContent = originalLabel;
             return;
           }
@@ -1137,8 +1161,7 @@
           submitBtn.textContent = originalLabel;
         })
         .catch(function (err) {
-          errorEl.textContent = err.message || "No se pudo enviar tu confirmación. Intenta de nuevo.";
-          errorEl.hidden = false;
+          mostrarError(errorEl, "No pudimos guardar tu confirmación.", detalleServidor(err && err.message));
           console.error("RSVP error:", err);
           submitBtn.textContent = originalLabel;
         })
@@ -1432,11 +1455,7 @@
         })
         .catch(function (err) {
           console.error("No se pudo enviar el aviso de transferencia:", err);
-          errorEl.textContent = (err && err.servidor)
-            ? "No pudimos enviarlo: " + err.message + "."
-            : "No pudimos enviarlo — parece un problema de conexión. " +
-            "Prueba de nuevo en un momento; tu transferencia ya llegó igual, esto es solo el aviso.";
-          errorEl.hidden = false;
+          mostrarError(errorEl, "No pudimos enviar tu aviso.", err && err.servidor ? detalleServidor(err.message) : null);
         })
         .then(function () {
           quitarAviso();

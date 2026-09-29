@@ -236,7 +236,7 @@ window.WeddingPase = (function () {
         // Sin esto quedaría una pestaña en blanco abierta al fallar.
         if (ventanaPase && !ventanaPase.closed) ventanaPase.close();
         if (triggerBtn) {
-          triggerBtn.textContent = "No se pudo, intenta de nuevo";
+          triggerBtn.textContent = "No pudimos generarlo. Inténtalo de nuevo";
           setTimeout(function () { triggerBtn.textContent = originalLabel; }, 2500);
         }
       })
