@@ -358,6 +358,10 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
 .envelope-seal {
   font-family: var(--font-script);
   font-weight: 400;
+  /* La manuscrita no entra en el ajuste de tamaño de celular (ver
+     "letra más grande en celular" al final): Parisienne tiene minúsculas
+     todavía más bajas que Cormorant, y ajustarla la inflaría ~50%. */
+  font-size-adjust: none;
 }
 /* La manuscrita tiene trazos altos y bajos muy largos: sin algo de aire
    las mayúsculas de una línea chocan con la siguiente. */
@@ -641,3 +645,37 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
    por DEBAJO del sello: el lacre se apoya sobre la solapa cerrada, y
    la línea cruzándolo lo aplanaba contra el papel. */
 .seal-scratch, .envelope-seal { z-index: 4; }
+
+/* — letra más grande en celular —
+   Cormorant Garamond tiene minúsculas muy bajas: medida en el navegador,
+   su "x" es el 0,39 del tamaño de la letra, contra 0,48 de Georgia y 0,52
+   de Helvetica. Un texto nuestro a 16px se leía como uno de ~12px en
+   cualquier otra web, y subir tamaños regla por regla nunca alcanzaba.
+
+   font-size-adjust arregla eso de raíz: le pide al navegador que agrande
+   la fuente hasta que su "x" mida el 0,46 del tamaño. Todo el texto en
+   Cormorant crece ~19% a la vez, parejo, sin tocar ni una regla de
+   tamaño y sin cambiar la jerarquía entre títulos, párrafos y etiquetas.
+
+   Solo en celular. La manuscrita queda fuera (ver el bloque de
+   tipografía manuscrita, más arriba), y también la tarjeta del pase: esa
+   se convierte en PDF con medidas fijas y tiene que salir igual desde un
+   teléfono que desde una computadora. Un navegador que no lo soporte
+   (iOS anterior a 17) simplemente muestra la letra como antes. */
+@media (max-width: 640px) {
+  body { font-size-adjust: 0.46; }
+  /* los campos de formulario no heredan: el navegador les pone su propia
+     fuente de control, que reinicia este ajuste */
+  input, textarea, select, button { font-size-adjust: inherit; }
+  .pase-card, .pase-card * { font-size-adjust: none; }
+
+  /* Con la letra más grande, los rótulos en mayúsculas de la portada se
+     partían feo: "ACOMPÁÑANOS EN NUESTRA / BODA" (una palabra sola) e
+     "IGLESIA VIDA NUEVA / RINCONADA". Menos espacio entre letras y
+     reparto equilibrado de líneas. */
+  .hero-eyebrow { letter-spacing: .14em; text-wrap: balance; }
+  .hero-venue { letter-spacing: .02em; text-wrap: balance; }
+  /* la nota bajo "Ver la lista de regalos" iba en una columna angosta
+     de tres líneas */
+  .gift-list-band-note { max-width: none; text-wrap: balance; }
+}

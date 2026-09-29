@@ -339,7 +339,10 @@
     var bar = document.querySelector("#rsvp-bar");
     if (!bar || !codigo) return;
     var plazo = bar.querySelector("#rsvp-bar-deadline");
-    if (plazo && W.rsvp && W.rsvp.editUntilLabel) plazo.textContent = "Responde antes del " + W.rsvp.editUntilLabel;
+    // "Hasta el…" y no "Responde antes del…": con la letra más grande de
+    // celular, la versión larga se partía en dos líneas en un teléfono de
+    // 360px y la barra crecía.
+    if (plazo && W.rsvp && W.rsvp.editUntilLabel) plazo.textContent = "Hasta el " + W.rsvp.editUntilLabel;
 
     var respondio = false;
     var puede = false;
