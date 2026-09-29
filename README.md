@@ -81,3 +81,10 @@ git push -u origin main
 Con GitHub Pages activado (Settings → Pages → Deploy from branch → `main`)
 el sitio queda accesible públicamente sin backend ni costo, listo para
 compartir con los invitados mientras se decide/implementa la fase 3.
+
+## Versión de CSS y JS (caché)
+
+GitHub Pages deja que el navegador guarde CSS y JS hasta 10 minutos. Si después de un cambio el HTML
+nuevo llega con el CSS viejo, la página se ve rota (pasó con la animación de carga de regalos: solo se
+veía el moño, gigante). Por eso los enlaces llevan `?v=AAAAMMDDhhmm` en `index.html`, `regalos.html` y
+`preview.html`: **al cambiar cualquier CSS o JS, actualizar ese número** para que todos bajen lo nuevo.
