@@ -1,0 +1,42 @@
+# Mantiene despierto el backend (Google Apps Script).
+#
+# Apps Script "se duerme" tras un rato sin visitas, y la primera visita
+# después paga el arranque en frío: medido entre 2 y 40 segundos. Eso es
+# el sobre esperando "Buscando tu nombre…" o la mesa de regalos sin
+# cargar. Con una visita cada 10 minutos, el invitado casi siempre llega
+# a un backend ya despierto.
+#
+# Se pide la lista de regalos: es de solo lectura y está en caché del lado
+# del script, así que no escribe nada en la hoja ni cuenta como apertura
+# de ningún invitado.
+#
+# Solo de 7:00 a 00:00 hora de Lima (UTC-5): de madrugada no entra nadie
+# y no vale la pena. GitHub puede atrasar unos minutos las ejecuciones
+# programadas, y las pausa si el repositorio pasa 60 días sin cambios;
+# en ese caso basta con volver a activarlo en la pestaña Actions.
+name: Mantener la API despierta
+
+on:
+  schedule:
+    - cron: "*/10 12-23,0-4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: js/config.js
+          sparse-checkout-cone-mode: false
+      - name: Visitar la API
+        run: |
+          # La URL se lee de js/config.js: una sola fuente, si cambia el
+          # despliegue no hay que tocar este archivo.
+          API=$(grep -o 'https://script.google.com/macros/s/[^"]*/exec' js/config.js | head -1)
+          test -n "$API" || { echo "No encontré apiUrl en js/config.js"; exit 1; }
+          curl -sL -m 90 -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n" "$API?tipo=regalos"
