@@ -41,7 +41,7 @@
     setTimeout(mostrar, 50);
     // El foco pasa al botón principal del diálogo: con teclado o lector de
     // pantalla, antes se quedaba detrás, en la página tapada.
-    var principal = modal.querySelector(".dialog-actions .btn-primary") || modal.querySelector("button");
+    var principal = modal.querySelector(".btn-primary:not([hidden])") || modal.querySelector("button:not([hidden])");
     if (principal) setTimeout(function () { try { principal.focus({ preventScroll: true }); } catch (e) {} }, 60);
   }
 
@@ -913,11 +913,23 @@
     var modal = document.querySelector("#rsvp-thanks");
     if (!modal) return null;
     var W = window.WEDDING || {};
-    var closeBtn = modal.querySelector("#rsvp-thanks-close");
     var msgYes = modal.querySelector("#rsvp-thanks-msg-yes");
     var msgNo = modal.querySelector("#rsvp-thanks-msg-no");
-    var okBtn = modal.querySelector("#rsvp-thanks-ok");
+    var whenEl = modal.querySelector("#rsvp-thanks-when");
+    var countEl = modal.querySelector("#rsvp-thanks-count");
     var paseBtn = modal.querySelector("#rsvp-thanks-pase");
+    var cambiarBtn = modal.querySelector("#rsvp-thanks-cambiar");
+
+    // "Sábado 9 de enero · 4:00 p.m.", armado desde config.js para que no
+    // pueda decir una hora distinta a la del resto de la invitación.
+    var cuando = "";
+    var inicio = new Date(W.weddingDateISO);
+    if (!isNaN(inicio.getTime())) {
+      var dia = inicio.toLocaleDateString("es-PE", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Lima" }).replace(",", "");
+      var hora = inicio.toLocaleTimeString("es-PE", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Lima" })
+        .replace(/^0/, "").replace(/\s*p\.?\s*m\.?/i, " p.m.").replace(/\s*a\.?\s*m\.?/i, " a.m.");
+      cuando = dia.charAt(0).toUpperCase() + dia.slice(1) + " · " + hora;
+    }
 
     // tipo_invitacion no viene en el POST del formulario (solo nombre,
     // num_asistentes, asistencia) — se saca del mismo guestPromise que ya
@@ -944,17 +956,18 @@
       info = info || {};
       lastInfo = info;
       var nombre = (info.nombre || "").trim().split(" ")[0]; // solo el primer nombre, más cercano
+      var pases = parseInt(info.num_asistentes, 10) || 1;
 
       modal.querySelectorAll("[data-thanks-attending]").forEach(function (el) { el.hidden = !attending; });
       modal.querySelectorAll("[data-thanks-declined]").forEach(function (el) { el.hidden = attending; });
 
-      // Una frase y nada más: los datos (cuántos, cuándo, dónde) ya están
-      // en la página, y el pase y "editar" quedan en el resumen de la
-      // respuesta. Antes esta ventana repetía todo eso en recuadros.
       if (attending) {
-        msgYes.textContent = (nombre ? "Gracias, " + nombre + ". " : "Gracias. ") + "Ya tienes tu lugar reservado.";
+        msgYes.textContent = (nombre ? "Gracias, " + nombre + ". " : "Gracias. ") + "Tu lugar ya está guardado.";
+        if (whenEl) whenEl.textContent = cuando;
+        if (countEl) countEl.textContent = pases + (pases === 1 ? " pase confirmado" : " pases confirmados");
       } else {
-        msgNo.textContent = (nombre ? "Gracias por avisarnos, " + nombre + ". " : "Gracias por avisarnos. ") + "Te vamos a extrañar.";
+        msgNo.textContent = (nombre ? "Gracias por avisarnos, " + nombre + ". " : "Gracias por avisarnos. ") +
+          "Te tendremos presente ese día.";
       }
 
       abrirDialogo(modal);
@@ -964,8 +977,20 @@
       setTimeout(function () { modal.hidden = true; }, 200);
     }
 
-    closeBtn.addEventListener("click", close);
-    if (okBtn) okBtn.addEventListener("click", close);
+    modal.querySelectorAll("[data-thanks-close], #rsvp-thanks-ok").forEach(function (b) {
+      b.addEventListener("click", close);
+    });
+    // "Cambiar mi respuesta": cierra y abre el formulario para editar, el
+    // mismo que abre "Editar mi respuesta" en el resumen.
+    if (cambiarBtn) {
+      cambiarBtn.addEventListener("click", function () {
+        close();
+        var editar = document.querySelector("#rsvp-saved-edit");
+        if (editar) editar.click();
+        var form = document.querySelector("#rsvp-form");
+        if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
     modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !modal.hidden) close();

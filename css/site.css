@@ -2032,3 +2032,45 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   .gl-gift { animation: gl-pulse 2s ease-in-out infinite !important; }
 }
 @keyframes gl-pulse { 50% { opacity: .6; } }
+
+/* — ventana tras confirmar (diseño 15a, "tarjeta con flores") —
+   Angosta (420px) para que no quede espacio vacío, blanca, con el ramo de
+   la invitación asomando por la esquina superior izquierda. Sin icono ni
+   X: se cierra con "Cerrar", tocando fuera o con Escape. */
+.rsvp-thanks-dialog {
+  position: relative; width: min(420px, calc(100vw - 32px));
+  overflow: visible; padding: 0; border-radius: 32px;
+  background: var(--color-bg); text-align: center;
+}
+.rsvp-thanks-dialog::before {
+  content: ""; position: absolute; left: -22px; top: -26px; width: 128px; height: 86px;
+  background: url('../img/floral-corner.png') no-repeat center / contain;
+  background-image: image-set(url('../img/floral-corner.webp') type('image/webp'), url('../img/floral-corner.png') type('image/png'));
+  pointer-events: none;
+}
+.rsvp-thanks-content { padding: 44px 34px 30px; }
+.rsvp-thanks-content .section-kicker { text-align: center; }
+.rsvp-thanks-title {
+  margin: 12px 0 10px; font-family: var(--font-script); font-weight: 400; font-size-adjust: none;
+  font-size: 44px; line-height: 1.15; color: var(--color-text);
+}
+.rsvp-thanks-msg { margin: 0; font-size: 17px; line-height: 1.6; color: var(--color-text-soft); }
+.rsvp-thanks-cuando {
+  margin: 22px 0 0; padding: 14px 0;
+  border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);
+}
+.rsvp-thanks-cuando strong { display: block; font-size: 17px; font-weight: 600; color: var(--color-text); }
+.rsvp-thanks-cuando span { display: block; margin-top: 4px; font-size: 15px; color: var(--color-text-soft); }
+.rsvp-thanks-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 24px; }
+.rsvp-thanks-actions .btn-primary { width: 100%; min-height: 48px; font-size: 16px; border-radius: 999px; }
+.rsvp-thanks-link {
+  min-height: 40px; padding: 0 10px; border: 0; background: none; cursor: pointer;
+  font-family: inherit; font-size: 15px; color: var(--color-text-soft);
+}
+#rsvp-thanks-cambiar { text-decoration: underline; text-underline-offset: 3px; color: var(--color-text); }
+@media (max-width: 640px) {
+  .rsvp-thanks-content { padding: 40px 24px 24px; }
+  .rsvp-thanks-title { font-size: 40px; }
+  /* el ramo no se sale por el borde de la pantalla */
+  .rsvp-thanks-dialog::before { left: -8px; top: -24px; width: 112px; height: 76px; }
+}

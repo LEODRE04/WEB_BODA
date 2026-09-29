@@ -74,7 +74,7 @@
     setTimeout(mostrar, 50);
     // El foco pasa al botón principal del diálogo: con teclado o lector de
     // pantalla, antes se quedaba detrás, en la página tapada.
-    var principal = modal.querySelector(".dialog-actions .btn-primary") || modal.querySelector("button");
+    var principal = modal.querySelector(".btn-primary:not([hidden])") || modal.querySelector("button:not([hidden])");
     if (principal) setTimeout(function () { try { principal.focus({ preventScroll: true }); } catch (e) {} }, 60);
   }
 
