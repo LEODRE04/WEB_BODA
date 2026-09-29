@@ -369,15 +369,9 @@
       grid.innerHTML = "";
       pintarFiltro();
 
-      // El regalo sin completar con más aportado hasta ahora se marca
-      // como "el más elegido" — un empujoncito simple, sin más lógica
-      // que comparar recaudado entre los que aún no llegan al 100%.
-      var destacadoId = null, maxRecaudado = 0;
-      regalos.forEach(function (g) {
-        var completo = g.precio > 0 && g.recaudado >= g.precio;
-        if (!completo && g.recaudado > maxRecaudado) { maxRecaudado = g.recaudado; destacadoId = g.id; }
-      });
-
+      // Antes el regalo sin completar con más aportado se marcaba como
+      // "El más elegido". Se quitó a pedido de los novios: la única
+      // etiqueta que queda es "Completo".
       regalos.forEach(function (g) {
         var completo = g.precio > 0 && g.recaudado >= g.precio;
         if (!pasaFiltro(g)) return;
@@ -387,12 +381,12 @@
         card.className = "gift-card" + (completo ? " is-funded" : "") + (seleccionadoId === g.id ? " is-selected" : "");
         card.dataset.giftId = g.id;
 
-        if (completo || g.id === destacadoId) {
+        if (completo) {
           var badges = document.createElement("div");
           badges.className = "gift-card-badges";
           var badge = document.createElement("span");
-          badge.className = "tag " + (completo ? "tag-accent-2" : "tag-outline");
-          badge.textContent = completo ? "✓ Completo" : "El más elegido";
+          badge.className = "tag tag-accent-2";
+          badge.textContent = "✓ Completo";
           badges.appendChild(badge);
           card.appendChild(badges);
         }
