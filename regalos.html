@@ -232,22 +232,12 @@
       <div class="gift-thanks-icon" aria-hidden="true">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
       </div>
-      <div class="section-kicker">Aporte recibido</div>
+      <!-- Solo el agradecimiento: sin recuadro de regalo/monto/estado ni
+           barra de avance. El avance lo ven al volver a la lista. -->
       <div class="dialog-title" id="gift-thanks-title">Gracias por este regalo</div>
-      <p class="dialog-body">Ya nos llegó tu aviso. Revisaremos la transferencia y te confirmaremos por WhatsApp.</p>
-      <div class="rsvp-thanks-recap gift-thanks-recap">
-        <div><span>Regalo</span><strong id="gift-thanks-regalo"></strong></div>
-        <div><span>Tu aporte</span><strong id="gift-thanks-monto"></strong></div>
-        <div><span>Estado</span><strong>Por verificar</strong></div>
-      </div>
-      <div class="gift-thanks-progress">
-        <div class="details-label" style="margin-bottom:6px">Avance de este regalo</div>
-        <div id="gift-thanks-progress-bar"></div>
-      </div>
-      <p class="gift-thanks-msg" id="gift-thanks-msg" hidden></p>
-      <div class="dialog-actions" style="justify-content:center;align-items:center;flex-wrap:wrap">
-        <button type="button" class="btn btn-primary" id="gift-thanks-back" style="font-size:13.5px">Volver a la lista</button>
-        <a class="btn btn-secondary" id="gift-thanks-rsvp" href="index.html#rsvp" style="font-size:13.5px" hidden>Ver mi confirmación</a>
+      <p class="dialog-body">Revisaremos la transferencia y te avisamos.</p>
+      <div class="dialog-actions" style="justify-content:center">
+        <button type="button" class="btn btn-primary" id="gift-thanks-back">Volver a la lista</button>
       </div>
     </div>
   </div>

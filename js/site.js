@@ -885,12 +885,8 @@
     var closeBtn = modal.querySelector("#rsvp-thanks-close");
     var msgYes = modal.querySelector("#rsvp-thanks-msg-yes");
     var msgNo = modal.querySelector("#rsvp-thanks-msg-no");
-    var countEl = modal.querySelector("#rsvp-thanks-count");
-    var whenEl = modal.querySelector("#rsvp-thanks-when");
-    var whereEl = modal.querySelector("#rsvp-thanks-where");
-    var noteEl = modal.querySelector("#rsvp-thanks-note");
+    var okBtn = modal.querySelector("#rsvp-thanks-ok");
     var paseBtn = modal.querySelector("#rsvp-thanks-pase");
-    var editUntil = (W.rsvp && W.rsvp.editUntilLabel) || "la fecha límite";
 
     // tipo_invitacion no viene en el POST del formulario (solo nombre,
     // num_asistentes, asistencia) — se saca del mismo guestPromise que ya
@@ -917,22 +913,17 @@
       info = info || {};
       lastInfo = info;
       var nombre = (info.nombre || "").trim().split(" ")[0]; // solo el primer nombre, más cercano
-      var asistentes = parseInt(info.num_asistentes, 10) || 1;
 
       modal.querySelectorAll("[data-thanks-attending]").forEach(function (el) { el.hidden = !attending; });
       modal.querySelectorAll("[data-thanks-declined]").forEach(function (el) { el.hidden = attending; });
 
+      // Una frase y nada más: los datos (cuántos, cuándo, dónde) ya están
+      // en la página, y el pase y "editar" quedan en el resumen de la
+      // respuesta. Antes esta ventana repetía todo eso en recuadros.
       if (attending) {
-        msgYes.textContent = (nombre ? "Gracias por decir que sí, " + nombre + ". " : "Gracias por decir que sí. ") +
-          "Saber que vas a estar con nosotros ese día nos hace muy felices — ya tienes tu lugar reservado.";
-        countEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
-        whenEl.textContent = W.weddingDateLabel || "";
-        whereEl.textContent = (W.venue && W.venue.name) || "";
-        noteEl.textContent = "Te esperamos con muchas ganas. Puedes editar tu respuesta hasta el " + editUntil + ".";
+        msgYes.textContent = (nombre ? "Gracias, " + nombre + ". " : "Gracias. ") + "Ya tienes tu lugar reservado.";
       } else {
-        msgNo.textContent = (nombre ? "Gracias por avisarnos, " + nombre + ". " : "Gracias por avisarnos. ") +
-          "Te vamos a extrañar ese día, pero entendemos y agradecemos mucho que te hayas tomado el tiempo de contarnos.";
-        noteEl.textContent = "Si tus planes cambian, puedes avisarnos hasta el " + editUntil + ".";
+        msgNo.textContent = (nombre ? "Gracias por avisarnos, " + nombre + ". " : "Gracias por avisarnos. ") + "Te vamos a extrañar.";
       }
 
       abrirDialogo(modal);
@@ -943,6 +934,7 @@
     }
 
     closeBtn.addEventListener("click", close);
+    if (okBtn) okBtn.addEventListener("click", close);
     modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !modal.hidden) close();

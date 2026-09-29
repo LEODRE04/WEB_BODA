@@ -892,42 +892,14 @@
     if (!modal) return null;
     var closeBtn = modal.querySelector("#gift-thanks-close");
     var backBtn = modal.querySelector("#gift-thanks-back");
-    var rsvpLink = modal.querySelector("#gift-thanks-rsvp");
     var titleEl = modal.querySelector("#gift-thanks-title");
-    var regaloEl = modal.querySelector("#gift-thanks-regalo");
-    var montoEl = modal.querySelector("#gift-thanks-monto");
-    var progressBarEl = modal.querySelector("#gift-thanks-progress-bar");
-    var msgEl = modal.querySelector("#gift-thanks-msg");
-    var codigo = new URLSearchParams(window.location.search).get("codigo");
 
-    if (rsvpLink && codigo) {
-      rsvpLink.href = "index.html?codigo=" + encodeURIComponent(codigo) + "#rsvp";
-      rsvpLink.hidden = false;
-    }
-
+    // Solo el agradecimiento con el nombre. Antes repetía el regalo, el
+    // monto, el estado, la barra de avance y el mensaje en recuadros; el
+    // avance lo ven igual al volver a la lista.
     function open(g, monto, mensaje, nombre) {
       var firstName = (nombre || "").trim().split(" ")[0];
       titleEl.textContent = firstName ? "Gracias por este regalo, " + firstName : "Gracias por este regalo";
-      regaloEl.textContent = g.nombre;
-      montoEl.textContent = money(monto);
-
-      // El aporte recién avisado entra como "por confirmar" hasta que los
-      // novios lo verifiquen, así que se suma a lo pendiente, no a lo
-      // reunido — igual que lo va a mostrar la lista al recargar.
-      progressBarEl.innerHTML = "";
-      progressBarEl.appendChild(progressNode({
-        precio: g.precio,
-        recaudado: g.recaudado,
-        pendiente: (Number(g.pendiente) || 0) + monto,
-      }));
-
-      if (mensaje) {
-        msgEl.textContent = "«" + mensaje + "»";
-        msgEl.hidden = false;
-      } else {
-        msgEl.hidden = true;
-      }
-
       abrirDialogo(modal);
     }
     function close() {
