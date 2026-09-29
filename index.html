@@ -295,13 +295,18 @@
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
         <h2 class="section-title">Tu presencia es el regalo</h2>
-        <p class="section-lede" style="margin:10px auto 0;text-align:center">Si además quieres acompañarnos con un detalle, estos son nuestros datos.</p>
+        <p class="section-lede" style="margin:10px auto 0;text-align:center">Lo más importante para nosotros es compartir este día contigo. Si además quieres acompañarnos con un regalo, un aporte será la forma más práctica de ayudarnos en esta nueva etapa.</p>
       </div>
       <div class="gifts-grid">
+      <!-- Datos para transferir y "¿Ya nos hiciste un regalo?" van en UNA
+           tarjeta, arriba y abajo de una línea: antes eran dos cajas
+           separadas y el aviso quedaba lejos de las cuentas a las que se
+           refiere. -->
+      <div class="transfer-box">
       <div class="pay-card-wrap">
         <details class="pay-sheet">
           <summary class="pay-toggle">
-            <span class="pay-toggle-txt">Ver los datos para transferir</span>
+            <span class="pay-toggle-txt">Ver datos para transferir</span>
           </summary>
           <div class="pay-bank">
             <span class="pay-bank-tag">Yape / Plin</span>
@@ -360,10 +365,10 @@
           <!-- Paso 1 — la pregunta -->
           <div class="transferencia-paso" id="transferencia-paso1">
             <div class="transferencia-texto">
-              <strong>¿Ya hiciste la transferencia?</strong>
-              <p>Un Yape o una transferencia nos llega sin nombre. Avísanos y sabremos que fue tuyo.</p>
+              <strong>¿Ya nos hiciste un regalo?</strong>
+              <p>Nos encantará saberlo. Cuando hayas realizado tu transferencia, avísanos para saber que fue tu regalo y poder agradecértelo personalmente.</p>
             </div>
-            <button type="button" class="btn btn-primary" id="transferencia-btn">Ya transferí</button>
+            <button type="button" class="btn btn-primary" id="transferencia-btn">Ya transferí — avisar a los novios</button>
           </div>
 
           <!-- Paso 2 — el agradecimiento, que es también el formulario -->
@@ -408,6 +413,7 @@
           </div>
 
         </div>
+      </div>
 
         <!-- Franja de la lista de regalos (bloque 3a): antes era una fila
              más dentro del grid y se perdía entre las tarjetas de pago.

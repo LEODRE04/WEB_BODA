@@ -1829,3 +1829,23 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   .rsvp .floral-frame::before, .rsvp .floral-frame::after,
   .faq .floral-frame::before, .faq .floral-frame::after { display: none; }
 }
+
+/* — datos para transferir + "¿Ya nos hiciste un regalo?" en una tarjeta —
+   Antes eran dos cajas separadas por 20px: el desplegable de cuentas
+   (blanco, con borde) y el aviso (salvia, sin borde), y se leían como
+   dos cosas distintas. Ahora comparten un solo borde y una sola esquina
+   redondeada: arriba las cuentas, abajo —separado solo por una línea—
+   el aviso sobre ellas. El z-index de .pay-card-wrap (para que las hojas
+   que caen pasen por detrás) sube al contenedor, que ahora es el que
+   tiene el fondo. */
+.transfer-box {
+  position: relative; z-index: 6;
+  border: 1px solid color-mix(in srgb, var(--color-neutral-600) 60%, transparent);
+  border-radius: 24px; overflow: hidden; background: var(--color-bg);
+}
+.transfer-box .pay-card-wrap { z-index: auto; }
+.transfer-box .pay-sheet { border: 0; border-radius: 0; }
+.transfer-box .transferencia-card {
+  border-radius: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
+}
