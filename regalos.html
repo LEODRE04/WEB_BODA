@@ -62,12 +62,39 @@
            estaba dormida. Antes el texto de carga vivía DENTRO de la lista
            oculta y no se veía: el invitado solo veía un hueco. -->
       <div class="gift-loading" id="gift-loading">
-        <p class="gift-loading-txt" id="gift-loading-txt" role="status">Cargando los regalos…</p>
-        <div class="gift-grid gift-skeletons" aria-hidden="true">
-          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
-          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
-          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
+        <!-- Adaptada de "Pantalla de carga: regalo de bodas": la caja se
+             envuelve, se cierra con la cinta y le aparece el moño. Colores
+             del sitio: caja crema, papel salvia con lunares, cinta y moño
+             en arena (el "dorado" de esta paleta). -->
+        <div class="gl-scene" aria-hidden="true">
+          <div class="gl-floor"></div>
+          <div class="gl-gift">
+            <div class="gl-body"><div class="gl-paper"></div></div>
+            <div class="gl-lid"><div class="gl-paper"></div></div>
+            <div class="gl-rib-v"></div>
+            <div class="gl-rib-h"></div>
+            <svg class="gl-bow" viewBox="0 0 72 44">
+              <defs>
+                <linearGradient id="gl-s1" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#EAE3D2"/><stop offset=".5" stop-color="#C9B894"/><stop offset="1" stop-color="#A3936E"/>
+                </linearGradient>
+                <linearGradient id="gl-s2" x1="1" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#EAE3D2"/><stop offset=".5" stop-color="#C9B894"/><stop offset="1" stop-color="#A3936E"/>
+                </linearGradient>
+              </defs>
+              <path d="M36 36 C26 14 6 6 4 22 C2 36 22 40 36 36Z" fill="url(#gl-s1)"/>
+              <path d="M36 36 C46 14 66 6 68 22 C70 36 50 40 36 36Z" fill="url(#gl-s2)"/>
+              <path d="M34 34 C27 22 16 18 14 25 C13 31 25 35 34 34Z" fill="#7A6A45" opacity=".3"/>
+              <path d="M38 34 C45 22 56 18 58 25 C59 31 47 35 38 34Z" fill="#7A6A45" opacity=".3"/>
+              <ellipse cx="36" cy="36" rx="7" ry="6" fill="url(#gl-s1)"/>
+              <ellipse cx="34" cy="34" rx="2.8" ry="1.8" fill="#F7F4EA" opacity=".85"/>
+            </svg>
+          </div>
+          <span class="gl-spark gl-a"></span>
+          <span class="gl-spark gl-b"></span>
+          <span class="gl-spark gl-c"></span>
         </div>
+        <p class="gift-loading-txt" role="status"><span id="gift-loading-txt">Preparando la lista de regalos</span><span class="gl-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
       </div>
 
       <div class="gift-grid" id="gift-grid" hidden></div>

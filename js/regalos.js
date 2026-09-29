@@ -288,11 +288,11 @@
       if (!loadingEl || regalos.length) return;
       loadingEl.hidden = false;
       if (emptyEl) emptyEl.hidden = true;
-      if (loadingTxt) loadingTxt.textContent = "Cargando los regalos…";
+      if (loadingTxt) loadingTxt.textContent = "Preparando la lista de regalos";
       avisosCarga.forEach(clearTimeout);
       avisosCarga = [
-        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Está tardando un poco más de lo normal; ya casi."; }, 6000),
-        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Sigue cargando… gracias por la paciencia."; }, 15000),
+        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Está tardando un poco más de lo normal; ya casi"; }, 6000),
+        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Sigue cargando, gracias por la paciencia"; }, 15000),
       ];
     }
     function ocultarCarga() {
