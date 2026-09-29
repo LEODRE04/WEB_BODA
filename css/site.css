@@ -1849,3 +1849,15 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   border-radius: 0;
   border-top: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
 }
+
+/* — campos del panel de aporte: blancos sobre el crema —
+   El panel es crema (--color-surface) y los campos usaban ese mismo
+   crema de fondo, con un borde arena al 65%: "Otro monto", "Tu nombre" y
+   "Mensaje" se camuflaban con el panel y parecía que no estaban llenos.
+   Pasan a blanco con el borde arena entero, igual que las pastillas de
+   monto de arriba, que ya eran blancas. */
+#gift-contribute .input {
+  background: var(--color-bg);
+  border-color: var(--color-neutral-600);
+}
+#gift-contribute .input:focus { border-color: var(--color-accent); }
