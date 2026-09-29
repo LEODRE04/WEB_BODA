@@ -905,6 +905,11 @@ body { background: var(--color-neutral-100); }
 .gift-intro-steps { display: flex; flex-direction: column; gap: 14px; margin: 18px 0; }
 .gift-intro-step { display: flex; gap: 14px; align-items: flex-start; }
 .gift-intro-step p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--color-text-soft); }
+/* Cada paso: un título corto en negrita y la explicación debajo. */
+.gift-intro-step-title {
+  display: block; margin: 1px 0 2px;
+  font-size: 16px; font-weight: 600; line-height: 1.35; color: var(--color-text);
+}
 .gift-intro-num {
   width: 30px; height: 30px; border-radius: 999px; flex: none;
   display: flex; align-items: center; justify-content: center;
