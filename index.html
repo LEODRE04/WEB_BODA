@@ -31,11 +31,11 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202609291136">
-<link rel="stylesheet" href="css/site.css?v=202609291136">
+<link rel="stylesheet" href="css/tokens.css?v=202609291821">
+<link rel="stylesheet" href="css/site.css?v=202609291821">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
      para volver al diseño anterior, borra esta línea nada más. -->
-<link rel="stylesheet" href="css/theme-elegante.css?v=202609291136">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202609291821">
 </head>
 <body>
 
@@ -48,6 +48,54 @@
      css/theme-elegante.css y js/site.js). Se puede quitar entero junto
      con el resto del tema sin afectar nada más de la página. -->
 <div class="envelope-gate" id="envelope-gate">
+  <!-- Pantalla de carga (iniciarCarga en site.js), adaptada de "Carta
+       escrita y enviada": una mano escribe la carta, entra al sobre, se
+       sella y el sobre sale volando. Colores del sitio: tinta verde
+       bosque, forro y sello salvia, detalles en arena. -->
+  <div class="carta-loader" id="carta-loader" role="status" aria-live="polite" hidden>
+    <div class="carta-scene" aria-hidden="true">
+      <div class="carta-floor"></div>
+      <div class="carta-env">
+        <div class="carta-back"></div>
+        <div class="carta-letter">
+          <svg viewBox="0 0 110 140">
+            <path class="carta-ink carta-l1" pathLength="1" d="M16 32 c2 -7 5 -7 5 0 c0 5 3 5 5 0 c2 -5 4 -4 4 0 c0 4 3 4 5 -1 c2 -6 5 -6 5 1 c1 4 3 3 5 -1 c2 -4 4 -3 4 1 c1 3 3 3 5 -1 c2 -5 5 -5 5 0 c0 4 3 4 5 0 c2 -4 4 -4 5 0 c1 3 3 3 5 0 c2 -4 4 -4 5 0 c1 3 4 3 6 0"/>
+            <path class="carta-ink carta-l2" pathLength="1" d="M16 52 c2 -5 4 -5 5 0 c1 4 3 4 5 0 c2 -6 5 -6 5 0 c0 4 3 4 5 0 c2 -4 4 -4 4 0 c1 4 4 4 6 -1 c2 -5 4 -5 5 0 c1 4 3 4 5 0 c2 -4 4 -4 5 0 c1 3 3 3 5 -1 c2 -5 5 -5 5 1 c1 3 3 3 5 0 c2 -4 4 -4 5 0 c1 3 4 3 6 0"/>
+            <path class="carta-ink carta-l3" pathLength="1" d="M16 72 c2 -4 4 -4 5 0 c1 4 3 4 5 -1 c2 -6 5 -6 5 1 c1 3 3 3 5 0 c2 -4 4 -4 4 0 c1 4 4 4 6 0 c2 -5 4 -5 5 0 c1 3 3 3 5 0 c2 -6 5 -6 5 0 c1 4 3 4 5 0 c2 -4 4 -4 5 0 c1 3 3 3 5 0 c2 -4 4 -4 5 0 c1 3 4 3 6 0"/>
+            <path class="carta-ink carta-l4" pathLength="1" d="M16 92 c2 -5 4 -5 5 0 c1 4 3 4 5 0 c2 -4 4 -4 5 0 c1 3 3 3 5 -1 c2 -5 5 -5 5 1 c1 3 3 3 5 0 c2 -4 4 -4 5 0 c1 3 4 3 5 0 c2 -5 5 -5 6 0"/>
+            <path class="carta-ink carta-hrt" pathLength="1" d="M55 110 C52 104 46 104 47 110 C48 116 55 121 55 124 C55 121 62 116 63 110 C64 104 58 104 55 110"/>
+          </svg>
+        </div>
+        <div class="carta-front"></div>
+        <div class="carta-flap"></div>
+        <div class="carta-seal">
+          <svg viewBox="0 0 14 13"><path d="M7 12.5 C2 8.5 0 6.3 0 3.8 C0 1.7 1.6 0 3.6 0 C5 0 6.3.8 7 2 C7.7.8 9 0 10.4 0 C12.4 0 14 1.7 14 3.8 C14 6.3 12 8.5 7 12.5Z" fill="#F7F4EA" opacity=".9"/></svg>
+        </div>
+        <div class="carta-pen">
+          <svg class="carta-hand" viewBox="0 0 100 100">
+            <path d="M20 70 C30 40 56 18 88 2 C78 26 52 52 20 70Z" fill="#FFFFFF" stroke="#C3D1B4" stroke-width=".8"/>
+            <path d="M20 70 C42 50 64 28 88 2 C62 22 38 46 20 70Z" fill="#DFE8D4"/>
+            <path d="M13 77 L88 2" stroke="#C9B894" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M4 86 L11 73 L16 78Z" fill="#A3936E"/>
+            <path d="M58 70 L116 58 L124 118 L60 104Z" fill="#9FB28E"/>
+            <path d="M52 74 C58 67 67 69 71 76 L63 97 C56 95 50 93 47 88Z" fill="#FFFFFF" stroke="#EAE3D2" stroke-width=".8"/>
+            <path d="M14 73 C14 65 22 61 30 63 C36 59 44 61 49 65 C56 67 61 73 61 79 C61 87 52 93 40 93 C26 93 14 85 14 73Z" fill="#F2C7A8"/>
+            <path d="M22 88 C30 92 44 93 52 88" stroke="#E0AA88" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <ellipse cx="23" cy="67" rx="7.5" ry="5" transform="rotate(-38 23 67)" fill="#F4CFB2" stroke="#E0AA88" stroke-width=".8"/>
+            <ellipse cx="17" cy="78" rx="6" ry="4.5" transform="rotate(20 17 78)" fill="#F4CFB2" stroke="#E0AA88" stroke-width=".8"/>
+          </svg>
+        </div>
+      </div>
+      <svg class="carta-trail carta-ta" viewBox="0 0 14 13"><path d="M7 12.5 C2 8.5 0 6.3 0 3.8 C0 1.7 1.6 0 3.6 0 C5 0 6.3.8 7 2 C7.7.8 9 0 10.4 0 C12.4 0 14 1.7 14 3.8 C14 6.3 12 8.5 7 12.5Z" fill="#9FB28E"/></svg>
+      <svg class="carta-trail carta-tb" viewBox="0 0 14 13"><path d="M7 12.5 C2 8.5 0 6.3 0 3.8 C0 1.7 1.6 0 3.6 0 C5 0 6.3.8 7 2 C7.7.8 9 0 10.4 0 C12.4 0 14 1.7 14 3.8 C14 6.3 12 8.5 7 12.5Z" fill="#C9B894"/></svg>
+      <svg class="carta-trail carta-tc" viewBox="0 0 14 13"><path d="M7 12.5 C2 8.5 0 6.3 0 3.8 C0 1.7 1.6 0 3.6 0 C5 0 6.3.8 7 2 C7.7.8 9 0 10.4 0 C12.4 0 14 1.7 14 3.8 C14 6.3 12 8.5 7 12.5Z" fill="#9FB28E"/></svg>
+    </div>
+    <p class="carta-label">
+      <span class="carta-t1">Escribiendo tu invitación<b>.</b><b>.</b><b>.</b></span>
+      <span class="carta-t2">Enviándotela con cariño<b>.</b><b>.</b><b>.</b></span>
+    </p>
+    <p class="carta-lento" id="carta-lento" hidden>Está tardando un poco más de lo normal; ya casi.</p>
+  </div>
   <div class="envelope-gate-inner floral-frame">
     <div class="ornament-line"></div>
     <p class="envelope-eyebrow">Te invitamos a:</p>
@@ -87,13 +135,6 @@
       </div>
     </div>
 
-    <!-- La carga del sobre (iniciarCarga en site.js): porcentaje y qué
-         está pasando. Se va cuando el sello se estampa y deja su lugar a
-         la instrucción de raspar. -->
-    <div class="envelope-loader" id="envelope-loader" aria-live="polite" hidden>
-      <p class="envelope-loader-pct" id="envelope-loader-pct">0%</p>
-      <p class="envelope-loader-status" id="envelope-loader-status">Preparando tu invitación…</p>
-    </div>
 
     <!-- Instrucción del sello raspable (js/sello-raspable.js). Oculta
          hasta que ese script arranca: sin canvas, el sobre se abre con
@@ -717,9 +758,9 @@
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
 
-<script src="js/config.js?v=202609291136"></script>
-<script src="js/pase.js?v=202609291136"></script>
-<script src="js/site.js?v=202609291136"></script>
-<script src="js/sello-raspable.js?v=202609291136"></script>
+<script src="js/config.js?v=202609291821"></script>
+<script src="js/pase.js?v=202609291821"></script>
+<script src="js/site.js?v=202609291821"></script>
+<script src="js/sello-raspable.js?v=202609291821"></script>
 </body>
 </html>

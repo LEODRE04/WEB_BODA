@@ -523,13 +523,10 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
    rebote. Y mientras carga flota, un poco. La flotación usa
    `translate` y `rotate` como propiedades sueltas, no `transform`,
    para no pisarse con la llegada, que sí usa transform. */
-.envelope-gate.is-loading .envelope,
+/* El sobre llega cuando se va la pantalla de la carta (is-loaded), no
+   antes: mientras carga queda tapado y no tiene sentido que flote. */
 .envelope-gate.is-loaded .envelope {
   animation: envelope-arrive 1.1s cubic-bezier(.3, 1.3, .5, 1) both;
-}
-.envelope-gate.is-loading .envelope {
-  animation: envelope-arrive 1.1s cubic-bezier(.3, 1.3, .5, 1) both,
-             envelope-float 3.2s ease-in-out 1.1s infinite;
 }
 @keyframes envelope-arrive {
   from { opacity: 0; transform: translateY(40px) rotate(-6deg) scale(.92); }
@@ -684,4 +681,173 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   /* .prayer-card .prayer-signature y no solo la clase: la regla de los
      párrafos de la tarjeta (.prayer-card p) es más específica y ganaba. */
   .prayer-card .prayer-signature { font-size: 25px; line-height: 1.35; }
+}
+
+
+/* — pantalla de carga: la carta escrita y enviada —
+   Adaptada de "Carta escrita y enviada" (iniciarCarga en site.js). Una
+   mano con pluma escribe cuatro renglones y un corazón, la carta baja al
+   sobre, la solapa se cierra, cae el sello y el sobre sale volando dejando
+   corazones. Colores del sitio en vez del rosa y dorado del original:
+   tinta verde bosque, forro y sello salvia, pluma y detalles en arena.
+   Tapa todo el sobre de apertura hasta que la carga termina. */
+.carta-loader {
+  --carta-dur: 5.6s;
+  position: absolute; inset: 0; z-index: 20;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: radial-gradient(ellipse at 50% 45%, #ffffff, var(--color-surface) 85%);
+  transition: opacity .5s ease;
+}
+.carta-loader.is-done { opacity: 0; pointer-events: none; }
+.carta-scene { position: relative; width: 260px; height: 240px; }
+.carta-floor {
+  position: absolute; left: 75px; top: 222px; width: 110px; height: 12px; border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, #2f4429 16%, transparent), transparent 70%);
+  animation: carta-floor var(--carta-dur) ease-in-out infinite;
+}
+.carta-env {
+  position: absolute; left: 65px; top: 136px; width: 130px; height: 86px; perspective: 500px;
+  animation: carta-fly var(--carta-dur) cubic-bezier(.5, 0, .5, 1) infinite;
+}
+.carta-back, .carta-front, .carta-flap, .carta-seal {
+  animation-duration: var(--carta-dur); animation-iteration-count: infinite;
+}
+.carta-back {
+  position: absolute; inset: 0; border-radius: 5px;
+  background: linear-gradient(180deg, var(--color-accent-300), var(--color-accent-200) 60%);
+  animation-name: carta-env-in;
+}
+.carta-front {
+  position: absolute; inset: 0; z-index: 3; border-radius: 5px;
+  background: linear-gradient(160deg, #fff, var(--color-neutral-300) 45%, var(--color-neutral-500));
+  clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+  animation-name: carta-env-in;
+}
+.carta-front::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(to top right, transparent 49.3%, rgba(47,68,41,.10) 50%, transparent 50.7%) left / 50% 100% no-repeat,
+    linear-gradient(to top left, transparent 49.3%, rgba(47,68,41,.10) 50%, transparent 50.7%) right / 50% 100% no-repeat;
+}
+.carta-flap {
+  position: absolute; left: 0; top: 0; width: 130px; height: 54px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  animation-name: carta-flap; animation-timing-function: cubic-bezier(.5, 0, .3, 1);
+}
+.carta-seal {
+  position: absolute; left: 50%; top: 42px; width: 22px; height: 22px; margin-left: -11px;
+  z-index: 6; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, var(--color-accent-500), var(--color-accent) 60%, var(--color-accent-800));
+  box-shadow: 0 1px 2px rgba(36,51,31,.4);
+  display: grid; place-items: center;
+  animation-name: carta-seal; animation-timing-function: ease-out;
+}
+.carta-seal svg { width: 10px; height: 9px; }
+.carta-letter {
+  position: absolute; left: 10px; top: -124px; width: 110px; height: 140px; z-index: 2;
+  background: #fff; border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(47,68,41,.16), inset 0 0 0 5px #fff, inset 0 0 0 5.8px var(--color-neutral-500);
+  transform-origin: 50% 0;
+  animation: carta-letter var(--carta-dur) cubic-bezier(.45, 0, .3, 1) infinite;
+}
+.carta-letter svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.carta-ink {
+  fill: none; stroke: var(--color-accent-800); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation-duration: var(--carta-dur); animation-iteration-count: infinite; animation-timing-function: linear;
+}
+.carta-l1 { animation-name: carta-l1; } .carta-l2 { animation-name: carta-l2; } .carta-l3 { animation-name: carta-l3; }
+.carta-l4 { animation-name: carta-l4; }
+.carta-hrt { animation-name: carta-hrt; stroke: var(--color-accent-500); stroke-width: 1.5; }
+.carta-pen {
+  position: absolute; left: 10px; top: -124px; width: 0; height: 0; z-index: 7;
+  animation: carta-pen var(--carta-dur) linear infinite;
+}
+.carta-hand {
+  position: absolute; left: -4px; top: -86px; width: 100px; height: 100px; overflow: visible;
+  animation: carta-bob .28s ease-in-out infinite alternate;
+}
+.carta-trail { position: absolute; width: 10px; height: 9px; opacity: 0; animation: carta-trail var(--carta-dur) ease-out infinite; }
+.carta-ta { left: 150px; top: 120px; animation-delay: .1s; }
+.carta-tb { left: 182px; top: 88px; animation-delay: .3s; width: 8px; }
+.carta-tc { left: 212px; top: 58px; animation-delay: .5s; width: 6px; }
+
+.carta-label {
+  position: relative; margin: 0; height: 30px; width: 280px; text-align: center;
+  font-style: italic; font-size: 21px; letter-spacing: .02em; color: var(--color-text-soft);
+}
+.carta-label > span { position: absolute; inset: 0; animation: var(--carta-dur) ease infinite; }
+.carta-t1 { animation-name: carta-t1 !important; }
+.carta-t2 { animation-name: carta-t2 !important; opacity: 0; }
+.carta-label b { font-weight: 400; display: inline-block; animation: carta-dot 1.4s ease-in-out infinite; }
+.carta-label b:nth-of-type(2) { animation-delay: .2s; }
+.carta-label b:nth-of-type(3) { animation-delay: .4s; }
+.carta-lento { margin: 0; font-size: 15px; color: var(--color-text-muted); }
+
+@keyframes carta-letter {
+  0% { opacity: 0; transform: translateY(8px); }
+  4%, 50% { opacity: 1; transform: none; }
+  55% { transform: scale(1, .5); }
+  63%, 100% { opacity: 1; transform: translateY(128px) scale(.8, .4); }
+}
+@keyframes carta-l1 { 0%, 5% { stroke-dashoffset: 1; } 13%, 100% { stroke-dashoffset: 0; } }
+@keyframes carta-l2 { 0%, 14% { stroke-dashoffset: 1; } 22%, 100% { stroke-dashoffset: 0; } }
+@keyframes carta-l3 { 0%, 23% { stroke-dashoffset: 1; } 31%, 100% { stroke-dashoffset: 0; } }
+@keyframes carta-l4 { 0%, 32% { stroke-dashoffset: 1; } 37%, 100% { stroke-dashoffset: 0; } }
+@keyframes carta-hrt { 0%, 38% { stroke-dashoffset: 1; } 43%, 100% { stroke-dashoffset: 0; } }
+@keyframes carta-pen {
+  0% { transform: translate(110px, 70px); opacity: 0; }
+  4% { transform: translate(24px, 34px); opacity: 1; }
+  5% { transform: translate(16px, 32px); }
+  13% { transform: translate(94px, 32px); }
+  14% { transform: translate(16px, 52px); }
+  22% { transform: translate(94px, 52px); }
+  23% { transform: translate(16px, 72px); }
+  31% { transform: translate(94px, 72px); }
+  32% { transform: translate(16px, 92px); }
+  37% { transform: translate(66px, 92px); }
+  38% { transform: translate(55px, 110px); }
+  40% { transform: translate(47px, 104px); }
+  41.5% { transform: translate(55px, 124px); }
+  43% { transform: translate(63px, 104px); opacity: 1; }
+  48%, 100% { transform: translate(150px, 150px); opacity: 0; }
+}
+@keyframes carta-env-in { 0%, 44% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes carta-flap {
+  0%, 44% { transform: rotateX(180deg); z-index: 1; background: var(--color-accent-300); opacity: 0; }
+  50% { opacity: 1; }
+  63% { transform: rotateX(180deg); }
+  66% { z-index: 1; background: var(--color-accent-300); }
+  66.1% { z-index: 4; background: var(--color-neutral-500); }
+  69%, 100% { transform: rotateX(0); z-index: 4; opacity: 1; background: linear-gradient(180deg, #fff, var(--color-neutral-500)); }
+}
+@keyframes carta-seal { 0%, 70% { transform: scale(0); } 73% { transform: scale(1.3); } 75%, 100% { transform: scale(1); } }
+@keyframes carta-fly {
+  0%, 76% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+  79% { transform: translate(-8px, 5px) rotate(4deg) scale(1); }
+  91% { transform: translate(150px, -170px) rotate(-18deg) scale(.35); opacity: 1; }
+  94%, 100% { transform: translate(165px, -185px) rotate(-20deg) scale(.3); opacity: 0; }
+}
+@keyframes carta-floor { 0%, 44% { opacity: 0; } 50%, 79% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes carta-trail {
+  0%, 81% { opacity: 0; transform: scale(0); }
+  84% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: translateY(-8px) scale(.6); }
+}
+@keyframes carta-bob { from { margin-top: 0; } to { margin-top: -1.5px; } }
+@keyframes carta-t1 { 0%, 44% { opacity: 1; } 48%, 97% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes carta-t2 { 0%, 46% { opacity: 0; } 50%, 90% { opacity: 1; } 95%, 100% { opacity: 0; } }
+@keyframes carta-dot {
+  0%, 60%, 100% { opacity: .25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+/* Sin movimiento: la carta escrita, quieta, con su texto. */
+@media (prefers-reduced-motion: reduce) {
+  .carta-env, .carta-floor, .carta-letter, .carta-flap, .carta-seal, .carta-trail, .carta-pen,
+  .carta-hand, .carta-ink, .carta-back, .carta-front, .carta-label > span, .carta-label b { animation: none !important; }
+  .carta-pen, .carta-trail, .carta-t2 { display: none; }
+  .carta-ink { stroke-dashoffset: 0; }
+  .carta-t1 { opacity: 1; }
+  .carta-back, .carta-front, .carta-flap { opacity: 0; }
 }
