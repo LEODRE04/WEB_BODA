@@ -57,9 +57,20 @@
         <button type="button" class="gift-filter-btn" data-filtro="todos" aria-pressed="false">Todos</button>
       </div>
 
-      <div class="gift-grid" id="gift-grid" hidden>
-        <p class="gift-grid-status">Cargando la lista de regalos…</p>
+      <!-- Carga (cargarRegalos): tarjetas "fantasma" con la forma de un
+           regalo mientras responde la API, que puede tardar de 2 a 40 s si
+           estaba dormida. Antes el texto de carga vivía DENTRO de la lista
+           oculta y no se veía: el invitado solo veía un hueco. -->
+      <div class="gift-loading" id="gift-loading">
+        <p class="gift-loading-txt" id="gift-loading-txt" role="status">Cargando los regalos…</p>
+        <div class="gift-grid gift-skeletons" aria-hidden="true">
+          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
+          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
+          <div class="gift-skel"><span class="sk sk-title"></span><span class="sk sk-line"></span><span class="sk sk-photo"></span><span class="sk sk-price"></span><span class="sk sk-bar"></span></div>
+        </div>
       </div>
+
+      <div class="gift-grid" id="gift-grid" hidden></div>
       <p class="gift-grid-status" id="gift-grid-empty" hidden>Todavía no hay regalos en la lista — vuelve a intentarlo más tarde, o escríbenos por WhatsApp si tienes dudas.</p>
 
       <!-- En celular, "Continuar" recién revela el panel de aporte de

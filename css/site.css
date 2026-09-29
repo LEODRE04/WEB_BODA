@@ -1906,3 +1906,33 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
 
 .rsvp-saved-regalos { margin: 10px 0 0; font-size: 15px; color: var(--color-text-soft); }
 .rsvp-saved-regalos a { font-weight: 600; color: var(--color-accent-700); }
+
+/* — carga de la mesa de regalos: tarjetas fantasma —
+   Misma forma y medidas que una .gift-card (título, línea, foto, precio y
+   barra), con un brillo que las recorre. Con "reducir movimiento" quedan
+   quietas. */
+.gift-loading-txt {
+  margin: 0 0 14px; text-align: center; font-size: 15px; font-style: italic;
+  color: var(--color-text-soft);
+}
+.gift-skel {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 18px 18px 16px; border-radius: 24px;
+  border: 2px solid var(--color-divider); background: var(--color-bg);
+}
+.sk {
+  display: block; border-radius: 8px;
+  /* arena clara con el brillo en crema: con los cremas más claros las
+     barras casi no se veían sobre el blanco y la tarjeta parecía vacía */
+  background: linear-gradient(90deg,
+    var(--color-neutral-500) 0%, var(--color-neutral-300) 45%, var(--color-neutral-500) 90%);
+  background-size: 250% 100%;
+  animation: sk-brillo 1.4s ease-in-out infinite;
+}
+.sk-title { width: 45%; height: 16px; }
+.sk-line { width: 80%; height: 12px; }
+.sk-photo { width: 100%; height: 90px; border-radius: 16px; }
+.sk-price { width: 30%; height: 18px; }
+.sk-bar { width: 100%; height: 6px; border-radius: 999px; }
+@keyframes sk-brillo { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }

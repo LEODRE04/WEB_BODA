@@ -276,6 +276,30 @@
   function initGiftRegistry(guestPromise) {
     var grid = document.querySelector("#gift-grid");
     var emptyEl = document.querySelector("#gift-grid-empty");
+    var loadingEl = document.querySelector("#gift-loading");
+    var loadingTxt = document.querySelector("#gift-loading-txt");
+    var avisosCarga = [];
+
+    // Las tarjetas fantasma solo mientras todavía no hay lista: al
+    // refrescar después de un aporte la lista ya está a la vista y no
+    // tiene que desaparecer. Si tarda, el texto lo dice, para que no
+    // parezca que la página se quedó colgada.
+    function mostrarCarga() {
+      if (!loadingEl || regalos.length) return;
+      loadingEl.hidden = false;
+      if (emptyEl) emptyEl.hidden = true;
+      if (loadingTxt) loadingTxt.textContent = "Cargando los regalos…";
+      avisosCarga.forEach(clearTimeout);
+      avisosCarga = [
+        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Está tardando un poco más de lo normal; ya casi."; }, 6000),
+        setTimeout(function () { if (loadingTxt) loadingTxt.textContent = "Sigue cargando… gracias por la paciencia."; }, 15000),
+      ];
+    }
+    function ocultarCarga() {
+      avisosCarga.forEach(clearTimeout);
+      avisosCarga = [];
+      if (loadingEl) loadingEl.hidden = true;
+    }
     var panel = document.querySelector("#gift-contribute");
     if (!grid || !panel) return;
 
@@ -378,6 +402,7 @@
     }
 
     function renderGrid() {
+      ocultarCarga();
       grid.innerHTML = "";
       pintarFiltro();
 
@@ -741,6 +766,7 @@
     // mismo para algo que se arregla solo.
     function cargarRegalos(esReintento) {
       if (!url) { errorDeCarga = true; regalos = []; renderGrid(); return; }
+      mostrarCarga();
       return fetchConTimeout(url + "?tipo=regalos", { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (body) {
