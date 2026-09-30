@@ -286,7 +286,7 @@ filas de prueba como "ANDRE" o "asd".
 `enviarResumen` manda un correo a las 8 p.m. (hora de Lima) cada 3 días al dueño de la hoja y a
 quienes pueden editarla: confirmaciones nuevas desde el último resumen (nombre por nombre, y quiénes
 avisaron que no van), totales (confirmados, personas, no asisten, pendientes como número) y regalos
-(total verificado, por verificar, lo nuevo y los avisos de "Ya transferí").
+(total aportado, lo nuevo y los avisos de "Ya transferí").
 
 - **Activar:** Apps Script › elegir `activarResumen` › Ejecutar (una vez; pide permiso para enviar
   correos). No hace falta volver a desplegar.

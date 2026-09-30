@@ -313,17 +313,9 @@
     el.hidden = false;
   }
 
-  // La barra tiene dos tramos: lo verificado por los novios (lleno) y lo
-  // avisado pero todavía sin verificar (rayado, "por confirmar"). Solo lo
-  // verificado cuenta para "completo" y para cuánto falta: un aviso con un
-  // monto inventado ya no deja un regalo como completo para todos. Lo por
-  // confirmar se muestra igual, para que nadie aporte dos veces lo mismo
-  // sin saber que alguien ya avisó.
   function progressNode(g) {
-    var pendiente = Math.max(0, Number(g.pendiente) || 0);
     var falta = Math.max(0, g.precio - g.recaudado);
     var pct = g.precio > 0 ? Math.min(100, Math.round((g.recaudado / g.precio) * 100)) : 0;
-    var pctPend = g.precio > 0 ? Math.min(100 - pct, Math.round((pendiente / g.precio) * 100)) : 0;
     var wrap = document.createElement("div");
     wrap.className = "gift-progress";
     var bar = document.createElement("div");
@@ -331,18 +323,11 @@
     var fill = document.createElement("span");
     fill.style.width = pct + "%";
     bar.appendChild(fill);
-    if (pctPend > 0 && falta > 0) {
-      var pend = document.createElement("span");
-      pend.className = "is-pending";
-      pend.style.width = pctPend + "%";
-      bar.appendChild(pend);
-    }
     var label = document.createElement("p");
     label.className = "gift-progress-label";
     label.textContent = falta <= 0
       ? "Ya está completo — ¡gracias!"
-      : money(g.recaudado) + " reunidos de " + money(g.precio) +
-        (pendiente > 0 ? " · " + money(pendiente) + " por confirmar" : "");
+      : money(g.recaudado) + " reunidos de " + money(g.precio);
     wrap.appendChild(bar);
     wrap.appendChild(label);
     return wrap;

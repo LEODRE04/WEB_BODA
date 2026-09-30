@@ -48,9 +48,8 @@ var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "e
 // Primera de las 3 columnas de seguimiento en Invitados (E, F y G):
 // abierto_en | ultima_apertura | aperturas.
 var APERTURA_COL = 5;
-var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha", "verificado"];
+var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
 var APORTE_COL_FECHA = 6;       // F
-var APORTE_COL_VERIFICADO = 7;  // G: casilla que marcan ustedes
 // Id reservado para el aviso "Ya transferí" de la mesa de regalos: alguien
 // avisa que depositó por Yape o transferencia, sin que corresponda a
 // ningún regalo de la lista.
@@ -456,29 +455,16 @@ function listRegalos() {
       descripcion: rows[i][2],
       foto_url: rows[i][3],
       precio: Number(rows[i][4] || 0),
-      recaudado: aportes[id] ? aportes[id].verificado : 0,
-      pendiente: aportes[id] ? aportes[id].pendiente : 0,
+      recaudado: aportes[id] || 0,
     });
   }
   return regalos;
 }
 
-// — aportes verificados y por verificar —
-// Antes, cualquier aviso de aporte sumaba al instante a la barra pública
-// del regalo: un aviso con un monto inventado lo dejaba "Completo" para
-// todos. Ahora cada fila de Aportes tiene una casilla "verificado" (G)
-// que marcan ustedes al ver la transferencia en el banco o en Yape:
-//   - verificado  → suma a la barra ("reunidos")
-//   - sin marcar  → se muestra aparte, como "por confirmar"
-//
-// Mientras la hoja no tenga la columna (prepararHoja la agrega), todo
-// cuenta como verificado, igual que antes: así pegar este código no deja
-// en cero todas las barras antes de tiempo.
-function conVerificacion(sheet) {
-  if (sheet.getMaxColumns() < APORTE_COL_VERIFICADO) return false;
-  return String(sheet.getRange(1, APORTE_COL_VERIFICADO).getValue()).trim().toLowerCase() === "verificado";
-}
-
+// Todo aviso de aporte suma a la barra del regalo al instante. Hubo una
+// versión con casilla "verificado" y tope por lo que faltaba; se quitaron
+// a pedido de los novios: si alguien se pasa o avisa antes de tiempo, da
+// igual, el depósito llega igual y lo ven en su banco.
 function sumAportesPorRegalo() {
   var sheet = getSheet(SHEET_APORTES);
   var totales = {};
@@ -486,18 +472,13 @@ function sumAportesPorRegalo() {
   var ultimaFila = sheet.getLastRow();
   if (ultimaFila < 2) return totales;
 
-  // Solo las columnas que hacen falta: id y monto (A-C) y, si existe, la
-  // casilla de verificación (G). El mensaje y la constancia no viajan.
-  var verifica = conVerificacion(sheet);
+  // Solo regalo_id y monto (columnas A-C): la hoja de aportes crece sin
+  // techo y el mensaje/comprobante no se usan para sumar.
   var rows = sheet.getRange(2, 1, ultimaFila - 1, 3).getValues();
-  var marcas = verifica ? sheet.getRange(2, APORTE_COL_VERIFICADO, ultimaFila - 1, 1).getValues() : null;
   for (var i = 0; i < rows.length; i++) {
     var id = String(rows[i][0]).trim();
     if (!id) continue;
-    var t = totales[id] || (totales[id] = { verificado: 0, pendiente: 0 });
-    var monto = Number(rows[i][2] || 0);
-    if (!verifica || marcas[i][0] === true) t.verificado += monto;
-    else t.pendiente += monto;
+    totales[id] = (totales[id] || 0) + Number(rows[i][2] || 0);
   }
   return totales;
 }
@@ -541,29 +522,10 @@ function handleAporte(data) {
   // vea todos juntos; como ningún regalo usa este id, no altera el
   // "recaudado" de nadie.
   var esDeposito = regaloId === APORTE_DEPOSITO;
-  var notaTope = "";
   if (!esDeposito) {
     if (!nombre) return jsonOut({ error: "falta el nombre" });
     if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
-    var precio = precioDeRegalo(regaloId);
-    if (precio === null) return jsonOut({ error: "ese regalo ya no existe" });
-
-    // — tope: no más de lo que falta —
-    // Lo que falta se calcula con lo VERIFICADO. Si alguien avisa más que
-    // eso, se registra solo lo que falta y lo que indicó queda anotado en
-    // el mensaje. No se rechaza: este aviso llega DESPUÉS de transferir,
-    // y rebotar a alguien que ya pagó sería peor que dejarles la nota
-    // para revisarlo con la transferencia a la vista. La página ya no
-    // deja elegir más de lo que falta; esto cubre la carrera de dos
-    // invitados a la vez y a quien llame a la API directo.
-    if (precio > 0) {
-      var ya = sumAportesPorRegalo()[regaloId];
-      var falta = Math.max(0, precio - (ya ? ya.verificado : 0));
-      if (monto > falta) {
-        notaTope = "[Indicó S/ " + monto + "; se registró lo que faltaba, S/ " + falta + "] ";
-        monto = falta;
-      }
-    }
+    if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
   }
 
   // Subir la captura a Drive es lo más lento de todo el request (varios
@@ -590,17 +552,12 @@ function handleAporte(data) {
       celda(regaloId),
       celda(nombre, MAX_NOMBRE),
       esDeposito ? 0 : monto,
-      celda(notaTope + String(data.mensaje || ""), MAX_MENSAJE),
+      celda(String(data.mensaje || ""), MAX_MENSAJE),
       comprobanteUrl,
       new Date(), // fecha real, no texto ISO (ver upsertRespuesta)
     ]);
     var filaNueva = hojaAportes.getLastRow();
     hojaAportes.getRange(filaNueva, APORTE_COL_FECHA).setNumberFormat(FORMATO_FECHA);
-    // La casilla "verificado" nace desmarcada: el aporte no suma a la
-    // barra del regalo hasta que ustedes comprueben la transferencia.
-    if (conVerificacion(hojaAportes)) {
-      hojaAportes.getRange(filaNueva, APORTE_COL_VERIFICADO).insertCheckboxes().setValue(false);
-    }
   } finally {
     lock.releaseLock();
   }
@@ -701,10 +658,7 @@ function prepararHoja() {
 
   convertirFechasTexto(requireSheet(SHEET_RESPUESTAS), [5, 6]);
   var aportes = getSheet(SHEET_APORTES);
-  if (aportes) {
-    convertirFechasTexto(aportes, [APORTE_COL_FECHA]);
-    columnaVerificado(aportes);
-  }
+  if (aportes) convertirFechasTexto(aportes, [APORTE_COL_FECHA]);
 
   var F = adaptadorDeFormulas(ss);
   var colEstado = columnasDeSeguimiento(requireSheet(SHEET_INVITADOS), F);
@@ -744,30 +698,6 @@ function adaptadorDeFormulas(ss) {
     }
     return out;
   };
-}
-
-// La columna G "verificado" de Aportes, con casillas. Las filas que ya
-// existían nacen MARCADAS: antes de este cambio todas sumaban, y así
-// ninguna barra cambia de golpe. Desmarquen las que sean de prueba (o las
-// que no correspondan a una transferencia real) y dejan de sumar.
-// Si la columna ya existe, no se toca: las marcas son de ustedes.
-function columnaVerificado(sheet) {
-  if (conVerificacion(sheet)) return;
-  if (sheet.getMaxColumns() < APORTE_COL_VERIFICADO) {
-    sheet.insertColumnsAfter(sheet.getMaxColumns(), APORTE_COL_VERIFICADO - sheet.getMaxColumns());
-  }
-  var enc = sheet.getRange(1, APORTE_COL_VERIFICADO);
-  if (String(enc.getValue()).trim() !== "") {
-    throw new Error("La columna G de Aportes ya tiene datos. Muévanlos a otra columna y vuelvan a correr prepararHoja.");
-  }
-  enc.setValue("verificado").setFontWeight("bold");
-  var ultima = sheet.getLastRow();
-  if (ultima >= 2) {
-    var rango = sheet.getRange(2, APORTE_COL_VERIFICADO, ultima - 1, 1);
-    rango.insertCheckboxes();
-    rango.setValues(rango.getValues().map(function () { return [true]; }));
-  }
-  invalidarCacheRegalos();
 }
 
 function convertirFechasTexto(sheet, columnas) {
@@ -912,8 +842,7 @@ function hojaResumen(ss, E, F) {
     ["Días para el cierre (30 oct)", '=MAX(0, DATE(2026, 10, 30) - TODAY())'],
     ["", ""],
     ["Regalos", ""],
-    ["Aportado y verificado (S/)", '=SUMIFS(Aportes!C2:C, Aportes!A2:A, "<>deposito", Aportes!G2:G, TRUE)'],
-    ["Por verificar (S/)", '=SUMIFS(Aportes!C2:C, Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>", Aportes!G2:G, FALSE)'],
+    ["Aportado a regalos (S/)", '=SUMIFS(Aportes!C2:C, Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>")'],
     ["Aportes a regalos", '=COUNTIFS(Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>")'],
     ["Avisos de «Ya transferí»", '=COUNTIF(Aportes!A2:A, "deposito")'],
   ];
@@ -922,7 +851,7 @@ function hojaResumen(ss, E, F) {
   sheet.getRange(1, 1, filas.length, 1).setValues(filas.map(function (f) { return [f[0]]; }));
   sheet.getRange(1, 2, filas.length, 1).setFormulas(filas.map(function (f) { return [F(f[1])]; }));
   sheet.getRange("B8").setNumberFormat("0%");
-  sheet.getRange("B13:B14").setNumberFormat("#,##0");
+  sheet.getRange("B13").setNumberFormat("#,##0");
   [1, 12].forEach(function (f) { sheet.getRange(f, 1).setFontWeight("bold").setFontSize(12); });
   sheet.setColumnWidth(1, 240);
   sheet.setColumnWidth(2, 110);
@@ -937,7 +866,7 @@ function hojaResumen(ss, E, F) {
 //     nombre, y los que avisaron que no van;
 //   - totales de confirmación: confirmados, personas, no asisten y
 //     pendientes (este último solo como número);
-//   - regalos: montos totales verificados y por verificar, lo nuevo desde
+//   - regalos: monto total aportado, lo nuevo desde
 //     el último resumen, y los avisos de "Ya transferí".
 //
 // Para activarlo: Extensiones > Apps Script > elegir "activarResumen" >
@@ -1024,19 +953,17 @@ function mandarResumen(moverFecha) {
 
   // — regalos —
   var ap = getSheet(SHEET_APORTES);
-  var verificado = 0, porVerificar = 0, nPorVerificar = 0, nuevoMonto = 0, nuevosAportes = 0;
+  var aportado = 0, nuevoMonto = 0, nuevosAportes = 0;
   var avisosNuevos = 0, avisosTotal = 0;
   if (ap && ap.getLastRow() >= 2) {
-    var conCasilla = conVerificacion(ap);
-    var filasAp = ap.getRange(2, 1, ap.getLastRow() - 1, Math.max(APORTE_COL_FECHA, conCasilla ? APORTE_COL_VERIFICADO : 0)).getValues();
+    var filasAp = ap.getRange(2, 1, ap.getLastRow() - 1, APORTE_COL_FECHA).getValues();
     filasAp.forEach(function (r) {
       var id = String(r[0]).trim();
       if (!id) return;
       var nuevo = fechaDe(r[APORTE_COL_FECHA - 1]) > desde;
       if (id === APORTE_DEPOSITO) { avisosTotal++; if (nuevo) avisosNuevos++; return; }
       var monto = Number(r[2]) || 0;
-      var ok = !conCasilla || r[APORTE_COL_VERIFICADO - 1] === true;
-      if (ok) verificado += monto; else { porVerificar += monto; nPorVerificar++; }
+      aportado += monto;
       if (nuevo) { nuevosAportes++; nuevoMonto += monto; }
     });
   }
@@ -1064,8 +991,7 @@ function mandarResumen(moverFecha) {
     "No asisten: <b>" + noAsisten + "</b><br>" +
     "Pendientes: <b>" + pendientes + "</b> de " + invitaciones + " (" + leyeron + " leyeron el link, " + (pendientes - leyeron) + " no lo abrieron)</p>" +
     "<h3 style=\"margin:18px 0 6px\">Regalos</h3>" +
-    "<p style=\"margin:0\">Total verificado: <b>" + soles(verificado) + "</b><br>" +
-    "Por verificar: <b>" + soles(porVerificar) + "</b>" + (nPorVerificar ? " (" + nPorVerificar + (nPorVerificar === 1 ? " aporte" : " aportes") + "; márquenlos en Aportes, columna G)" : "") + "<br>" +
+    "<p style=\"margin:0\">Total aportado: <b>" + soles(aportado) + "</b><br>" +
     "Nuevo " + desdeTxt + ": <b>" + soles(nuevoMonto) + "</b> en " + nuevosAportes + (nuevosAportes === 1 ? " aporte" : " aportes") + "<br>" +
     "Avisos de «Ya transferí»: " + avisosNuevos + (avisosNuevos === 1 ? " nuevo, " : " nuevos, ") + avisosTotal + " en total</p>" +
     "<p style=\"margin:22px 0 0;color:#777;font-size:13px\">La hoja completa: <a href=\"" + ss.getUrl() + "\">" + escaparHtml(ss.getName()) + "</a></p>" +
@@ -1082,8 +1008,8 @@ function mandarResumen(moverFecha) {
     subject: "Boda A&K · resumen del " + fechaLarga(ahora) + " · " + confirmados + " confirmados, " + pendientes + " pendientes",
     htmlBody: html,
     body: "Resumen de la boda (" + fechaLarga(ahora) + "). Confirmados: " + confirmados + " (" + personas +
-      " personas). No asisten: " + noAsisten + ". Pendientes: " + pendientes + ". Regalos verificados: " +
-      soles(verificado) + ", por verificar: " + soles(porVerificar) + ".",
+      " personas). No asisten: " + noAsisten + ". Pendientes: " + pendientes + ". Regalos: " +
+      soles(aportado) + " aportados.",
   });
   if (moverFecha) props.setProperty(PROP_ULTIMO_RESUMEN, String(ahora.getTime()));
 }

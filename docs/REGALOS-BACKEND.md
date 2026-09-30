@@ -95,16 +95,9 @@ window.WEDDING.rsvp.apiUrl = "http://localhost:5177/api/rsvp";
   el mismo segundo (ambos aportes se guardan, se suman igual) — para el
   tamaño de una lista de invitados de boda es un riesgo aceptable.
 
-## Verificación de aportes (columna G de Aportes)
+## Aportes: suman al instante
 
-Cada aviso de aporte entra con la casilla **verificado** (columna G) desmarcada y se muestra en la
-página como "por confirmar" (tramo rayado de la barra). Solo suma a "reunidos" —y solo cuenta para
-marcar un regalo como completo— cuando ustedes marcan la casilla después de ver la transferencia.
-
-- La columna la crea `prepararHoja` (ver RSVP-BACKEND.md). Las filas que ya existían nacen
-  **marcadas**, para que ninguna barra cambie de golpe: desmarquen las de prueba.
-- Mientras la columna no exista, todo cuenta como verificado, como antes.
-- **Tope:** si alguien avisa más de lo que falta (según lo verificado), se registra solo lo que
-  falta y el monto que indicó queda anotado al inicio del mensaje. No se rechaza, porque el aviso
-  llega después de transferir.
-- El Resumen muestra "Aportado y verificado" y "Por verificar" por separado.
+Cada aviso de aporte suma a la barra del regalo en cuanto llega, sin verificación ni tope. Hubo una
+versión con casilla "verificado" (columna G de Aportes) y tope por lo que faltaba; se quitaron a pedido
+de los novios: si alguien avisa antes de depositar o aporta de más, el depósito llega igual. La
+columna G, si quedó en la hoja, ya no se usa y se puede borrar.
