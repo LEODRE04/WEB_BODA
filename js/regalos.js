@@ -29,6 +29,61 @@
     initCopyButtons();
     initGiftRegistry(guestPromise);
     initGiftIntro();
+    initMusica();
+  }
+
+  // — música que sigue desde la invitación —
+  // La misma canción y el mismo botón que en index.html. Solo aparece si
+  // en esta visita la música ya se escuchó en la invitación (o si la
+  // pausaron): entrar directo a la mesa de regalos no pone música sola.
+  // Al volver a la invitación, site.js la retoma igual.
+  function initMusica() {
+    var audio = document.querySelector("#bg-music");
+    var btn = document.querySelector("#music-toggle");
+    if (!audio || !btn || !window.Efectos) return;
+    var estado = window.Efectos.musica.estado();
+    if (!estado) return;
+
+    var iconPlaying = btn.querySelector(".icon-playing");
+    var iconPaused = btn.querySelector(".icon-paused");
+    var label = btn.querySelector("#music-toggle-text");
+    var revealTimer = null;
+    function ui(sonando) {
+      if (iconPlaying) iconPlaying.toggleAttribute("hidden", !sonando);
+      if (iconPaused) iconPaused.toggleAttribute("hidden", sonando);
+      var texto = sonando ? "Pausar música" : "Reanudar música";
+      btn.setAttribute("aria-pressed", String(sonando));
+      btn.setAttribute("aria-label", texto);
+      if (label) label.textContent = texto;
+      btn.classList.add("is-revealed");
+      clearTimeout(revealTimer);
+      revealTimer = setTimeout(function () { btn.classList.remove("is-revealed"); }, 1800);
+    }
+
+    btn.hidden = false;
+    ui(false);
+    btn.addEventListener("click", function () {
+      if (audio.paused) {
+        audio.play().then(function () { ui(true); window.Efectos.musica.marcar(true); }).catch(function () {});
+      } else {
+        audio.pause();
+        ui(false);
+        window.Efectos.musica.marcar(false);
+      }
+    });
+    window.Efectos.musica.continuar(audio, function () { ui(true); });
+
+    // Igual que en la invitación: se pausa sola al salir de la pestaña y
+    // vuelve al regresar, solo si fue ella la que pausó.
+    var pausadaSola = false;
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        if (!audio.paused) { audio.pause(); pausadaSola = true; ui(false); }
+      } else if (pausadaSola) {
+        pausadaSola = false;
+        audio.play().then(function () { ui(true); }).catch(function () {});
+      }
+    });
   }
 
   // — modal "Cómo funciona la lista": se muestra la primera vez y nunca

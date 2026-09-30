@@ -78,6 +78,8 @@
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
     initRsvpBar(codigo, guestPromise);
+    // Las tarjetas de cada sección entran al llegar a la pantalla.
+    if (window.Efectos) window.Efectos.revelar("main .envelope-card, main .prayer-card");
     initGiftListLink(codigo);
     initTransferencia(guestPromise);
   }
@@ -287,6 +289,7 @@
     if (!btn) return;
     btn.addEventListener("click", function () {
       if (gate.classList.contains("is-opening") || gate.dataset.abriendo) return; // evita doble click
+      if (window.Efectos) window.Efectos.sonido.desbloquear(); // el sonido de papel necesita un toque
       gate.dataset.abriendo = "1";
       // Si llegó con un link a una sección (o quedó scrolleado de antes),
       // que al abrir el sobre siempre arranque desde arriba.
@@ -301,6 +304,7 @@
 
     function abrirSobre() {
       gate.classList.add("is-opening");
+      if (window.Efectos) window.Efectos.sonido.papel();
 
       // Tres tiempos, encadenados con los de css/theme-elegante.css:
       //   0ms    se levanta la solapa y la hoja empieza a salir
@@ -327,6 +331,12 @@
           gate.style.setProperty("--letter-scale", Math.ceil(escala * 1.15));
         }
         gate.classList.add("is-unfolding");
+        // Ráfaga de pétalos desde el sobre mientras la hoja crece.
+        var env = gate.querySelector(".envelope");
+        if (env && window.Efectos) {
+          var re = env.getBoundingClientRect();
+          window.Efectos.rafaga(re.left + re.width / 2, re.top + re.height / 3);
+        }
       }, 900);
       setTimeout(function () { gate.classList.add("is-open"); }, 1750);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);
@@ -653,12 +663,18 @@
       revealBriefly();
     }
 
+    // Música que sigue entre páginas (js/efectos.js): se anota si el
+    // invitado la dejó sonando o la pausó, para que la mesa de regalos (y
+    // la vuelta a la invitación) la retomen igual.
+    var marcarMusica = function (sonando) { if (window.Efectos) window.Efectos.musica.marcar(sonando); };
+
     btn.addEventListener("click", function () {
       if (audio.paused) {
-        audio.play().then(function () { setPlayingUI(true); }).catch(function () {});
+        audio.play().then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () {});
       } else {
         audio.pause();
         setPlayingUI(false);
+        marcarMusica(false);
       }
     });
 
@@ -667,8 +683,23 @@
     if (openBtn) {
       openBtn.addEventListener("click", function () {
         btn.hidden = false;
-        audio.play().then(function () { setPlayingUI(true); }).catch(function () { setPlayingUI(false); });
+        audio.play().then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () { setPlayingUI(false); });
       });
+    }
+
+    // Volviendo de la mesa de regalos (o recargando), el sobre ya no se
+    // muestra y nadie toca "abrir": si la música venía sonando, se retoma.
+    var sobreYaAbierto = false;
+    try { sobreYaAbierto = sessionStorage.getItem("envelope_opened") === "1"; } catch (e) {}
+    if (sobreYaAbierto && window.Efectos) {
+      var estado = window.Efectos.musica.estado();
+      if (estado) {
+        btn.hidden = false;
+        // En pausa hasta que de verdad suene: el navegador puede esperar al
+        // primer toque del invitado para dejarla sonar.
+        setPlayingUI(false);
+        window.Efectos.musica.continuar(audio, function () { setPlayingUI(true); });
+      }
     }
 
     // Pausa sola al salir de la pestaña (cambiar de pestaña, minimizar) o del
@@ -876,6 +907,8 @@
       }
 
       abrirDialogo(modal);
+      // Si va: una lluvia breve de pétalos detrás de la tarjeta.
+      if (attending && window.Efectos) window.Efectos.lluvia(modal);
     }
     function close() {
       modal.classList.remove("is-open");

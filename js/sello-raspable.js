@@ -351,6 +351,8 @@
       activo = punto(e);
       recorrido = 0;
       if (!tocado) { tocado = true; raiz.classList.add("is-touched"); }
+      // el roce del lacre necesita un toque para poder sonar (js/efectos.js)
+      if (window.Efectos) window.Efectos.sonido.desbloquear();
       if (hayLacre(activo)) soltarMigas(activo, 3, 1);
       raspar(activo, activo);
     });
@@ -359,10 +361,21 @@
       var p = punto(e);
       var d = Math.hypot(p.x - activo.x, p.y - activo.y);
       if (d < 1) return;
-      var habia = hayLacre(p);
+      // "¿Hay lacre?" se mira un poco por delante del dedo, en la dirección
+      // en que se mueve: el punto exacto ya lo borró el trazo anterior (el
+      // pincel es más ancho que lo que avanza un dedo entre dos eventos), y
+      // con movimientos lentos las migas y el sonido casi no salían.
+      var adelante = {
+        x: p.x + ((p.x - activo.x) / d) * PINCEL * 0.8,
+        y: p.y + ((p.y - activo.y) / d) * PINCEL * 0.8,
+      };
+      var habia = hayLacre(adelante);
       raspar(activo, p);
       recorrido += d;
-      if (habia) soltarMigas(p, Math.min(4, 1 + (d / 8) | 0), 1);
+      if (habia) {
+        soltarMigas(p, Math.min(4, 1 + (d / 8) | 0), 1);
+        if (window.Efectos) window.Efectos.sonido.roce();
+      }
       activo = p;
       var ahora = performance.now();
       if (ahora - ultimaMedida > 90) { ultimaMedida = ahora; medir(); }

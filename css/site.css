@@ -2074,3 +2074,32 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   /* el ramo no se sale por el borde de la pantalla */
   .rsvp-thanks-dialog::before { left: -8px; top: -24px; width: 112px; height: 76px; }
 }
+
+/* — efectos (js/efectos.js) — */
+/* Pétalos de ráfaga y de lluvia: la misma forma y color que .petal. */
+.efecto-capa { pointer-events: none; }
+.efecto-fija { position: fixed; inset: 0; z-index: 130; overflow: hidden; }
+.efecto-lluvia { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.efecto-petalo {
+  position: absolute; width: var(--tam, 12px); height: var(--tam, 12px);
+  margin: calc(var(--tam, 12px) / -2) 0 0 calc(var(--tam, 12px) / -2);
+  background: linear-gradient(135deg, var(--color-accent-100), var(--color-accent-300) 55%, var(--color-accent-400));
+  border-radius: 100% 0 100% 0;
+  box-shadow: 0 1px 3px color-mix(in srgb, #2f4429 14%, transparent);
+  opacity: 0;
+  animation: efecto-petalo var(--dur, 1.5s) cubic-bezier(.2, .7, .4, 1) var(--retraso, 0s) forwards;
+}
+@keyframes efecto-petalo {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(.6); }
+  10% { opacity: 1; }
+  45% { transform: translate(calc(var(--dx) * .8), var(--dy)) rotate(calc(var(--giro) * .5)) scale(1); }
+  80% { opacity: .9; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + var(--caida))) rotate(var(--giro)) scale(.9); }
+}
+/* la tarjeta del diálogo queda por delante de su lluvia */
+.rsvp-thanks .dialog { z-index: 1; }
+
+/* Secciones que aparecen al bajar: la clase .revelar la pone el JS, así
+   que sin JS todo se ve desde el principio. */
+.revelar { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+.revelar.is-visible { opacity: 1; transform: none; }
