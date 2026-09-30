@@ -22,54 +22,91 @@
     host.appendChild(c);
     return c;
   }
+  // Cuatro variantes, para que no sea una nube uniforme de un solo tono:
+  // salvia medio, verde hondo, arena y pétalo blanco con borde verde.
+  var VARIANTES = ["ep-salvia", "ep-hondo", "ep-arena", "ep-blanco", "ep-salvia", "ep-hondo"];
   function petalo(c, css) {
     var p = document.createElement("span");
-    p.className = "efecto-petalo";
+    p.className = "efecto-petalo " + VARIANTES[(Math.random() * VARIANTES.length) | 0];
     Object.keys(css).forEach(function (k) { p.style.setProperty(k, css[k]); });
     c.appendChild(p);
   }
 
-  // Ráfaga desde (x, y) en la pantalla: salen hacia afuera y hacia arriba,
-  // giran y caen, en poco más de un segundo.
+  // Ráfaga desde (x, y) en la pantalla (al abrir el sobre): un abanico
+  // amplio hacia arriba que después cae sobre la invitación que aparece,
+  // durante unos 3 s. Pétalos grandes y de varios tonos: con los verdes
+  // más claros y 1 s de duración se perdían contra el fondo.
   function rafaga(x, y, cantidad) {
     if (quieto) return;
     var c = capa(document.body, "efecto-fija");
-    var n = cantidad || (window.innerWidth < 640 ? 22 : 32);
+    var ancho = window.innerWidth, alto = window.innerHeight;
+    var n = cantidad || (ancho < 640 ? 46 : 70);
     for (var i = 0; i < n; i++) {
-      var ang = rnd(-Math.PI, 0);          // hacia arriba, en abanico
-      var dist = rnd(120, Math.max(220, window.innerWidth * 0.45));
+      var ang = rnd(-Math.PI * 0.95, -Math.PI * 0.05);
+      var dist = rnd(ancho * 0.25, ancho * 0.6);
       petalo(c, {
         left: x + "px", top: y + "px",
         "--dx": (Math.cos(ang) * dist).toFixed(0) + "px",
-        "--dy": (Math.sin(ang) * dist * 0.8).toFixed(0) + "px",
-        "--caida": rnd(160, 320).toFixed(0) + "px",
-        "--giro": rnd(-540, 540).toFixed(0) + "deg",
-        "--tam": rnd(9, 17).toFixed(1) + "px",
-        "--dur": rnd(1.2, 1.9).toFixed(2) + "s",
-        "--retraso": rnd(0, .15).toFixed(2) + "s",
+        "--dy": (Math.sin(ang) * rnd(alto * 0.25, alto * 0.45)).toFixed(0) + "px",
+        "--caida": rnd(alto * 0.55, alto * 0.95).toFixed(0) + "px",
+        "--giro": rnd(-720, 720).toFixed(0) + "deg",
+        "--tam": rnd(14, 26).toFixed(1) + "px",
+        "--dur": rnd(2.4, 3.6).toFixed(2) + "s",
+        "--retraso": rnd(0, .35).toFixed(2) + "s",
       });
     }
-    setTimeout(function () { c.remove(); }, 2400);
+    setTimeout(function () { c.remove(); }, 4400);
   }
 
-  // Lluvia breve sobre un elemento (el fondo de un diálogo, por ejemplo).
-  function lluvia(host, cantidad) {
-    if (quieto || !host) return;
-    var c = capa(host, "efecto-lluvia");
-    var n = cantidad || 26;
+  // Lluvia sobre toda la pantalla, por delante de todo (también de un
+  // diálogo abierto): pétalos que caen desde arriba balanceándose.
+  function lluvia(cantidad, duracionMax) {
+    if (quieto) return;
+    var c = capa(document.body, "efecto-fija efecto-encima");
+    var n = cantidad || 22;
+    var alto = window.innerHeight;
     for (var i = 0; i < n; i++) {
       petalo(c, {
-        left: rnd(0, 100).toFixed(1) + "%", top: "-24px",
-        "--dx": rnd(-60, 60).toFixed(0) + "px",
+        left: rnd(0, 100).toFixed(1) + "%", top: "-30px",
+        "--dx": rnd(-80, 80).toFixed(0) + "px",
         "--dy": "0px",
-        "--caida": (window.innerHeight + 40) + "px",
-        "--giro": rnd(-360, 360).toFixed(0) + "deg",
-        "--tam": rnd(9, 16).toFixed(1) + "px",
-        "--dur": rnd(1.8, 2.8).toFixed(2) + "s",
-        "--retraso": rnd(0, .8).toFixed(2) + "s",
+        "--caida": (alto + 60) + "px",
+        "--giro": rnd(-480, 480).toFixed(0) + "deg",
+        "--tam": rnd(13, 22).toFixed(1) + "px",
+        "--dur": rnd(2.6, 3.8).toFixed(2) + "s",
+        "--retraso": rnd(0, duracionMax || 1.2).toFixed(2) + "s",
       });
     }
+    setTimeout(function () { c.remove(); }, 5600);
+  }
+
+  // Estallido desde las esquinas de un elemento (al confirmar que vas): el
+  // ramo de la esquina de la tarjeta "suelta" los pétalos, que cruzan por
+  // delante y caen; después sigue una lluvia breve.
+  function celebrar(el) {
+    if (quieto || !el) return;
+    var r = el.getBoundingClientRect();
+    var c = capa(document.body, "efecto-fija efecto-encima");
+    var alto = window.innerHeight;
+    [[r.left + 30, r.top + 20, 1], [r.right - 20, r.top + 10, -1]].forEach(function (o, k) {
+      var n = k === 0 ? 30 : 18;   // más desde el ramo de la izquierda
+      for (var i = 0; i < n; i++) {
+        var ang = rnd(-Math.PI * 0.85, -Math.PI * 0.15);
+        var dist = rnd(90, r.width * 0.9);
+        petalo(c, {
+          left: o[0] + "px", top: o[1] + "px",
+          "--dx": (Math.abs(Math.cos(ang)) * dist * o[2]).toFixed(0) + "px",
+          "--dy": (Math.sin(ang) * rnd(80, 200)).toFixed(0) + "px",
+          "--caida": rnd(alto * 0.5, alto * 0.85).toFixed(0) + "px",
+          "--giro": rnd(-600, 600).toFixed(0) + "deg",
+          "--tam": rnd(13, 24).toFixed(1) + "px",
+          "--dur": rnd(2.2, 3.2).toFixed(2) + "s",
+          "--retraso": rnd(0, .25).toFixed(2) + "s",
+        });
+      }
+    });
     setTimeout(function () { c.remove(); }, 4000);
+    setTimeout(function () { lluvia(18, 1.4); }, 500);
   }
 
   // — sonidos de papel —
@@ -187,6 +224,7 @@
   window.Efectos = {
     rafaga: rafaga,
     lluvia: lluvia,
+    celebrar: celebrar,
     sonido: { desbloquear: desbloquear, roce: roce, papel: papel },
     revelar: revelar,
     musica: { marcar: marcarMusica, estado: estadoMusica, continuar: continuarMusica },

@@ -907,8 +907,13 @@
       }
 
       abrirDialogo(modal);
-      // Si va: una lluvia breve de pétalos detrás de la tarjeta.
-      if (attending && window.Efectos) window.Efectos.lluvia(modal);
+      // Si va: el ramo de la tarjeta suelta pétalos por delante, y sigue
+      // una lluvia breve. Un instante después de abrirse, para que la
+      // tarjeta ya esté en su lugar.
+      if (attending && window.Efectos) {
+        var tarjeta = modal.querySelector(".rsvp-thanks-dialog");
+        setTimeout(function () { window.Efectos.celebrar(tarjeta); }, 250);
+      }
     }
     function close() {
       modal.classList.remove("is-open");

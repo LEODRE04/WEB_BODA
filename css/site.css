@@ -2080,20 +2080,28 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
 .efecto-capa { pointer-events: none; }
 .efecto-fija { position: fixed; inset: 0; z-index: 130; overflow: hidden; }
 .efecto-lluvia { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.efecto-encima { z-index: 200; }
 .efecto-petalo {
   position: absolute; width: var(--tam, 12px); height: var(--tam, 12px);
   margin: calc(var(--tam, 12px) / -2) 0 0 calc(var(--tam, 12px) / -2);
-  background: linear-gradient(135deg, var(--color-accent-100), var(--color-accent-300) 55%, var(--color-accent-400));
   border-radius: 100% 0 100% 0;
-  box-shadow: 0 1px 3px color-mix(in srgb, #2f4429 14%, transparent);
+  box-shadow: 0 2px 5px color-mix(in srgb, #2f4429 22%, transparent);
   opacity: 0;
-  animation: efecto-petalo var(--dur, 1.5s) cubic-bezier(.2, .7, .4, 1) var(--retraso, 0s) forwards;
+  animation: efecto-petalo var(--dur, 1.5s) linear var(--retraso, 0s) forwards;
 }
+/* Variantes con más cuerpo que los pétalos del fondo: con los verdes más
+   claros se perdían contra el blanco y el crema. */
+.ep-salvia { background: linear-gradient(135deg, var(--color-accent-200), var(--color-accent-400) 55%, var(--color-accent-500)); }
+.ep-hondo { background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-600) 60%, var(--color-accent-700)); }
+.ep-arena { background: linear-gradient(135deg, var(--color-neutral-500), var(--color-neutral-600) 55%, var(--color-neutral-700)); }
+.ep-blanco { background: linear-gradient(135deg, #fff, var(--color-neutral-300)); border: 1px solid var(--color-accent-400); }
+/* Sube rápido frenando (hasta el 35%) y cae acelerando, como con
+   gravedad: con una sola curva de frenado caía cada vez más lento. */
 @keyframes efecto-petalo {
-  0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(.6); }
+  0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(.6); animation-timing-function: cubic-bezier(.15, .75, .35, 1); }
   10% { opacity: 1; }
-  45% { transform: translate(calc(var(--dx) * .8), var(--dy)) rotate(calc(var(--giro) * .5)) scale(1); }
-  80% { opacity: .9; }
+  35% { transform: translate(calc(var(--dx) * .75), var(--dy)) rotate(calc(var(--giro) * .4)) scale(1); animation-timing-function: cubic-bezier(.45, 0, .75, .7); }
+  85% { opacity: .95; }
   100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + var(--caida))) rotate(var(--giro)) scale(.9); }
 }
 /* la tarjeta del diálogo queda por delante de su lluvia */
