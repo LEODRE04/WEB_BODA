@@ -331,12 +331,8 @@
           gate.style.setProperty("--letter-scale", Math.ceil(escala * 1.15));
         }
         gate.classList.add("is-unfolding");
-        // Ráfaga de pétalos desde el sobre mientras la hoja crece.
-        var env = gate.querySelector(".envelope");
-        if (env && window.Efectos) {
-          var re = env.getBoundingClientRect();
-          window.Efectos.rafaga(re.left + re.width / 2, re.top + re.height / 3);
-        }
+        // Cañón de confeti a toda la pantalla mientras la hoja crece.
+        if (window.Efectos) window.Efectos.confeti();
       }, 900);
       setTimeout(function () { gate.classList.add("is-open"); }, 1750);
       setTimeout(function () { gate.hidden = true; window.scrollTo(0, 0); }, 2150);

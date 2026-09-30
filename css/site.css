@@ -2111,3 +2111,46 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
    que sin JS todo se ve desde el principio. */
 .revelar { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
 .revelar.is-visible { opacity: 1; transform: none; }
+
+/* — cañón de confeti (al abrir el sobre) —
+   La pieza de afuera hace la trayectoria (sube frenando y cae acelerando,
+   derivando de lado) y la de adentro gira en 3D sin parar: así se ve como
+   papel que revolotea y no como un cuadrito que se desliza. */
+.efecto-confeti {
+  position: absolute; width: 0; height: 0; opacity: 0;
+  animation: efecto-confeti var(--dur, 3s) linear var(--retraso, 0s) forwards;
+}
+.cf-papel {
+  position: absolute; display: block; left: 0; top: 0;
+  transform-style: preserve-3d;
+  animation: cf-giro var(--giro-dur, .8s) linear infinite;
+}
+.cf-tira { width: 7px; height: 15px; margin: -7px 0 0 -3px; border-radius: 2px; }
+.cf-cuadro { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 2px; }
+.cf-circulo { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; }
+.cf-salvia { background: var(--color-accent-400); }
+.cf-hondo { background: var(--color-accent-600); }
+.cf-oscuro { background: var(--color-accent-800); }
+.cf-arena { background: var(--color-neutral-600); }
+.cf-arena-osc { background: var(--color-neutral-700); }
+.cf-claro { background: var(--color-accent-200); box-shadow: inset 0 0 0 1px var(--color-accent-300); }
+.cf-blanco { background: #fff; box-shadow: inset 0 0 0 1px var(--color-neutral-600); }
+@keyframes efecto-confeti {
+  0% { opacity: 1; transform: translate(0, 0); animation-timing-function: cubic-bezier(.1, .8, .3, 1); }
+  35% { transform: translate(calc(var(--dx) * .7), var(--dy)); animation-timing-function: cubic-bezier(.5, 0, .8, .6); }
+  88% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + var(--caida))); }
+}
+@keyframes cf-giro {
+  from { transform: rotate3d(var(--eje), 0deg) rotate(0deg); }
+  to { transform: rotate3d(var(--eje), 360deg) rotate(180deg); }
+}
+/* el que cae desde arriba no sube: cae derecho, meciéndose de lado */
+.efecto-confeti.cf-cae { animation-name: efecto-confeti-cae; animation-timing-function: cubic-bezier(.35, 0, .7, 1); }
+@keyframes efecto-confeti-cae {
+  0% { opacity: 1; transform: translate(0, 0); }
+  33% { transform: translate(calc(var(--dx) * .6), calc(var(--caida) * .3)); }
+  66% { transform: translate(calc(var(--dx) * -.3), calc(var(--caida) * .65)); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--caida)); }
+}

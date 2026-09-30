@@ -58,6 +58,67 @@
     setTimeout(function () { c.remove(); }, 4400);
   }
 
+  // — cañón de confeti (al abrir el sobre) —
+  // Dos cañones desde las esquinas de abajo disparan hacia arriba y hacia
+  // el centro, y medio segundo después cae confeti desde arriba a todo lo
+  // ancho: llena la pantalla entera, no un punto en el centro. Cada pieza
+  // tiene dos capas: la de afuera hace la trayectoria (CSS, subir y caer)
+  // y la de adentro gira en 3D, que es lo que hace que parezca papel.
+  var COLORES_CONFETI = ["cf-salvia", "cf-hondo", "cf-oscuro", "cf-arena", "cf-arena-osc", "cf-blanco", "cf-claro"];
+  function pieza(c, css, forma, extra) {
+    var p = document.createElement("span");
+    p.className = "efecto-confeti" + (extra ? " " + extra : "");
+    Object.keys(css).forEach(function (k) { p.style.setProperty(k, css[k]); });
+    var q = document.createElement("span");
+    q.className = "cf-papel " + forma + " " + COLORES_CONFETI[(Math.random() * COLORES_CONFETI.length) | 0];
+    q.style.setProperty("--giro-dur", rnd(0.45, 1.1).toFixed(2) + "s");
+    q.style.setProperty("--eje", rnd(-1, 1).toFixed(2) + "," + rnd(0.3, 1).toFixed(2) + "," + rnd(-0.5, 0.5).toFixed(2));
+    p.appendChild(q);
+    c.appendChild(p);
+  }
+  function forma() {
+    var r = Math.random();
+    return r < 0.6 ? "cf-tira" : r < 0.85 ? "cf-cuadro" : "cf-circulo";
+  }
+  function confeti() {
+    if (quieto) return;
+    var c = capa(document.body, "efecto-fija");
+    var ancho = window.innerWidth, alto = window.innerHeight;
+    var porCanon = ancho < 640 ? 55 : 85;
+    // los dos cañones, desde fuera de las esquinas inferiores
+    // Cada pieza apunta a un punto al azar a lo ancho de TODA la pantalla
+    // (su punto más alto), no a un rango fijo de distancia: con distancias
+    // fijas las dos ráfagas se cruzaban en el centro y se amontonaban ahí.
+    [[-10, 1], [ancho + 10, -1]].forEach(function (o) {
+      for (var i = 0; i < porCanon; i++) {
+        var subida = rnd(alto * 0.3, alto * 0.95);
+        var destino = rnd(ancho * 0.03, ancho * 0.97);   // x del punto más alto
+        var dx = (destino - o[0]) / 0.7;                  // la cima está al 70% del dx
+        pieza(c, {
+          left: o[0] + "px", top: (alto + 10) + "px",
+          "--dx": dx.toFixed(0) + "px",
+          "--dy": (-subida).toFixed(0) + "px",
+          "--caida": (subida + rnd(40, 160)).toFixed(0) + "px",
+          "--dur": rnd(2.6, 3.8).toFixed(2) + "s",
+          "--retraso": rnd(0, 0.25).toFixed(2) + "s",
+        }, forma());
+      }
+    });
+    // la lluvia desde arriba, pareja a todo lo ancho
+    var lluviaN = ancho < 640 ? 45 : 70;
+    for (var j = 0; j < lluviaN; j++) {
+      pieza(c, {
+        left: rnd(0, 100).toFixed(1) + "%", top: "-20px",
+        "--dx": rnd(-60, 60).toFixed(0) + "px",
+        "--dy": "0px",
+        "--caida": (alto + 60) + "px",
+        "--dur": rnd(2.8, 4.2).toFixed(2) + "s",
+        "--retraso": rnd(0.4, 1.4).toFixed(2) + "s",
+      }, forma(), "cf-cae");
+    }
+    setTimeout(function () { c.remove(); }, 6200);
+  }
+
   // Lluvia sobre toda la pantalla, por delante de todo (también de un
   // diálogo abierto): pétalos que caen desde arriba balanceándose.
   function lluvia(cantidad, duracionMax) {
@@ -225,6 +286,7 @@
     rafaga: rafaga,
     lluvia: lluvia,
     celebrar: celebrar,
+    confeti: confeti,
     sonido: { desbloquear: desbloquear, roce: roce, papel: papel },
     revelar: revelar,
     musica: { marcar: marcarMusica, estado: estadoMusica, continuar: continuarMusica },
