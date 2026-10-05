@@ -29,6 +29,8 @@
     initCopyButtons();
     initGiftRegistry(guestPromise);
     initGiftIntro();
+    var fotoGracias = document.querySelector(".gift-thanks-photo");
+    if (fotoGracias && window.Efectos) window.Efectos.esperarFoto(fotoGracias.querySelector("img"), fotoGracias);
     initMusica();
   }
 
@@ -534,6 +536,8 @@
           } else {
             photoWrap.appendChild(img);
           }
+          // skeleton mientras baja la foto (son lazy: llegan al bajar)
+          if (window.Efectos) window.Efectos.esperarFoto(img, photoWrap);
         } else {
           photoWrap.className = "gift-card-photo is-placeholder";
           var placeholder = document.createElement("span");

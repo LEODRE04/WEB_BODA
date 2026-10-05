@@ -2344,3 +2344,62 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   .dresscode.is-bailando * { animation: none !important; }
   .dresscode-figure { cursor: default; }
 }
+
+/* — skeletons de carga —
+   Un mismo brillo para todo lo que tarda en llegar: fotos (.photo, fotos
+   de los regalos), mapas de Google, el saludo con el nombre del invitado
+   y la línea "Para: … · N pases" del RSVP. Arena sobre arena, como el
+   resto de la paleta; con movimiento reducido queda quieto.
+   La lista de regalos entera tiene su propia animación (el regalo que se
+   envuelve), así que no lleva skeleton. */
+@keyframes skel-brillo { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+.skel,
+.photo.is-cargando,
+.gift-card-photo.is-cargando,
+.gift-thanks-photo.is-cargando,
+.map-skel,
+.rsvp-guest-banner.is-cargando::before {
+  background-color: var(--color-neutral-500);
+  background-image: linear-gradient(100deg,
+    transparent 30%, color-mix(in srgb, #fff 55%, transparent) 50%, transparent 70%);
+  background-size: 220% 100%;
+  animation: skel-brillo 1.5s ease-in-out infinite;
+}
+.skel { display: inline-block; vertical-align: middle; height: .9em; border-radius: 999px; }
+.skel-nombre { width: 8.5em; }
+.skel-num { width: 1.1em; }
+.photo.is-cargando .photo-label { visibility: hidden; }
+
+/* mapa: calles tenues y un pin que late encima del brillo */
+.map-embed { position: relative; }
+.map-skel {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  transition: opacity .4s ease;
+}
+.map-embed:not(.is-cargando) .map-skel { opacity: 0; pointer-events: none; }
+.map-skel-calles { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-skel-calles path {
+  fill: none; stroke: color-mix(in srgb, #fff 60%, transparent);
+  stroke-width: 9; stroke-linecap: round;
+}
+.map-skel-pin {
+  position: relative; width: 26px; height: 35px;
+  fill: var(--color-accent-600); animation: skel-pin 1.4s ease-in-out infinite;
+}
+.map-skel-pin circle { fill: var(--color-neutral-500); }
+@keyframes skel-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.map-skel-txt {
+  position: relative; font-size: 13px; letter-spacing: .08em;
+  color: var(--color-text-soft);
+}
+
+/* RSVP: la línea "Para: … · N pases" en barrita */
+.rsvp-guest-banner.is-cargando::before {
+  content: ""; display: block; width: min(15em, 70%); height: 1em; margin: .25em 0; border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel, .photo.is-cargando, .gift-card-photo.is-cargando, .gift-thanks-photo.is-cargando,
+  .map-skel, .rsvp-guest-banner.is-cargando::before, .map-skel-pin { animation: none; }
+}

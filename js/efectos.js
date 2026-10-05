@@ -282,7 +282,21 @@
     return true;
   }
 
+  // — skeleton de una foto —
+  // Mientras la <img> baja, su recuadro muestra un brillo que pasa (clase
+  // is-cargando, ver "skeletons de carga" en site.css); al terminar —bien
+  // o mal— se quita. Si ya estaba en caché ni se llega a ver.
+  function esperarFoto(img, recuadro) {
+    if (!img || !recuadro) return;
+    if (img.complete && img.naturalWidth > 0) return;
+    recuadro.classList.add("is-cargando");
+    function listo() { recuadro.classList.remove("is-cargando"); }
+    img.addEventListener("load", listo, { once: true });
+    img.addEventListener("error", listo, { once: true });
+  }
+
   window.Efectos = {
+    esperarFoto: esperarFoto,
     rafaga: rafaga,
     lluvia: lluvia,
     celebrar: celebrar,

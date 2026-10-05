@@ -583,6 +583,9 @@
   function initPhotoFallbacks() {
     document.querySelectorAll(".photo img").forEach(function (img) {
       var slot = img.closest(".photo");
+      // Skeleton mientras baja: sin esto, en datos móviles se veía un rato
+      // el marcador de desarrollo ("Foto de portada — coloca img/p3.jpg").
+      if (window.Efectos) window.Efectos.esperarFoto(img, slot);
       img.addEventListener("load", function () {
         if (slot) slot.classList.add("has-img");
       });
@@ -871,7 +874,30 @@
         iframe.title = "Mapa de " + (embed.getAttribute("data-maps-embed") === "recepcion" ? "la recepción" : "la ceremonia");
         iframe.referrerPolicy = "no-referrer-when-downgrade";
         embed.innerHTML = "";
+        // Skeleton del mapa: Google tarda 1-3 s en pintar (más en datos
+        // móviles) y mientras tanto el iframe es un recuadro en blanco.
+        // Va encima del iframe y se desvanece cuando este termina de
+        // cargar; a los 20 s se quita igual, por si "load" nunca llega.
+        var skel = document.createElement("div");
+        skel.className = "map-skel";
+        skel.setAttribute("aria-hidden", "true");
+        skel.innerHTML =
+          '<svg class="map-skel-calles" viewBox="0 0 300 250" preserveAspectRatio="xMidYMid slice">' +
+            '<path d="M-10 70 Q90 90 160 60 T320 80M-10 180 Q120 150 200 190 T320 170M70 -10 Q90 120 60 260M210 -10 Q190 110 240 260"/></svg>' +
+          '<svg class="map-skel-pin" viewBox="0 0 24 32"><path d="M12 0C5.4 0 0 5.2 0 11.7 0 20.5 12 32 12 32s12-11.5 12-20.3C24 5.2 18.6 0 12 0Z"/><circle cx="12" cy="11.5" r="4.5"/></svg>' +
+          '<span class="map-skel-txt">Cargando mapa</span>';
+        embed.classList.add("is-cargando");
+        embed.setAttribute("aria-busy", "true");
+        var quitarSkel = function () {
+          if (!embed.classList.contains("is-cargando")) return;
+          embed.classList.remove("is-cargando");
+          embed.removeAttribute("aria-busy");
+          setTimeout(function () { skel.remove(); }, 450);
+        };
+        iframe.addEventListener("load", quitarSkel);
+        setTimeout(quitarSkel, 20000);
         embed.appendChild(iframe);
+        embed.appendChild(skel);
       }
     });
     // querySelectorAll (no solo el primero): el botón de WhatsApp aparece
@@ -1086,7 +1112,24 @@
       bloquearSinLink();
     } else {
       codigoInput.value = codigo;
+      // Mientras se busca al invitado: en vez de mostrar los campos de
+      // nombre y pases (que casi siempre se esconden al llegar la
+      // respuesta, y saltaba todo), la línea "Para: … · N pases" en
+      // skeleton.
+      if (fields) fields.hidden = true;
+      banner.textContent = "";
+      banner.classList.add("is-cargando");
+      banner.setAttribute("aria-busy", "true");
+      banner.setAttribute("aria-label", "Buscando tu invitación");
+      banner.hidden = false;
+      var finCarga = function () {
+        banner.classList.remove("is-cargando");
+        banner.removeAttribute("aria-busy");
+        banner.removeAttribute("aria-label");
+      };
       guestPromise.then(function (guest) {
+        finCarga();
+        if (!guest) { banner.hidden = true; if (fields) fields.hidden = false; }
         // Sin respuesta de la API: no sabemos el nombre, así que quedan
         // los campos a la vista para escribirlo. El backend igual toma el
         // nombre de la hoja al guardar.
