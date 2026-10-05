@@ -78,6 +78,7 @@
     initEnvelopeGate(codigo, guestPromise);
     initRsvpForm(codigo, guestPromise, thanksModal);
     initRsvpBar(codigo, guestPromise);
+    initVals();
     // Las tarjetas de cada sección entran al llegar a la pantalla.
     if (window.Efectos) window.Efectos.revelar("main .envelope-card, main .prayer-card");
     initGiftListLink(codigo);
@@ -431,6 +432,39 @@
       clearTimeout(timer);
       if (nota) nota.remove();
     };
+  }
+
+  // — el vals del código de vestimenta —
+  // La primera vez que la sección se ve, un segundo y medio después, el
+  // vestido y el traje bailan (la animación está en site.css). Tocar
+  // cualquiera de los dos lo repite. Con "reducir movimiento" no baila.
+  function initVals() {
+    var pista = document.querySelector(".dresscode");
+    if (!pista) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var bailando = false;
+    function bailar() {
+      if (bailando) return;
+      bailando = true;
+      pista.classList.remove("is-bailando");
+      void pista.offsetWidth; // reinicia la animación si ya había bailado
+      pista.classList.add("is-bailando");
+    }
+    var traje = pista.querySelector(".dresscode-figure-suit");
+    if (traje) traje.addEventListener("animationend", function () {
+      bailando = false;
+      pista.classList.remove("is-bailando");
+    });
+    pista.querySelectorAll(".dresscode-figure").forEach(function (f) {
+      f.addEventListener("click", bailar);
+    });
+    if (!("IntersectionObserver" in window)) return;
+    var io = new IntersectionObserver(function (entradas) {
+      if (!entradas.some(function (e) { return e.isIntersecting; })) return;
+      io.disconnect();
+      setTimeout(bailar, 1500);
+    }, { threshold: 0.6 });
+    io.observe(pista);
   }
 
   // — la carga del sobre —

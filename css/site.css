@@ -2145,3 +2145,54 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   90% { opacity: 1; }
   100% { opacity: 0; transform: translate(var(--dx), var(--caida)); }
 }
+
+/* — el vals del código de vestimenta —
+   Cuando la sección llega a la pantalla (initVals en site.js), pasado un
+   segundo y medio, el vestido y el traje bailan un vals: dos compases de
+   3/4 balanceándose (bajan en el "uno", suben en el "dos" y el "tres"),
+   acercándose el uno al otro, y un compás en el que los dos dan una
+   vuelta entera, en sentidos opuestos. Terminan exactamente donde
+   empezaron. Todas las paradas usan la misma lista de transformaciones
+   para que el giro en 3D se interpole de verdad (si cambiara la lista, el
+   navegador lo convertiría en una matriz y una vuelta de 360° quedaría
+   en nada). Tocar las figuras lo repite. */
+.dresscode { perspective: 700px; }
+.dresscode-figure { transform-origin: 50% 96%; cursor: pointer; }
+.dresscode.is-bailando .dresscode-figure-dress { animation: vals-vestido 6s ease-in-out both; }
+.dresscode.is-bailando .dresscode-figure-suit { animation: vals-traje 6s ease-in-out both; }
+@keyframes vals-vestido {
+  0%   { transform: translate(0px, 0) rotate(0deg) rotateY(0deg); }
+  /* compás 1 */
+  6%   { transform: translate(8px, 3px) rotate(5deg) rotateY(0deg); }
+  12%  { transform: translate(15px, -6px) rotate(-5deg) rotateY(0deg); }
+  18%  { transform: translate(20px, -4px) rotate(-3deg) rotateY(0deg); }
+  /* compás 2 */
+  24%  { transform: translate(14px, 3px) rotate(5deg) rotateY(0deg); }
+  30%  { transform: translate(6px, -6px) rotate(8deg) rotateY(0deg); }
+  36%  { transform: translate(3px, -4px) rotate(5deg) rotateY(0deg); }
+  /* compás 3: la vuelta */
+  44%  { transform: translate(18px, 2px) rotate(0deg) rotateY(0deg); }
+  58%  { transform: translate(24px, -8px) rotate(0deg) rotateY(180deg); }
+  72%  { transform: translate(18px, -2px) rotate(0deg) rotateY(360deg); }
+  /* de vuelta a su lugar, con una pequeña reverencia */
+  84%  { transform: translate(6px, 2px) rotate(-7deg) rotateY(360deg); }
+  100% { transform: translate(0px, 0) rotate(0deg) rotateY(360deg); }
+}
+@keyframes vals-traje {
+  0%   { transform: translate(0px, 0) rotate(0deg) rotateY(0deg); }
+  6%   { transform: translate(-8px, 3px) rotate(-5deg) rotateY(0deg); }
+  12%  { transform: translate(-15px, -6px) rotate(5deg) rotateY(0deg); }
+  18%  { transform: translate(-20px, -4px) rotate(3deg) rotateY(0deg); }
+  24%  { transform: translate(-14px, 3px) rotate(-5deg) rotateY(0deg); }
+  30%  { transform: translate(-6px, -6px) rotate(-8deg) rotateY(0deg); }
+  36%  { transform: translate(-3px, -4px) rotate(-5deg) rotateY(0deg); }
+  44%  { transform: translate(-18px, 2px) rotate(0deg) rotateY(0deg); }
+  58%  { transform: translate(-24px, -8px) rotate(0deg) rotateY(-180deg); }
+  72%  { transform: translate(-18px, -2px) rotate(0deg) rotateY(-360deg); }
+  84%  { transform: translate(-6px, 2px) rotate(7deg) rotateY(-360deg); }
+  100% { transform: translate(0px, 0) rotate(0deg) rotateY(-360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dresscode.is-bailando .dresscode-figure { animation: none; }
+  .dresscode-figure { cursor: default; }
+}
