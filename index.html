@@ -31,11 +31,11 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610051640">
-<link rel="stylesheet" href="css/site.css?v=202610051640">
+<link rel="stylesheet" href="css/tokens.css?v=202610051653">
+<link rel="stylesheet" href="css/site.css?v=202610051653">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
      para volver al diseño anterior, borra esta línea nada más. -->
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610051640">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610051653">
 </head>
 <body>
 
@@ -494,11 +494,25 @@
       <div class="section-kicker dresscode-kicker">Código de vestimenta</div>
       <div class="dresscode">
         <svg class="dresscode-figure dresscode-figure-dress" viewBox="0 0 120 210" aria-hidden="true" focusable="false">
-          <!-- maniquí: pie, poste, cuello y hombros -->
-          <rect class="dc-stand" x="57" y="166" width="6" height="35" rx="1"/>
-          <ellipse class="dc-stand" cx="60" cy="202" rx="26" ry="5"/>
+          <!-- maniquí: pie, poste, cuello y hombros. El poste y el pie
+               (dc-soporte) se esconden mientras baila (ver initVals). -->
+          <rect class="dc-stand dc-soporte" x="57" y="166" width="6" height="35" rx="1"/>
+          <ellipse class="dc-stand dc-soporte" cx="60" cy="202" rx="26" ry="5"/>
+          <!-- piernas y zapatos para bailar: detrás de la falda, ocultos -->
+          <g class="dc-baile dc-pie dc-pie-a" style="transform-origin: 53px 160px">
+            <rect class="dc-form" x="50" y="150" width="7" height="46" rx="3.5"/>
+            <ellipse class="dc-zapato" cx="52" cy="198" rx="7" ry="3.4"/>
+          </g>
+          <g class="dc-baile dc-pie dc-pie-b" style="transform-origin: 66px 160px">
+            <rect class="dc-form" x="63" y="150" width="7" height="46" rx="3.5"/>
+            <ellipse class="dc-zapato" cx="68" cy="198" rx="7" ry="3.4"/>
+          </g>
           <rect class="dc-form" x="54" y="14" width="12" height="12" rx="3"/>
           <ellipse class="dc-stand" cx="60" cy="14" rx="7" ry="2.5"/>
+          <!-- cabeza lisa, sin facciones: aparece para bailar -->
+          <g class="dc-baile dc-cabeza dc-cabeza-d" style="transform-origin: 60px 13px">
+            <circle class="dc-form" cx="60" cy="2" r="10"/>
+          </g>
           <path class="dc-form" d="M43,26 Q60,20 77,26 Q84,34 82,46 L38,46 Q36,34 43,26Z"/>
           <!-- cuerpo del vestido, con tirantes y escote sencillo -->
           <path class="dc-dress" d="M41,40 Q50,33 60,42 Q70,33 79,40 Q82,60 76,80 L44,80 Q38,60 41,40Z"/>
@@ -510,6 +524,15 @@
           <path class="dc-dress" d="M44,82 L76,82 Q90,120 98,162 Q60,173 22,162 Q30,120 44,82Z"/>
           <path class="dc-fold-d" d="M52,86 Q46,124 40,164 M60,86 L60,168 M68,86 Q74,124 80,164"/>
           <path class="dc-dress-sh" d="M22,162 Q37,169 51,165 Q60,170 69,165 Q83,169 98,162 Q60,173 22,162Z"/>
+          <!-- brazos para bailar, girando desde el hombro: ocultos -->
+          <g class="dc-baile dc-brazo dc-brazo-d-ext" style="transform-origin: 38.5px 31px">
+            <rect class="dc-form" x="35" y="29" width="7" height="45" rx="3.5"/>
+            <circle class="dc-form" cx="38.5" cy="76" r="4"/>
+          </g>
+          <g class="dc-baile dc-brazo dc-brazo-d-int" style="transform-origin: 81.5px 31px">
+            <rect class="dc-form" x="78" y="29" width="7" height="45" rx="3.5"/>
+            <circle class="dc-form" cx="81.5" cy="76" r="4"/>
+          </g>
         </svg>
         <!-- Titular corto en manuscrita y el pedido en letra normal. Antes
              la frase entera iba en manuscrita a 25px, y una oración larga
@@ -519,19 +542,29 @@
           <p class="dresscode-text">Queremos que estés cómodo, así que puedes elegir entre un look semi elegante o elegante.</p>
         </div>
         <svg class="dresscode-figure dresscode-figure-suit" viewBox="0 0 120 210" aria-hidden="true" focusable="false">
-          <!-- maniquí: pie, poste y cuello -->
-          <rect class="dc-stand" x="57" y="190" width="6" height="11" rx="1"/>
-          <ellipse class="dc-stand" cx="60" cy="202" rx="26" ry="5"/>
+          <!-- maniquí: pie, poste y cuello (dc-soporte se esconde al bailar) -->
+          <rect class="dc-stand dc-soporte" x="57" y="190" width="6" height="11" rx="1"/>
+          <ellipse class="dc-stand dc-soporte" cx="60" cy="202" rx="26" ry="5"/>
           <rect class="dc-form" x="54" y="14" width="12" height="14" rx="3"/>
           <ellipse class="dc-stand" cx="60" cy="14" rx="7" ry="2.5"/>
+          <g class="dc-baile dc-cabeza dc-cabeza-t" style="transform-origin: 60px 13px">
+            <circle class="dc-form" cx="60" cy="1.5" r="10.5"/>
+          </g>
           <!-- pantalón -->
           <path class="dc-suit-dk" d="M40,112 L80,112 L79,194 L63,194 L60,131 L57,194 L41,194Z"/>
           <path class="dc-crease" d="M49,124 L49,192 M71,124 L71,192"/>
-          <!-- mangas y puños -->
-          <path class="dc-suit-dk" d="M38,30 L29,35 L24,110 L34,111 L39,50Z"/>
-          <path class="dc-suit-dk" d="M82,30 L91,35 L96,110 L86,111 L81,50Z"/>
-          <rect class="dc-shirt" x="24" y="108" width="11" height="3" rx="1"/>
-          <rect class="dc-shirt" x="85" y="108" width="11" height="3" rx="1"/>
+          <!-- mangas y puños: son los brazos que se mueven al bailar (giran
+               desde el hombro); las manos aparecen en los puños -->
+          <g class="dc-brazo dc-brazo-t-int" style="transform-origin: 36px 32px">
+            <path class="dc-suit-dk" d="M38,30 L29,35 L24,110 L34,111 L39,50Z"/>
+            <rect class="dc-shirt" x="24" y="108" width="11" height="3" rx="1"/>
+            <circle class="dc-baile dc-mano dc-form" cx="29" cy="115" r="4.5" style="transform-origin: 29px 111px"/>
+          </g>
+          <g class="dc-brazo dc-brazo-t-ext" style="transform-origin: 84px 32px">
+            <path class="dc-suit-dk" d="M82,30 L91,35 L96,110 L86,111 L81,50Z"/>
+            <rect class="dc-shirt" x="85" y="108" width="11" height="3" rx="1"/>
+            <circle class="dc-baile dc-mano dc-form" cx="91" cy="115" r="4.5" style="transform-origin: 91px 111px"/>
+          </g>
           <!-- saco -->
           <path class="dc-suit" d="M38,29 Q60,23 82,29 L85,114 Q72,118 60,114 Q48,118 35,114Z"/>
           <!-- camisa y corbata -->
@@ -548,6 +581,13 @@
           <!-- pañuelo del bolsillo -->
           <rect class="dc-suit-dk" x="66" y="49" width="11" height="2.2" rx="1"/>
           <path class="dc-shirt" d="M67,49 L69,44 L71,48 L73,43 L75,49Z"/>
+          <!-- zapatos para bailar, bajo el pantalón: ocultos -->
+          <g class="dc-baile dc-pie dc-pie-a" style="transform-origin: 48px 194px">
+            <ellipse class="dc-suit-dk" cx="47" cy="197" rx="9" ry="3.6"/>
+          </g>
+          <g class="dc-baile dc-pie dc-pie-b" style="transform-origin: 72px 194px">
+            <ellipse class="dc-suit-dk" cx="73" cy="197" rx="9" ry="3.6"/>
+          </g>
         </svg>
       </div>
       <p class="dresscode-note">Y, con cariño, reservemos el blanco para la novia.</p>
@@ -758,10 +798,10 @@
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
 
-<script src="js/config.js?v=202610051640"></script>
-<script src="js/pase.js?v=202610051640"></script>
-<script src="js/efectos.js?v=202610051640"></script>
-<script src="js/site.js?v=202610051640"></script>
-<script src="js/sello-raspable.js?v=202610051640"></script>
+<script src="js/config.js?v=202610051653"></script>
+<script src="js/pase.js?v=202610051653"></script>
+<script src="js/efectos.js?v=202610051653"></script>
+<script src="js/site.js?v=202610051653"></script>
+<script src="js/sello-raspable.js?v=202610051653"></script>
 </body>
 </html>

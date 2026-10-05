@@ -443,15 +443,34 @@
     if (!pista) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     var bailando = false;
+    // Cuánto se acerca cada figura para que las manos de adentro se
+    // encuentren: con los brazos en posición, de centro a centro tienen
+    // que quedar a ~160 unidades del viewBox (que mide 120 de ancho).
+    function medirPareja() {
+      var v = pista.querySelector(".dresscode-figure-dress");
+      var t = pista.querySelector(".dresscode-figure-suit");
+      if (!v || !t) return;
+      var rv = v.getBoundingClientRect(), rt = t.getBoundingClientRect();
+      var ahora = (rt.left + rt.width / 2) - (rv.left + rv.width / 2);
+      var meta = 160 * rv.width / 120;
+      pista.style.setProperty("--acercar", ((ahora - meta) / 2).toFixed(1) + "px");
+      // En la vuelta se juntan 50 unidades más cada uno: la mano de él
+      // queda sobre la cabeza de ella.
+      pista.style.setProperty("--giro", (50 * rv.width / 120).toFixed(1) + "px");
+    }
     function bailar() {
       if (bailando) return;
       bailando = true;
+      medirPareja();
       pista.classList.remove("is-bailando");
       void pista.offsetWidth; // reinicia la animación si ya había bailado
       pista.classList.add("is-bailando");
     }
     var traje = pista.querySelector(".dresscode-figure-suit");
-    if (traje) traje.addEventListener("animationend", function () {
+    // Las partes (brazos, cabeza, pies) también disparan animationend y
+    // suben hasta acá: solo cuenta el del traje entero.
+    if (traje) traje.addEventListener("animationend", function (e) {
+      if (e.target !== traje) return;
       bailando = false;
       pista.classList.remove("is-bailando");
     });
