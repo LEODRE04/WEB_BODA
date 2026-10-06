@@ -39,6 +39,10 @@ comentadas por bloque.
 
 ### Inglés
 
+> **Apagado por ahora** (`var ACTIVO = false` al inicio de `js/i18n.js`):
+> todo sale en español y no aparece el botón. Para prenderlo, cambiar a
+> `true` y subir la versión `?v=`.
+
 La página sale en inglés si el celular del invitado está en inglés (o en
 un idioma que no sea español, portugués, italiano, catalán ni gallego).
 El invitado puede cambiar con el botón **ES | EN** de arriba, y se

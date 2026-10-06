@@ -27,6 +27,16 @@
 (function () {
   "use strict";
 
+  // — interruptor general — false = apagado: todo en español, sin botón
+  // ES | EN y sin mirar el idioma del celular ni ?lang=. Para prenderlo,
+  // poner true (y subir la versión ?v= como siempre). Lo demás del
+  // archivo queda listo, sin tocar.
+  var ACTIVO = false;
+  if (!ACTIVO) {
+    window.I18N = { lang: "es", locale: "es-PE", tr: function (s) { return s; }, traducir: function () {} };
+    return;
+  }
+
   function guardar(l) { try { localStorage.setItem("idioma", l); } catch (e) {} }
   function detectar() {
     try {
