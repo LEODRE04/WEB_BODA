@@ -17,6 +17,7 @@ css/tokens.css       design system "Organic" (colores, tipografías, componentes
 css/site.css         maquetación de la invitación + responsive
 js/config.js         TODOS los datos editables: nombres, fecha, cuentas, WhatsApp, apiUrl…
 js/site.js           interactividad: nav móvil, cuenta regresiva, copiar, RSVP con backend
+js/i18n.js           idioma: español / inglés (diccionario + detección + botón ES | EN)
 img/                 fotos de la pareja
 server/dev_api.py    backend de PRUEBA para desarrollo local (ver docs/RSVP-BACKEND.md)
 server/invitados.json lista de invitados de prueba que usa server/dev_api.py
@@ -35,6 +36,22 @@ Edítalo ahí — no hace falta tocar el HTML para esos datos.
 Para textos más largos (bienvenida, preguntas frecuentes, código de
 vestimenta) edita directamente `index.html`; son secciones claras y
 comentadas por bloque.
+
+### Inglés
+
+La página sale en inglés si el celular del invitado está en inglés (o en
+un idioma que no sea español, portugués, italiano, catalán ni gallego).
+El invitado puede cambiar con el botón **ES | EN** de arriba, y se
+recuerda. Para mandarle a alguien el link directo en un idioma, agrega
+`&lang=en` (o `?lang=en` si el link no tiene `?codigo=`), p. ej.
+`index.html?codigo=familia-garcia&lang=en`.
+
+Las traducciones viven en **`js/i18n.js`** (diccionario español → inglés).
+**Si cambias un texto en español, cambia también su clave ahí**: si no,
+en inglés ese texto se queda en español (no se rompe nada). Lo mismo con
+un regalo nuevo en la hoja de cálculo: su nombre y descripción se
+agregan al final del diccionario. Lo que llega de la hoja (nombres de
+invitados) y los correos del resumen siguen en español.
 
 ## Cómo correrlo en local
 

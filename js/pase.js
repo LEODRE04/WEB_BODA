@@ -94,13 +94,16 @@ window.WeddingPase = (function () {
   }
 
   function buildNode(opts, W) {
+    // Idioma de la página (js/i18n.js): en inglés, fechas en inglés y el
+    // pase entero traducido antes de convertirlo en PDF.
+    var I = window.I18N || { locale: "es-PE", tr: function (x) { return x; }, traducir: function () {} };
     var start = new Date(W.weddingDateISO);
-    var diaSemana = start.toLocaleDateString("es-PE", { weekday: "long", timeZone: "America/Lima" });
+    var diaSemana = start.toLocaleDateString(I.locale, { weekday: "long", timeZone: "America/Lima" });
     diaSemana = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
     var dia = pad2(start.getDate());
-    var mesAnio = start.toLocaleDateString("es-PE", { month: "long", year: "numeric", timeZone: "America/Lima" });
+    var mesAnio = start.toLocaleDateString(I.locale, { month: "long", year: "numeric", timeZone: "America/Lima" });
     mesAnio = mesAnio.charAt(0).toUpperCase() + mesAnio.slice(1);
-    var hora = start.toLocaleTimeString("es-PE", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Lima" }).replace(/^0/, "");
+    var hora = start.toLocaleTimeString(I.locale, { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Lima" }).replace(/^0/, "");
     var year = start.getFullYear();
     var pases = opts.numAsistentes || 1;
 
@@ -114,7 +117,7 @@ window.WeddingPase = (function () {
       '<div class="pase-heading">' + escapeHtml(W.couple.a) + ' <span class="pase-amp">&amp;</span> ' + escapeHtml(W.couple.b) + '</div>' +
       '<div class="pase-divider"></div>' +
       '<div class="pase-kicker">Invitación a nombre de</div>' +
-      '<div class="pase-nombre">' + escapeHtml(opts.nombre || "Invitado") + '</div>' +
+      '<div class="pase-nombre" data-no-traducir>' + escapeHtml(opts.nombre || "Invitado") + '</div>' +
       '<div class="pase-pases"><span>Pases</span><strong>' + pases + '</strong></div>' +
       '<div class="pase-date-block">' +
         '<div class="pase-date-kicker">' + escapeHtml(diaSemana) + '</div>' +
@@ -155,6 +158,7 @@ window.WeddingPase = (function () {
     qr.make();
     wrap.querySelector(".pase-qr-img").src = qr.createDataURL(6, 2);
 
+    I.traducir(wrap);
     return wrap;
   }
 
@@ -177,7 +181,7 @@ window.WeddingPase = (function () {
     var ventanaPase = null;
     try {
       ventanaPase = window.open("", "_blank");
-      if (ventanaPase) ventanaPase.document.write("<title>Preparando tu pase…</title>");
+      if (ventanaPase) ventanaPase.document.write("<title>" + (window.I18N ? window.I18N.tr("Preparando tu pase…") : "Preparando tu pase…") + "</title>");
     } catch (e) {
       ventanaPase = null;
     }
