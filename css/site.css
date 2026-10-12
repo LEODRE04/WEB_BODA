@@ -276,15 +276,26 @@ body { background: var(--color-neutral-100); }
    distinta altura y los botones de mapa quedaban escalonados. Ahora las
    dos columnas miden igual y los botones arrancan a la misma altura. */
 .details-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px; align-items: stretch; justify-content: center;
 }
 .details-grid > div { display: flex; flex-direction: column; }
+/* Con la letra más grande, "Iglesia Vida Nueva Rinconada" ocupa dos líneas
+   y "Av. La Molina 1935" una, y el mapa de la ceremonia quedaba más abajo
+   que el de la recepción. Con subgrid las dos columnas comparten filas
+   (etiqueta, título, mapa, tarjeta): los mapas arrancan a la misma altura
+   sin importar cuánto mida cada título. */
+@supports (grid-template-rows: subgrid) {
+  .details-grid > div { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+}
+.details-heading { text-wrap: balance; }
 .details-grid .venue-card { flex: 1; display: flex; flex-direction: column; }
 .details-grid .venue-card > div:last-child { margin-top: auto; }
 .details-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--color-accent-700); }
 .details-label.sage { color: var(--color-accent-2-700); }
 .details-heading { font-family: var(--font-heading); font-size: 26px; margin: 10px 0 12px; }
+/* La fecha límite no se parte en dos líneas ("7 de noviembre de / 2026"). */
+#rsvp-lede strong { white-space: nowrap; }
 .map-embed { border-radius: 28px; overflow: hidden; height: 250px; }
 .map-embed iframe { width: 100%; height: 100%; border: 0; display: block; }
 .venue-card { background: var(--color-bg); border-radius: 28px; padding: 20px 22px; }
@@ -456,9 +467,11 @@ body { background: var(--color-neutral-100); }
    pago. Ahora cruza todo el ancho en terracota, con el título grande.
    El botón invierte los colores (relleno crema, letra terracota
    oscura) porque un .btn-primary encima del terracota no se vería. — */
+/* Texto arriba y botón debajo: en dos columnas, dentro de una tarjeta
+   de 560px, el párrafo quedaba en una columna angosta de seis líneas. */
 .gift-list-band {
   grid-column: 1 / -1; margin-top: 24px;
-  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 28px;
+  display: grid; grid-template-columns: 1fr; align-items: center; gap: 20px; text-align: center;
   background: var(--color-accent); color: var(--color-bg);
   border-radius: 28px; padding: 30px 32px;
 }
@@ -471,7 +484,7 @@ body { background: var(--color-neutral-100); }
   font-size: 32px; line-height: 1.15; margin: 8px 0 10px; color: var(--color-bg);
 }
 .gift-list-band-text p {
-  margin: 0; font-size: 15px; line-height: 1.65; max-width: 52ch;
+  margin: 0 auto; font-size: 15px; line-height: 1.65; max-width: 52ch;
   color: var(--color-bg);
 }
 .gift-list-band-action {

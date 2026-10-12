@@ -76,7 +76,7 @@ window.WEDDING = {
   gifts: {
     yape: { titular: "André Leon", numero: "992770777" },
     interbank: { titular: "André Leon", soles: "8983225047822", cci: "00389801322504782240" },
-    bcp: { titular: "Krisli Heidinger Abadia", dolares: "19394831562154", cci: "00219319483156215419" },
+    bcp: { titular: "Krisli Heidinger", dolares: "19394831562154", cci: "00219319483156215419" },
   },
 
   // Lo mismo que dice la sección "Código de vestimenta" de index.html —

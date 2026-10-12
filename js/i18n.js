@@ -193,7 +193,7 @@
     "Celular": "Mobile number",
     "Cuenta en soles": "Account in soles (PEN)",
     "A nombre de André Leon": "Account holder: André Leon",
-    "A nombre de Krisli Heidinger Abadia": "Account holder: Krisli Heidinger Abadia",
+    "A nombre de Krisli Heidinger": "Account holder: Krisli Heidinger",
     "Cuenta en dólares": "US dollar account",
     "Soles · S/": "Soles (PEN) · S/",
     "Dólares · US$": "US dollars · US$",
