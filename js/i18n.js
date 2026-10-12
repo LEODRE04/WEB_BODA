@@ -170,6 +170,11 @@
     // bienvenida
     "Bienvenidos a nuestra boda": "Welcome to our wedding",
     "Queremos celebrar contigo": "We want to celebrate with you",
+    "Damos gracias a Dios por su gracia en nuestras vidas y por permitirnos comenzar juntos una nueva etapa, con el anhelo de vivir para su gloria. Nos encantaría que nos acompañes a celebrar nuestro matrimonio y compartir con nosotros esta alegría.":
+      "We thank God for His grace in our lives and for allowing us to begin a new chapter together, longing to live for His glory. We would love for you to join us in celebrating our marriage and share this joy with us.",
+    "«Porque de él, y por él, y para él, son todas las cosas. A él sea la gloria por los siglos. Amén».":
+      "“For from him and through him and for him are all things. To him be the glory forever! Amen.”",
+    "Romanos 11:36": "Romans 11:36",
     "Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.":
       "After seven years together we've reached this day, and we can't imagine it without the people who walked alongside us. It would make us so happy to have you there.",
     // cuándo y dónde
@@ -309,8 +314,8 @@
     "Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.":
       "Only if your invitation says so. When you confirm you'll see how many seats are reserved for you.",
     "¿Hasta cuándo puedo confirmar?": "When is the RSVP deadline?",
-    "Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 30 de octubre de 2026. Después ya no podremos agregar cubiertos.":
-      "It would help our planning a lot if you replied as soon as possible; the deadline, though, is October 30, 2026. After that we won't be able to add more seats.",
+    "Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 7 de noviembre de 2026. Después ya no podremos agregar cubiertos.":
+      "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 7, 2026. After that we won't be able to add more seats.",
     "¿Hay estacionamiento?": "Is there parking?",
     "Sí, alrededor del recinto y contaremos con personal de seguridad.": "Yes, around the venue, and there will be security staff.",
     "¿Dónde dejo mi regalo?": "Where do I leave my gift?",
@@ -454,6 +459,8 @@
 
   /* ——— frases que los scripts arman con nombres, números y fechas ——— */
   var PATRONES = [
+    [/^Tienes (\d+) pases? reservados? para nuestra boda$/, function (m) {
+      return "You have " + m[1] + (m[1] === "1" ? " seat" : " seats") + " reserved for our wedding"; }],
     [/^Estamos muy felices de poder invitarte\. Guardamos (un lugar|(\d+) lugares) pensando en ti, para (.+)\.$/, function (m) {
       return "We're so happy to invite you. We've saved " + (m[2] ? m[2] + " seats" : "a seat") + " for you at " + (EVENTO[m[3]] || m[3]) + "."; }],
     [/^Te esperamos en (.+)\.$/, function (m) { return "We look forward to seeing you at " + (EVENTO[m[1]] || m[1]) + "."; }],

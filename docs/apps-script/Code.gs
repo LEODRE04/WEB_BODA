@@ -812,7 +812,7 @@ function columnasDeSeguimiento(sheet, F) {
   // Las filas de abajo tienen que estar vacías para que la fórmula se
   // extienda; esta columna es nuestra, así que se puede limpiar.
   sheet.getRange(2, colRec, Math.max(sheet.getMaxRows() - 1, 1), 1).clearContent();
-  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 30 de octubre. ' +
+  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 7 de noviembre. ' +
     'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
   sheet.getRange(1, colRec).setFormula(F(
     '=ARRAYFORMULA({"recordatorio"; IF((' + E + '2:' + E + ' = "' + ESTADOS.sinAbrir + '") + (' +
@@ -876,7 +876,7 @@ function hojaResumen(ss, E, F) {
 var RESUMEN_CADA_DIAS = 3;
 var RESUMEN_HORA = 20;
 var PROP_ULTIMO_RESUMEN = "ultimo_resumen";
-var FECHA_CIERRE = new Date(2026, 9, 30); // 30 de octubre de 2026
+var FECHA_CIERRE = new Date(2026, 10, 7); // 7 de noviembre de 2026
 var MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
   "agosto", "setiembre", "octubre", "noviembre", "diciembre"];
 
@@ -984,7 +984,7 @@ function mandarResumen(moverFecha) {
   var html =
     "<div style=\"font-family:Georgia,serif;color:#364c2f;max-width:560px\">" +
     "<h2 style=\"margin:0 0 4px\">Resumen de la boda</h2>" +
-    "<p style=\"margin:0 0 18px;color:#777\">" + fechaLarga(ahora) + " · faltan " + dias + " días para el cierre del 30 de octubre</p>" +
+    "<p style=\"margin:0 0 18px;color:#777\">" + fechaLarga(ahora) + " · faltan " + dias + " días para el cierre del 7 de noviembre</p>" +
     "<h3 style=\"margin:0 0 6px\">Confirmaron " + desdeTxt + " (" + nuevosSi.length + ")</h3>" + listaSi + listaNo +
     "<h3 style=\"margin:18px 0 6px\">Totales</h3>" +
     "<p style=\"margin:0\">Confirmados: <b>" + confirmados + "</b> invitaciones · <b>" + personas + "</b> personas<br>" +

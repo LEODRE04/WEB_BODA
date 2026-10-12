@@ -198,18 +198,21 @@
       var pases = 1 + (Number(guest.acompanantes_permitidos) || 0);
       var info = guestPassInfo(guest);
 
-      // La línea de arriba se queda solo con "Hola, {nombre}" + los pases;
-      // el "nos encantaría que nos acompañes en…" pasa a la frase de
+      // "Hola, {nombre}" y debajo, como oración, cuántos pases tiene. El
+      // "nos encantaría que nos acompañes en…" pasa a la frase de
       // bienvenida de abajo, ya con la portada de por medio.
       el.querySelector("[data-guest-text]").textContent = guest.nombre;
-      el.querySelector("[data-guest-pases]").textContent = pases;
+      var frase = el.querySelector("[data-guest-pases-frase]");
+      var cuantos = document.createElement("b");
+      cuantos.textContent = pases + (pases === 1 ? " pase" : " pases");
+      frase.textContent = "";
+      frase.append("Tienes ", cuantos, (pases === 1 ? " reservado" : " reservados") + " para nuestra boda");
       if (ready) ready.hidden = false;
       el.hidden = false;
 
       if (welcome) {
-        welcome.textContent = "Estamos muy felices de poder invitarte. " +
-          (pases === 1 ? "Guardamos un lugar pensando en ti, para " : "Guardamos " + pases + " lugares pensando en ti, para ") +
-          info.evento + ".";
+        // Los pases ya los dice el saludo de arriba: acá no se repiten.
+        welcome.textContent = "Estamos muy felices de poder invitarte. Te esperamos en " + info.evento + ".";
         welcome.hidden = false;
       }
     });
@@ -276,7 +279,10 @@
       // invitado) — antes repetía las tres cosas en un párrafo gris.
       if (toBlock && toName && toCount) {
         toName.textContent = guest.nombre;
-        toCount.textContent = 1 + (Number(guest.acompanantes_permitidos) || 0);
+        var nPases = 1 + (Number(guest.acompanantes_permitidos) || 0);
+        toCount.textContent = nPases;
+        var toCountTxt = gate.querySelector("#envelope-to-count-txt");
+        if (toCountTxt) toCountTxt.textContent = nPases === 1 ? "pase" : "pases";
         toBlock.hidden = false;
       }
       if (guestText) {

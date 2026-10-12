@@ -59,9 +59,9 @@ window.WEDDING = {
   },
 
   rsvp: {
-    deadlineISO: "2026-10-30",
-    deadlineLabel: "30 de octubre de 2026",
-    editUntilLabel: "30 de octubre",
+    deadlineISO: "2026-11-07",
+    deadlineLabel: "7 de noviembre de 2026",
+    editUntilLabel: "7 de noviembre",
     whatsapp: "51992770777", // sin '+' ni espacios — se arma el link solo
     whatsappMessage: "¡Hola! Tengo una consulta sobre la boda de André y Krisli 💍",
 
