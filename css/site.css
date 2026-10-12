@@ -377,19 +377,21 @@ body { background: var(--color-neutral-100); }
    banco va solo, en versalitas verdes, y la moneda en su pastilla. */
 .pay-bank-tag {
   display: inline-flex; margin-bottom: 6px;
-  color: var(--color-accent-700);
-  font-size: 12.5px; font-weight: 700; letter-spacing: .18em;
+  color: var(--color-accent-800);
+  font-size: 17px; font-weight: 700; letter-spacing: .12em;
   text-transform: uppercase;
 }
 /* Moneda al lado del banco: con una cuenta en soles y otra en dólares,
    transferir a la equivocada es el error fácil. Las dos en el mismo
    verde (el dorado de dólares no se leía bien): las distingue el texto. */
+/* Rellena (no solo contorno) y del tamaño del banco: banco y moneda
+   son lo primero que hay que leer para no transferir a la equivocada. */
 .pay-bank-moneda {
-  display: inline-flex; margin: 0 0 6px 4px; padding: 2px 10px;
-  border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .04em;
-  box-shadow: inset 0 0 0 1.5px currentColor;
+  display: inline-flex; align-items: center; margin: 0 0 6px 8px; padding: 3px 12px;
+  border-radius: 999px; font-size: 14.5px; font-weight: 700; letter-spacing: .04em;
+  background: var(--color-accent); color: var(--color-bg);
+  vertical-align: 2px;
 }
-.pay-bank-moneda { color: var(--color-accent-700); }
 /* Las cuentas ya no son todas del mismo titular (BCP es de Krisli), así
    que cada banco dice a nombre de quién está. */
 .pay-bank-owner {
@@ -684,6 +686,8 @@ body { background: var(--color-neutral-100); }
 .gift-contribute-howto .pay-bank { padding: 12px 14px; border-radius: 16px; }
 .gift-contribute-howto .pay-num { font-size: 17px; }
 .gift-contribute-howto .pay-num-cci { font-size: 15px; }
+.gift-contribute-howto .pay-bank-tag { font-size: 15px; }
+.gift-contribute-howto .pay-bank-moneda { font-size: 13px; }
 .gift-mobile-back { display: none; }
 @media (max-width: 720px) {
   .gift-contribute-grid { grid-template-columns: 1fr; }
@@ -1682,7 +1686,7 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
    de leer incluso con el contraste ya corregido. */
 @media (max-width: 640px) {
   .section-kicker, .hero-eyebrow, .details-label,
-  .save-date-label, .pay-bank-tag, .gift-list-band-kicker { font-size: 12.5px; }
+  .save-date-label, .gift-list-band-kicker { font-size: 12.5px; }
   .field-tag { font-size: 11.5px; }
   .save-date-month { font-size: 12px; }
   .pay-row-label { font-size: 14px; }
