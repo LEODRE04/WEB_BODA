@@ -31,14 +31,14 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610112320">
-<link rel="stylesheet" href="css/site.css?v=202610112320">
+<link rel="stylesheet" href="css/tokens.css?v=202610112336">
+<link rel="stylesheet" href="css/site.css?v=202610112336">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
      para volver al diseño anterior, borra esta línea nada más. -->
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610112320">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610112336">
 <!-- Idioma (js/i18n.js): va primero, en el <head>, para traducir al
      inglés la página mientras se lee, antes de que se pinte. -->
-<script src="js/i18n.js?v=202610112320"></script>
+<script src="js/i18n.js?v=202610112336"></script>
 </head>
 <body>
 
@@ -232,10 +232,14 @@
       <p class="hero-welcome" data-guest-welcome hidden></p>
       <div class="hero-cta"><a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a></div>
     </div>
-    <div class="photo">
-      <picture><source srcset="img/p3.webp" type="image/webp"><img src="img/p3.jpg" alt="André y Krisli"></picture>
-      <span class="photo-label">Foto de portada — coloca img/p3.jpg</span>
-    </div>
+    <!-- Foto impresa (idea del 16c de claude.ai/design): margen de papel
+         crema, sombra suave y una leve inclinación. -->
+    <figure class="foto-impresa foto-impresa-portada">
+      <div class="photo">
+        <picture><source srcset="img/p3.webp" type="image/webp"><img src="img/p3.jpg" alt="André y Krisli"></picture>
+        <span class="photo-label">Foto de portada — coloca img/p3.jpg</span>
+      </div>
+    </figure>
   </section>
 
   <!-- Reserva la fecha: franja notoria justo debajo de la portada con el
@@ -277,10 +281,13 @@
   <section id="boda" class="welcome">
     <div class="envelope-card floral-frame">
       <div class="welcome-inner">
-        <div class="photo">
-          <picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture>
-          <span class="photo-label">Foto — coloca img/p1.jpg</span>
-        </div>
+        <figure class="foto-impresa">
+          <div class="photo">
+            <picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture>
+            <span class="photo-label">Foto — coloca img/p1.jpg</span>
+          </div>
+          <figcaption>André &amp; Krisli</figcaption>
+        </figure>
         <div>
           <div class="section-kicker">Bienvenidos a nuestra boda</div>
           <h2 class="section-title">Queremos celebrar contigo</h2>
@@ -411,22 +418,20 @@
       </div>
 
       </div>
+      </div>
 
-        <!-- Franja de la lista de regalos (bloque 3a): antes era una fila
-             más dentro del grid y se perdía entre las tarjetas de pago.
-             Ahora cruza todo el ancho, en terracota, con el título grande
-             y la explicación de que se puede aportar por partes. -->
-        <div class="gift-list-band">
-          <div class="gift-list-band-text">
-            <div class="gift-list-band-kicker">Lista de regalos</div>
-            <h3 class="gift-list-band-title">Elige un regalo</h3>
-            <p>Una selección de regalos pensados para acompañarnos en esta nueva etapa. Cada uno tiene un propósito especial para nuestro hogar y nuestra vida juntos.</p>
-          </div>
-          <div class="gift-list-band-action">
-            <a class="btn gift-list-band-btn" id="gift-list-link" href="regalos.html">Ver la lista de regalos</a>
-          </div>
+      <!-- Franja «Elige un regalo» (idea del 17c de claude.ai/design): fondo
+           salvia claro en vez del verde lleno, con un ícono de regalo, y a
+           todo el ancho de la tarjeta, fuera de la columna de las cuentas.
+           El href con ?codigo= lo arma initGiftListLink en site.js. -->
+      <div class="gift-list-band">
+        <span class="gift-list-band-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg></span>
+        <div class="gift-list-band-text">
+          <div class="gift-list-band-kicker">Lista de regalos</div>
+          <h3 class="gift-list-band-title">Elige un regalo</h3>
+          <p>Una selección de regalos pensados para acompañarnos en esta nueva etapa. Cada uno tiene un propósito especial para nuestro hogar y nuestra vida juntos.</p>
         </div>
-
+        <a class="btn btn-primary gift-list-band-btn" id="gift-list-link" href="regalos.html">Ver la lista de regalos</a>
       </div>
     </div>
   </section>
@@ -748,10 +753,10 @@
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
 
-<script src="js/config.js?v=202610112320"></script>
-<script src="js/pase.js?v=202610112320"></script>
-<script src="js/efectos.js?v=202610112320"></script>
-<script src="js/site.js?v=202610112320"></script>
-<script src="js/sello-raspable.js?v=202610112320"></script>
+<script src="js/config.js?v=202610112336"></script>
+<script src="js/pase.js?v=202610112336"></script>
+<script src="js/efectos.js?v=202610112336"></script>
+<script src="js/site.js?v=202610112336"></script>
+<script src="js/sello-raspable.js?v=202610112336"></script>
 </body>
 </html>

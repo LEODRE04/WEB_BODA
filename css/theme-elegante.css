@@ -85,7 +85,7 @@
 
 /* — fotos: filtro más cálido que el "washed" original, para que queden
    dentro de la misma paleta marfil/dorado — */
-.photo img { filter: sepia(.14) saturate(.85) contrast(.92) brightness(1.05); }
+.photo img, .gift-thanks-photo img { filter: sepia(.18) saturate(.72) contrast(.92) brightness(1.05); }
 
 /* — tarjetas con más aire y una sombra suave (look "invitación impresa") — */
 .venue-card, .faq-item, .companion-card, .rsvp-form {

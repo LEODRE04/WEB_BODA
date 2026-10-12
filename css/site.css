@@ -160,10 +160,11 @@ body { background: var(--color-neutral-100); }
    pastillas de la cuenta. Ahora la sección cierra acá. */
 .save-date .countdown-grid { margin: 24px 0 0; }
 .hero-cta { margin-top: auto; padding-top: 26px; }
-.hero .photo { min-height: 320px; }
+
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; }
-  .hero .photo { min-height: 260px; order: -1; }
+  .foto-impresa-portada { order: -1; margin: 22px 22px 6px; transform: rotate(-1deg); }
+  .foto-impresa-portada .photo { min-height: 260px; }
 }
 
 /* — reserva la fecha: franja notoria justo debajo de la portada, ver el
@@ -228,18 +229,43 @@ body { background: var(--color-neutral-100); }
 
 /* — bienvenida — */
 .welcome { padding: 56px 44px; background: var(--color-neutral-100); }
-.welcome-inner { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: center; }
-.welcome .photo { border-radius: 0 0 200px 200px; height: 420px; box-shadow: var(--shadow-lg); }
-.welcome-verse {
-  margin: 26px 0 0; max-width: 44ch; padding: 4px 0 4px 20px;
-  border-left: 2px solid var(--color-accent);
+.welcome-inner { display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: center; }
+/* — foto impresa (idea del 16c de claude.ai/design) —
+   Las fotos van como copias en papel: margen crema, sombra suave y una
+   leve inclinación (la de la portada hacia un lado, la de la bienvenida
+   hacia el otro), con la firma manuscrita al pie. Reemplaza al arco de
+   la bienvenida y a la foto a sangre de la portada. */
+.foto-impresa {
+  margin: 0; padding: 14px 14px 16px; border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: 0 14px 30px rgba(54, 76, 47, .12);
+  transform: rotate(-2deg);
+  display: flex; flex-direction: column;
+}
+.foto-impresa .photo { border-radius: 14px; flex: 1; }
+/* un velo crema, para que la foto se asiente sobre el papel */
+.foto-impresa .photo::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: rgba(248, 244, 231, .16);
+}
+.foto-impresa figcaption {
+  margin-top: 10px; text-align: center; font-family: var(--font-script);
+  font-size: 26px; line-height: 1.2; color: var(--color-text);
+}
+.welcome .foto-impresa .photo { height: 400px; flex: none; }
+.foto-impresa-portada { align-self: center; margin: 36px 44px 36px 8px; transform: rotate(1.5deg); }
+.foto-impresa-portada .photo { min-height: 440px; }
+.welcome-verse { margin: 28px 0 0; max-width: 44ch; }
+.welcome-verse::before {
+  content: ""; display: block; width: 48px; height: 1px; margin-bottom: 12px;
+  background: var(--color-divider);
 }
 .welcome-verse blockquote {
   margin: 0; font-style: italic; font-size: 20px; line-height: 1.5;
   color: var(--color-accent-700);
 }
 .welcome-verse figcaption {
-  margin-top: 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .2em;
+  margin-top: 10px; font-size: 12px; font-weight: 700; letter-spacing: .24em;
   text-transform: uppercase; color: var(--color-text-muted);
 }
 .welcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
@@ -257,7 +283,8 @@ body { background: var(--color-neutral-100); }
 
 @media (max-width: 860px) {
   .welcome-inner { grid-template-columns: 1fr; }
-  .welcome .photo { height: 280px; border-radius: 24px; }
+  .welcome .foto-impresa { margin: 0 8px; transform: rotate(-1deg); }
+  .welcome .foto-impresa .photo { height: 280px; }
   .welcome-grid { grid-template-columns: 1fr; }
 }
 /* — .timeline-desc: se quedó del itinerario (ya no existe como sección),
@@ -330,28 +357,29 @@ body { background: var(--color-neutral-100); }
    en el resto de la página siguen flotando igual. */
 .pay-card-wrap { position: relative; z-index: 6; }
 /* Las cuentas van siempre a la vista: antes arrancaban plegadas tras
-   un "Ver datos para transferir" y había que adivinar que se abría. */
+   un "Ver datos para transferir" y había que adivinar que se abría.
+   Cada banco va en su propio recuadro crema dentro de la tarjeta blanca
+   (idea del 17a de claude.ai/design): se ve de un vistazo dónde empieza
+   y termina cada cuenta, y los números van más grandes. */
 .pay-sheet {
-  background: var(--color-bg); border-radius: 24px;
-  border: 1px solid color-mix(in srgb, var(--color-neutral-600) 60%, transparent);
-  padding: 0 16px 4px; text-align: left;
+  background: var(--color-bg); border-radius: 28px;
+  border: 1px solid var(--color-divider);
+  padding: 24px; text-align: left;
+  display: flex; flex-direction: column; gap: 12px;
 }
 .pay-sheet-head {
-  margin: 0; padding: 15px 2px;
-  font-size: 15px; font-weight: 600; color: var(--color-accent-800);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
+  margin: 0 0 2px; font-size: 22px; font-weight: 700; color: var(--color-accent-800);
 }
 /* Cada banco aporta su propio aire arriba y abajo; el hairline entre
    bloques sale del borde superior, así el primero no lo lleva. */
-.pay-bank { padding: 14px 0; }
-.pay-bank + .pay-bank {
-  border-top: 1px solid color-mix(in srgb, var(--color-neutral-600) 50%, transparent);
-}
+.pay-bank { padding: 16px 18px; background: var(--color-surface); border-radius: 20px; }
+/* Sobre el recuadro crema la pastilla de fondo sobraba: el nombre del
+   banco va solo, en versalitas verdes, y la moneda en su pastilla. */
 .pay-bank-tag {
-  display: inline-flex; margin-bottom: 6px; padding: 3px 11px;
-  background: var(--color-accent-100); color: var(--color-accent-800);
-  font-size: 11px; font-weight: 600; letter-spacing: .16em;
-  text-transform: uppercase; border-radius: 999px;
+  display: inline-flex; margin-bottom: 6px;
+  color: var(--color-accent-700);
+  font-size: 12.5px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase;
 }
 /* Moneda al lado del banco: con una cuenta en soles y otra en dólares,
    transferir a la equivocada es el error fácil. Las dos en el mismo
@@ -371,7 +399,10 @@ body { background: var(--color-neutral-100); }
 .pay-row { display: flex; align-items: center; gap: 12px; }
 /* Dos filas del mismo banco (cuenta y CCI) no se separan con borde ni
    fondo: basta el aire. La pastilla ya dice dónde empieza cada banco. */
-.pay-row + .pay-row { margin-top: 9px; }
+.pay-row + .pay-row {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px dashed var(--color-divider);
+}
 .pay-row-body { flex: 1 1 auto; min-width: 0; }
 .pay-row-label {
   display: block; font-size: 12.5px;
@@ -380,7 +411,7 @@ body { background: var(--color-neutral-100); }
 /* Los dígitos van separados por espacios en el HTML (no hay nada que
    los agrupe por CSS), y data-copy conserva el número sin espacios. */
 .pay-num {
-  display: block; font-weight: 600; font-size: 17px; letter-spacing: .02em;
+  display: block; font-weight: 700; font-size: 21px; line-height: 1.25; letter-spacing: .02em;
   font-variant-numeric: lining-nums tabular-nums;
   color: var(--color-text);
   /* SIN overflow-wrap: anywhere. Los dígitos ya vienen en grupos
@@ -390,12 +421,12 @@ body { background: var(--color-neutral-100); }
      cuenta. */
 }
 .pay-num-tel { letter-spacing: .03em; }
-.pay-num-cci { font-size: 15px; }
+.pay-num-cci { font-size: 17px; font-weight: 600; }
 /* Blanco con contorno verde en vez del relleno arena de antes: al lado
    de la pastilla salvia, dos rellenos se peleaban. El borde va como
    box-shadow inset para que no sume al tamaño de la caja. */
 .pay-copy {
-  flex: none; width: 40px; height: 40px; border-radius: 999px;
+  flex: none; width: 44px; height: 44px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   border: 0; cursor: pointer; padding: 0;
   background: var(--color-bg); color: var(--color-accent-700);
@@ -467,42 +498,46 @@ body { background: var(--color-neutral-100); }
    pago. Ahora cruza todo el ancho en terracota, con el título grande.
    El botón invierte los colores (relleno crema, letra terracota
    oscura) porque un .btn-primary encima del terracota no se vería. — */
-/* Texto arriba y botón debajo: en dos columnas, dentro de una tarjeta
-   de 560px, el párrafo quedaba en una columna angosta de seis líneas. */
+/* — franja «Elige un regalo» (idea del 17c de claude.ai/design) —
+   Antes era un bloque verde lleno dentro de la columna de las cuentas, y
+   pesaba tanto como ellas. Ahora va a todo el ancho de la tarjeta, en
+   salvia claro, con un ícono de regalo a la izquierda y el botón primario
+   del sitio a la derecha: se lee como una invitación a seguir, no como
+   otro bloque de datos. En celular se apila y centra. */
 .gift-list-band {
-  grid-column: 1 / -1; margin-top: 24px;
-  display: grid; grid-template-columns: 1fr; align-items: center; gap: 20px; text-align: center;
+  margin-top: 32px;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px 26px;
+  background: var(--color-accent-100); color: var(--color-text);
+  border-radius: 28px; padding: 28px 34px;
+}
+.gift-list-band-icon {
+  width: 68px; height: 68px; flex: none; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
   background: var(--color-accent); color: var(--color-bg);
-  border-radius: 28px; padding: 30px 32px;
 }
 .gift-list-band-kicker {
   font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--color-bg);
+  color: var(--color-accent-700);
 }
 .gift-list-band-title {
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);
-  font-size: 32px; line-height: 1.15; margin: 8px 0 10px; color: var(--color-bg);
+  font-size: 34px; line-height: 1.15; margin: 4px 0 6px; color: var(--color-text);
 }
 .gift-list-band-text p {
-  margin: 0 auto; font-size: 15px; line-height: 1.65; max-width: 52ch;
-  color: var(--color-bg);
+  margin: 0; font-size: 15px; line-height: 1.6; max-width: 50ch;
+  color: var(--color-text-soft); text-wrap: pretty;
 }
-.gift-list-band-action {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-}
-.gift-list-band-btn {
-  background: var(--color-bg); color: var(--color-accent-700); font-size: 15px; padding: 13px 26px;
-}
-.gift-list-band-btn:hover { background: var(--color-neutral-200); color: var(--color-accent-800); }
+.gift-list-band-btn { white-space: nowrap; }
 .gift-list-band-note {
   font-size: 12.5px; text-align: center; max-width: 22ch;
   color: var(--color-bg);
 }
 @media (max-width: 700px) {
   .gift-list-band {
-    grid-template-columns: 1fr; gap: 18px; padding: 26px 22px; text-align: center;
+    grid-template-columns: 1fr; justify-items: center; gap: 14px; padding: 26px 22px; text-align: center;
   }
-  .gift-list-band-title { font-size: 26px; }
+  .gift-list-band-icon { width: 58px; height: 58px; }
+  .gift-list-band-title { font-size: 28px; }
   .gift-list-band-text p { margin-inline: auto; }
   .gift-list-band-btn { width: 100%; }
   .field-tag { white-space: nowrap; }
@@ -645,10 +680,10 @@ body { background: var(--color-neutral-100); }
    hacer. Además el panel son dos columnas, y con la lista plegada la
    derecha terminaba 277px antes que la izquierda. */
 .gift-contribute-howto .pay-list { max-width: none; gap: 8px; }
-.gift-contribute-howto .pay-sheet { padding: 2px 13px; }
-.gift-contribute-howto .pay-bank { padding: 11px 0; }
-.gift-contribute-howto .pay-num { font-size: 15.5px; }
-.gift-contribute-howto .pay-num-cci { font-size: 14px; }
+.gift-contribute-howto .pay-sheet { padding: 12px; gap: 8px; border-radius: 22px; }
+.gift-contribute-howto .pay-bank { padding: 12px 14px; border-radius: 16px; }
+.gift-contribute-howto .pay-num { font-size: 17px; }
+.gift-contribute-howto .pay-num-cci { font-size: 15px; }
 .gift-mobile-back { display: none; }
 @media (max-width: 720px) {
   .gift-contribute-grid { grid-template-columns: 1fr; }
@@ -1744,13 +1779,8 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
    La tarjeta que contiene las cuentas. El z-index de .pay-card-wrap
    (para que las hojas que caen pasen por detrás) sube al contenedor,
    que es el que tiene el fondo. */
-.transfer-box {
-  position: relative; z-index: 6;
-  border: 1px solid color-mix(in srgb, var(--color-neutral-600) 60%, transparent);
-  border-radius: 24px; overflow: hidden; background: var(--color-bg);
-}
+.transfer-box { position: relative; z-index: 6; }
 .transfer-box .pay-card-wrap { z-index: auto; }
-.transfer-box .pay-sheet { border: 0; border-radius: 0; }
 
 /* — campos del panel de aporte: blancos sobre el crema —
    El panel es crema (--color-surface) y los campos usaban ese mismo
