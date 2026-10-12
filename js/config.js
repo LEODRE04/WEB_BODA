@@ -74,10 +74,9 @@ window.WEDDING = {
   // ve el invitado están escritos en index.html (mesa de regalos) y en
   // regalos.html (cómo aportar). Si cambian, actualizar los tres lugares.
   gifts: {
-    titular: "André Leon",
-    yape: "992770777",
-    bcp: { soles: "19111596053083", cci: "00219111159605308355" },
-    interbank: { soles: "8983225047822", cci: "00389801322504782240" },
+    yape: { titular: "André Leon", numero: "992770777" },
+    interbank: { titular: "André Leon", soles: "8983225047822", cci: "00389801322504782240" },
+    bcp: { titular: "Krisli Heidinger Abadia", dolares: "19394831562154", cci: "00219319483156215419" },
   },
 
   // Lo mismo que dice la sección "Código de vestimenta" de index.html —
