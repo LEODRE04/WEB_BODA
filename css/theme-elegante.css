@@ -683,25 +683,29 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   .prayer-card .prayer-signature { font-size: 25px; line-height: 1.35; }
 }
 
-/* — portada más grande en computadora —
-   El ajuste de arriba es solo para celular, y en una pantalla grande el
-   sobre y la portada se veían diminutos: "Te invitamos a:" o el lugar
-   quedaban como letra de pie de página en medio de tanto blanco. Acá
-   se aplica el mismo font-size-adjust, pero solo al sobre y a la
-   portada (el resto de la página se lee bien), y la manuscrita —que
-   queda fuera del ajuste— se agranda a mano. El sobre en sí no cambia
-   de tamaño: el sello raspable tiene medidas fijas en el JS. */
+/* — letra más grande también en computadora —
+   El mismo font-size-adjust del celular (ver arriba), ahora en toda la
+   página: en una pantalla grande el cuerpo en Cormorant se leía como
+   letra de pie de página. Primero se aplicó solo al sobre y a la
+   portada, y el contraste con el resto de la página (que seguía
+   chico) era peor. La manuscrita y la tarjeta del pase quedan fuera,
+   igual que en celular; la manuscrita del sobre y de la portada se
+   agranda a mano. El sobre en sí no cambia de tamaño: el sello
+   raspable tiene medidas fijas en el JS. */
 @media (min-width: 641px) {
-  .envelope-gate, .hero { font-size-adjust: 0.46; }
+  /* 0,50 y no 0,46 como en celular: con todo el ancho de una pantalla
+     grande, a 0,46 el texto corrido seguía viéndose chico. */
+  body { font-size-adjust: 0.5; }
+  .section-lede { font-size: 17px; }
+  .welcome-verse blockquote { font-size: 21px; }
+  input, textarea, select, button { font-size-adjust: inherit; }
+  .pase-card, .pase-card * { font-size-adjust: none; }
   .envelope-gate-inner { max-width: 520px; }
   .envelope-eyebrow { font-size: 15px; }
   .envelope-title { font-size: 60px; }
   .envelope-names { font-size: 21px; }
   .envelope-date { font-size: 30px; }
   .seal-hint { font-size: 18px; max-width: none; }
-  /* los botones no heredan el ajuste (ver arriba): el link "¿Prefieres
-     no raspar?" se quedaba chico */
-  .envelope-gate button { font-size-adjust: inherit; }
   .hero-name { font-size: 76px; }
   .hero-amp span.amp { font-size: 30px; }
 }
