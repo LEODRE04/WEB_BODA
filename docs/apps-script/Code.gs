@@ -50,9 +50,10 @@ var RESPUESTA_COLUMNAS = ["codigo", "nombre", "num_asistentes", "asistencia", "e
 var APERTURA_COL = 5;
 var APORTE_COLUMNAS = ["regalo_id", "nombre", "monto", "mensaje", "comprobante_url", "fecha"];
 var APORTE_COL_FECHA = 6;       // F
-// Id reservado para el aviso "Ya transferí" de la mesa de regalos: alguien
-// avisa que depositó por Yape o transferencia, sin que corresponda a
-// ningún regalo de la lista.
+// Id del antiguo aviso "¿Ya nos hiciste un regalo?" (un depósito sin regalo
+// de la lista). Ese aviso se quitó de la web y la API ya no lo acepta; el
+// id se conserva solo para que el resumen siga separando las filas viejas
+// que hayan quedado en Aportes.
 var APORTE_DEPOSITO = "deposito";
 
 // Topes a lo que puede escribir un invitado. El frontend ya comprime las
@@ -515,18 +516,9 @@ function handleAporte(data) {
     return jsonOut({ error: "la constancia tiene que ser una imagen" });
   }
 
-  // El aviso de depósito no va contra un regalo de la lista y no pide
-  // nada al invitado: el nombre sale de su ?codigo= (vacío si entró sin
-  // link) y no hay monto. Por eso se salta las tres validaciones de
-  // abajo. Se guarda en la misma hoja de Aportes para que la pareja los
-  // vea todos juntos; como ningún regalo usa este id, no altera el
-  // "recaudado" de nadie.
-  var esDeposito = regaloId === APORTE_DEPOSITO;
-  if (!esDeposito) {
-    if (!nombre) return jsonOut({ error: "falta el nombre" });
-    if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
-    if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
-  }
+  if (!nombre) return jsonOut({ error: "falta el nombre" });
+  if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
+  if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
 
   // Subir la captura a Drive es lo más lento de todo el request (varios
   // segundos con una foto de celular), así que se hace FUERA del lock —
@@ -551,7 +543,7 @@ function handleAporte(data) {
     hojaAportes.appendRow([
       celda(regaloId),
       celda(nombre, MAX_NOMBRE),
-      esDeposito ? 0 : monto,
+      monto,
       celda(String(data.mensaje || ""), MAX_MENSAJE),
       comprobanteUrl,
       new Date(), // fecha real, no texto ISO (ver upsertRespuesta)
@@ -839,7 +831,7 @@ function hojaResumen(ss, E, F) {
     // Solo las respuestas con código: las que llegan sin link (pruebas,
     // o alguien que escribió cualquier nombre) no cuentan como gente real.
     ["Personas que vienen", '=SUMIFS(Respuestas!C2:C, Respuestas!D2:D, "si", Respuestas!A2:A, "<>")'],
-    ["Días para el cierre (30 oct)", '=MAX(0, DATE(2026, 10, 30) - TODAY())'],
+    ["Días para el cierre (7 nov)", '=MAX(0, DATE(2026, 11, 7) - TODAY())'],
     ["", ""],
     ["Regalos", ""],
     ["Aportado a regalos (S/)", '=SUMIFS(Aportes!C2:C, Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>")'],

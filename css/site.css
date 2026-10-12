@@ -550,17 +550,12 @@ body { background: var(--color-neutral-100); }
 .gift-card.is-funded { border-color: transparent; background: var(--color-surface); }
 .gift-card.is-funded:hover { border-color: var(--color-accent-2-200); }
 .gift-card.is-funded .gift-card-name,
-.gift-card.is-funded .gift-card-desc,
 .gift-card.is-funded .gift-card-price { opacity: .7; }
 .gift-card.is-funded .gift-card-photo { filter: grayscale(55%); opacity: .85; }
 .gift-card.is-funded .gift-progress-bar span { background: var(--color-accent-2-600); }
 @keyframes gift-flash { 0%, 100% { box-shadow: none; } 25% { box-shadow: 0 0 0 4px var(--color-accent-200); } }
 .gift-card.is-flash { animation: gift-flash 1s ease; }
 .gift-card-name { font-size: 15.5px; font-weight: 600; }
-.gift-card-desc {
-  margin: 0; font-size: 13px; line-height: 1.5;
-  color: var(--color-text-muted);
-}
 .gift-card-photo {
   height: 90px; border-radius: 16px; margin: 6px 0 2px; overflow: hidden;
   background: var(--color-accent-2-200);
@@ -1480,7 +1475,6 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .faq-item .q { font-size: 17px; }
   .faq-item .a { font-size: 15.5px; }
   /* Mesa de regalos */
-  .gift-card-desc { font-size: 14.5px; }
   /* 11.5px es de los textos más chicos del sitio y va debajo de la barra
      de avance de cada regalo. Sube poco: tiene que seguir leyéndose por
      debajo del nombre y del precio de la tarjeta. */

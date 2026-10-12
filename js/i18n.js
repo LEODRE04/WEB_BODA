@@ -156,7 +156,6 @@
     // reserva la fecha
     "Reserva la fecha": "Save the date",
     "Día": "Day",
-    "Hora": "Time",
     "Llegada": "Arrival",
     "Te esperamos a las": "We'll be expecting you at",
     "en la Iglesia Vida Nueva Rinconada, La Molina. Te recomendamos llegar a esa hora para ubicarte con calma y no perderte nada.":
@@ -175,8 +174,6 @@
     "«Porque de él, y por él, y para él, son todas las cosas. A él sea la gloria por los siglos. Amén».":
       "“For from him and through him and for him are all things. To him be the glory forever! Amen.”",
     "Romanos 11:36": "Romans 11:36",
-    "Después de siete años juntos llegamos a este día, y no lo imaginamos sin las personas que nos acompañaron en el camino. Nos hará muy felices tenerte con nosotros.":
-      "After seven years together we've reached this day, and we can't imagine it without the people who walked alongside us. It would make us so happy to have you there.",
     // cuándo y dónde
     "Cuándo y dónde": "When and where",
     "Los datos que necesitas": "Everything you need to know",
@@ -193,10 +190,8 @@
     "Tu presencia es el regalo": "Your presence is the gift",
     "Lo más importante para nosotros es compartir este día contigo. Si además quieres acompañarnos con un regalo, un aporte será la forma más práctica de ayudarnos en esta nueva etapa.":
       "What matters most to us is sharing this day with you. If you'd also like to give us a gift, a contribution is the most practical way to help us in this new chapter.",
-    "Ver datos para transferir": "See transfer details",
     "Celular": "Mobile number",
     "Cuenta en soles": "Account in soles (PEN)",
-    "Cuenta simple": "Cuenta Simple account",
     "A nombre de André Leon": "Account holder: André Leon",
     "A nombre de Krisli Heidinger Abadia": "Account holder: Krisli Heidinger Abadia",
     "Cuenta en dólares": "US dollar account",
@@ -205,31 +200,17 @@
     "Copiar el número de Yape": "Copy the Yape number",
     "Copiar la cuenta BCP en dólares": "Copy the BCP US dollar account",
     "Copiar el CCI del BCP": "Copy the BCP CCI",
-    "Copiar la cuenta simple de Interbank": "Copy the Interbank Cuenta Simple account",
+    "Copiar la cuenta en soles de Interbank": "Copy the Interbank soles account",
     "Copiar el CCI de Interbank": "Copy the Interbank CCI",
     "Copiado": "Copied",
-    "¿Ya nos hiciste un regalo?": "Already sent us a gift?",
-    "Nos encantará saberlo. Cuando hayas realizado tu transferencia, avísanos para saber que fue tu regalo y poder agradecértelo personalmente.":
-      "We'd love to know. Once you've made your transfer, let us know so we know it was from you and can thank you personally.",
-    "Ya transferí — avisar a los novios": "I've sent it — let the couple know",
     "Ya transferí, avisar a los novios": "I've sent it, let the couple know",
-    "¡Gracias!": "Thank you!",
-    "Le avisaremos a André y Krisli de tu detalle.": "We'll let André and Krisli know about your gift.",
     "Tu nombre": "Your name",
     "obligatorio": "required",
     "opcional": "optional",
     "· opcional": "· optional",
-    "Mensaje para los novios": "Message for the couple",
     "Mensaje": "Message",
     "Adjuntar constancia": "Attach receipt",
-    "Enviar aviso": "Send notice",
-    "Sin el mensaje no podemos enviarlo.": "We can't send it without a message.",
-    "Aviso enviado": "Notice sent",
-    "Unas palabras para ellos…": "A few words for them…",
-    "Escribe tu nombre para que sepan de quién es el regalo.": "Write your name so they know who the gift is from.",
-    "Escríbeles un mensaje, aunque sea corto — es lo que les llega.": "Write them a message, even a short one — it's what they'll receive.",
     "No se pudo leer, prueba con otra": "Couldn't read it, try another one",
-    "No pudimos enviar tu aviso.": "We couldn't send your notice.",
     "Lista de regalos": "Gift list",
     "Elige un regalo": "Choose a gift",
     "Una selección de regalos pensados para acompañarnos en esta nueva etapa. Cada uno tiene un propósito especial para nuestro hogar y nuestra vida juntos.":
@@ -339,8 +320,6 @@
     "← Volver a la lista": "← Back to the list",
     "Volver a la lista": "Back to the list",
     "Elige el que más te guste": "Choose your favorite",
-    "Tu presencia ya es el regalo. Si además quieres darnos algo, armamos esta lista de cosas que de verdad usaremos — puedes aportar completo o una parte.":
-      "Your presence is already the gift. If you'd also like to give us something, we put together this list of things we'll really use — you can cover all of it or just a part.",
     "¿Cómo funciona la lista?": "How does the list work?",
     "Cómo funciona la lista": "How the list works",
     "Disponibles": "Available",
@@ -376,7 +355,7 @@
     "Puedes acompañar tu aporte con un mensaje para André y Krisli. Lo recibirán junto con el regalo.":
       "You can add a message for André and Krisli with your contribution. They'll receive it along with the gift.",
     "Gracias por este regalo": "Thank you for this gift",
-    "Revisaremos la transferencia y te avisamos.": "We'll check the transfer and let you know.",
+    "Tu aporte ya suma en la lista. ¡Muchas gracias por acompañarnos!": "Your contribution already counts on the list. Thank you so much for being part of this!",
     "Mostrar regalos": "Show gifts",
     "No mostrar de nuevo": "Don't show again",
     "Ya está completo — ¡gracias!": "It's complete — thank you!",
@@ -391,7 +370,6 @@
     // — el pase (js/pase.js) —
     "Invitación a nombre de": "Invitation for",
     "Invitado": "Guest",
-    "Blanco reservado para la novia.": "White is reserved for the bride.",
     "Código de pase": "Pass code",
     "Recomendaciones": "Good to know",
     "Mesa de regalos y mapa en la invitación web.": "Gift registry and map in the web invitation.",
@@ -402,29 +380,17 @@
 
     // — regalos de la hoja de cálculo (nombre y descripción) —
     "Set de Cubiertos": "Cutlery set",
-    "Para las cenas de los domingos con toda la familia.": "For Sunday dinners with the whole family.",
     "Cafetera": "Coffee maker",
-    "Para los postres que André prometió aprender a hacer.": "For the desserts André promised to learn to make.",
     "Juego de ollas": "Cookware set",
-    "Para las recetas de siempre que queremos seguir cocinando.": "For the classic recipes we want to keep cooking.",
     "Sillas para el comedor": "Dining chairs",
-    "Para recibir a la familia y amigos en casa.": "For welcoming family and friends into our home.",
     "Set de cama": "Bedding set",
-    "Para las noches tranquilas en nuestro nuevo hogar.": "For quiet nights in our new home.",
     "Set de vajilla": "Dinnerware set",
-    "Para servir cada comida que compartamos en casa.": "For serving every meal we share at home.",
     "Cocina": "Stove",
-    "Para preparar juntos muchas comidas por venir.": "For cooking many meals together in the years to come.",
     "Lavadora": "Washing machine",
-    "Para hacernos un poco más fácil el día a día.": "To make everyday life a little easier.",
     "Microondas": "Microwave",
-    "Para las cenas rápidas de los días más ocupados.": "For quick dinners on the busiest days.",
     "Refrigeradora": "Refrigerator",
-    "Para acompañarnos en nuestro día a día durante muchos años.": "To be part of our everyday life for many years.",
     "Sillón": "Sofa",
-    "Para nuestras tardes de descanso y películas.": "For our lazy afternoons and movie nights.",
     "Luna de miel": "Honeymoon",
-    "Para celebrar juntos el comienzo de esta nueva etapa.": "To celebrate the beginning of this new chapter together.",
   };
 
   /* ——— fechas ——— "30 de octubre de 2026" → "October 30, 2026",
