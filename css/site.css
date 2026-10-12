@@ -340,6 +340,16 @@ body { background: var(--color-neutral-100); }
   font-size: 11px; font-weight: 600; letter-spacing: .16em;
   text-transform: uppercase; border-radius: 999px;
 }
+/* Moneda al lado del banco: con una cuenta en soles y otra en dólares,
+   transferir a la equivocada es el error fácil. Soles en verde, dólares
+   en terracota, para distinguirlas de un vistazo. */
+.pay-bank-moneda {
+  display: inline-flex; margin: 0 0 6px 4px; padding: 2px 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.pay-bank-moneda.is-soles { color: var(--color-accent-700); }
+.pay-bank-moneda.is-dolares { color: #7a5a1e; background: #f7efdc; }
 /* Las cuentas ya no son todas del mismo titular (BCP es de Krisli), así
    que cada banco dice a nombre de quién está. */
 .pay-bank-owner {

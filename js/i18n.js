@@ -195,6 +195,8 @@
     "A nombre de André Leon": "Account holder: André Leon",
     "A nombre de Krisli Heidinger Abadia": "Account holder: Krisli Heidinger Abadia",
     "Cuenta en dólares": "US dollar account",
+    "Soles · S/": "Soles (PEN) · S/",
+    "Dólares · US$": "US dollars · US$",
     "Copiar el número de Yape": "Copy the Yape number",
     "Copiar la cuenta BCP en dólares": "Copy the BCP US dollar account",
     "Copiar el CCI del BCP": "Copy the BCP CCI",
