@@ -31,14 +31,14 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610060108">
-<link rel="stylesheet" href="css/site.css?v=202610060108">
+<link rel="stylesheet" href="css/tokens.css?v=202610111958">
+<link rel="stylesheet" href="css/site.css?v=202610111958">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
      para volver al diseño anterior, borra esta línea nada más. -->
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610060108">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610111958">
 <!-- Idioma (js/i18n.js): va primero, en el <head>, para traducir al
      inglés la página mientras se lee, antes de que se pinte. -->
-<script src="js/i18n.js?v=202610060108"></script>
+<script src="js/i18n.js?v=202610111958"></script>
 </head>
 <body>
 
@@ -227,7 +227,7 @@
         <span class="hero-name">Krisli</span>
       </h1>
       <div class="hero-date">09 · 01 · 2027</div>
-      <p class="hero-venue">4:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
+      <p class="hero-venue">Desde las 2:00 p.m.<br>Iglesia Vida Nueva Rinconada<br>La Molina — Lima</p>
       <p class="hero-welcome" data-guest-welcome hidden></p>
       <div class="hero-cta"><a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a></div>
     </div>
@@ -258,11 +258,11 @@
           <span class="save-date-month">Enero 2027</span>
         </div>
         <div class="save-date-side">
-          <span class="save-date-label">Hora</span>
-          <strong class="save-date-value">4:00 p.m.</strong>
+          <span class="save-date-label">Llegada</span>
+          <strong class="save-date-value">2:00 p.m.</strong>
         </div>
       </div>
-      <p class="save-date-note">La ceremonia empieza puntual a las <strong>4:00 p.m.</strong> en la Iglesia Vida Nueva Rinconada, La Molina. Te esperamos desde las <strong>2:30 p.m.</strong> para acomodarnos con calma.</p>
+      <p class="save-date-note">Te esperamos a las <strong>2:00 p.m.</strong> en la Iglesia Vida Nueva Rinconada, La Molina. Te recomendamos llegar a esa hora para ubicarte con calma y no perderte nada.</p>
       <div class="countdown-grid">
         <div class="countdown-box"><span class="countdown-num" data-countdown="dias">–</span><span class="countdown-lbl">días</span></div>
         <div class="countdown-box"><span class="countdown-num" data-countdown="horas">–</span><span class="countdown-lbl">horas</span></div>
@@ -309,7 +309,7 @@
             <span class="photo-label" style="display:block;padding:110px 0;text-align:center;background:var(--color-accent-2-200)">mapa de Google incrustado — agrégalo en config.js</span>
           </div>
           <div class="venue-card">
-            <p class="venue-text">4:00 p.m.<br>La Molina — Lima</p>
+            <p class="venue-text">Llegada: 2:00 p.m.<br>La Molina — Lima</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <a class="btn btn-primary" data-maps-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Google Maps</a>
               <a class="btn btn-secondary" data-waze-url="ceremonia" href="#" aria-disabled="true" target="_blank" rel="noopener">Abrir en Waze</a>
@@ -349,16 +349,10 @@
         <p class="section-lede" style="margin:10px auto 0;text-align:center">Lo más importante para nosotros es compartir este día contigo. Si además quieres acompañarnos con un regalo, un aporte será la forma más práctica de ayudarnos en esta nueva etapa.</p>
       </div>
       <div class="gifts-grid">
-      <!-- Datos para transferir y "¿Ya nos hiciste un regalo?" van en UNA
-           tarjeta, arriba y abajo de una línea: antes eran dos cajas
-           separadas y el aviso quedaba lejos de las cuentas a las que se
-           refiere. -->
       <div class="transfer-box">
       <div class="pay-card-wrap">
-        <details class="pay-sheet">
-          <summary class="pay-toggle">
-            <span class="pay-toggle-txt">Ver datos para transferir</span>
-          </summary>
+        <div class="pay-sheet">
+          <p class="pay-sheet-head">Datos para transferir</p>
           <div class="pay-bank">
             <span class="pay-bank-tag">Yape / Plin</span>
             <div class="pay-row">
@@ -404,73 +398,9 @@
             </div>
           </div>
           <p class="pay-note">Todas a nombre de André Leon.</p>
-        </details>
+        </div>
       </div>
 
-        <!-- Aviso de transferencia (bloques 3a y 6g de claude.ai/design).
-             Son tres estados de la MISMA tarjeta, no un modal: preguntar,
-             luego el formulario de agradecimiento, luego el acuse. El
-             invitado nunca sale de la sección. -->
-        <div class="transferencia-card" id="transferencia-card">
-
-          <!-- Paso 1 — la pregunta -->
-          <div class="transferencia-paso" id="transferencia-paso1">
-            <div class="transferencia-texto">
-              <strong>¿Ya nos hiciste un regalo?</strong>
-              <p>Nos encantará saberlo. Cuando hayas realizado tu transferencia, avísanos para saber que fue tu regalo y poder agradecértelo personalmente.</p>
-            </div>
-            <button type="button" class="btn btn-primary" id="transferencia-btn">Ya transferí — avisar a los novios</button>
-          </div>
-
-          <!-- Paso 2 — el agradecimiento, que es también el formulario -->
-          <div class="transferencia-paso transferencia-gracias" id="transferencia-paso2" hidden>
-            <span class="transferencia-icono" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </span>
-            <div class="transferencia-texto">
-              <strong class="transferencia-titulo" id="transferencia-titulo">¡Gracias!</strong>
-              <p>Le avisaremos a André y Krisli de tu detalle.</p>
-              <p class="transferencia-fecha" id="transferencia-fecha"></p>
-
-              <!-- Solo sin link personal (initTransferencia lo muestra): sin
-                   esto el aviso llegaba sin nombre y no se sabía de quién era. -->
-              <div class="field" id="transferencia-nombre-field" hidden>
-                <label for="transferencia-nombre">Tu nombre <span class="field-tag is-req">obligatorio</span></label>
-                <input class="input" id="transferencia-nombre" autocomplete="name" placeholder="Nombre y apellido">
-              </div>
-
-              <div class="field">
-                <label for="transferencia-mensaje">Mensaje para los novios <span class="field-tag is-req">obligatorio</span></label>
-                <textarea class="input" id="transferencia-mensaje" rows="3" placeholder="Unas palabras para ellos…" aria-describedby="transferencia-error" required></textarea>
-              </div>
-
-              <div class="field">
-                <label class="gift-upload" for="transferencia-constancia" id="transferencia-upload">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                  <span class="gift-upload-txt">Adjuntar constancia</span>
-                  <span class="gift-upload-opt">· opcional</span>
-                </label>
-                <input type="file" id="transferencia-constancia" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
-              </div>
-
-              <p class="rsvp-error" id="transferencia-error" role="alert" hidden></p>
-              <button type="button" class="btn btn-primary btn-block" id="transferencia-enviar">Enviar aviso</button>
-              <p class="transferencia-nota">Sin el mensaje no podemos enviarlo.</p>
-            </div>
-          </div>
-
-          <!-- Paso 3 — acuse -->
-          <div class="transferencia-paso transferencia-gracias" id="transferencia-paso3" hidden>
-            <span class="transferencia-icono" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </span>
-            <div class="transferencia-texto">
-              <strong class="transferencia-titulo">Aviso enviado</strong>
-              <p id="transferencia-acuse"></p>
-            </div>
-          </div>
-
-        </div>
       </div>
 
         <!-- Franja de la lista de regalos (bloque 3a): antes era una fila
@@ -716,9 +646,10 @@
       <div class="faq-grid">
         <details class="faq-item">
           <summary class="q">¿A qué hora debo llegar?</summary>
-          <!-- Cuadra con "Te esperamos desde las 2:30" (Reserva la fecha)
-               y con "30 minutos antes" (el pase). -->
-          <p class="a">Las puertas abren a las 2:30 p.m. y la ceremonia empieza puntual a las 4:00 p.m. Te recomendamos llegar a más tardar a las 3:30 p.m. para ubicarte con calma.</p>
+          <!-- Cuadra con "Te esperamos a las 2:00" (Reserva la fecha) y con
+               la llegada del pase. La hora de inicio real no se dice en
+               ningún lado, a propósito (ver weddingDateISO en config.js). -->
+          <p class="a">Te recomendamos llegar a la iglesia a las 2:00 p.m. para ubicarte con calma y no perderte nada.</p>
         </details>
         <details class="faq-item">
           <summary class="q">¿Puedo llevar niños?</summary>
@@ -808,10 +739,10 @@
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
 
-<script src="js/config.js?v=202610060108"></script>
-<script src="js/pase.js?v=202610060108"></script>
-<script src="js/efectos.js?v=202610060108"></script>
-<script src="js/site.js?v=202610060108"></script>
-<script src="js/sello-raspable.js?v=202610060108"></script>
+<script src="js/config.js?v=202610111958"></script>
+<script src="js/pase.js?v=202610111958"></script>
+<script src="js/efectos.js?v=202610111958"></script>
+<script src="js/site.js?v=202610111958"></script>
+<script src="js/sello-raspable.js?v=202610111958"></script>
 </body>
 </html>

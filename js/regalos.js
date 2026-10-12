@@ -66,7 +66,7 @@
     ui(false);
     btn.addEventListener("click", function () {
       if (audio.paused) {
-        audio.play().then(function () { ui(true); window.Efectos.musica.marcar(true); }).catch(function () {});
+        window.Efectos.musica.sonar(audio).then(function () { ui(true); window.Efectos.musica.marcar(true); }).catch(function () {});
       } else {
         audio.pause();
         ui(false);
@@ -83,7 +83,7 @@
         if (!audio.paused) { audio.pause(); pausadaSola = true; ui(false); }
       } else if (pausadaSola) {
         pausadaSola = false;
-        audio.play().then(function () { ui(true); }).catch(function () {});
+        window.Efectos.musica.sonar(audio).then(function () { ui(true); }).catch(function () {});
       }
     });
   }
@@ -502,12 +502,8 @@
         name.textContent = g.nombre;
         card.appendChild(name);
 
-        if (g.descripcion) {
-          var desc = document.createElement("p");
-          desc.className = "gift-card-desc";
-          desc.textContent = g.descripcion;
-          card.appendChild(desc);
-        }
+        // Sin descripción a propósito: solo el título del regalo (la
+        // columna "descripcion" de la hoja ya no se muestra).
 
         // Mientras no haya foto real (foto_url vacío en la hoja de
         // cálculo) se muestra un marcador en vez de dejar el hueco vacío

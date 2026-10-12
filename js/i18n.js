@@ -157,9 +157,12 @@
     "Reserva la fecha": "Save the date",
     "Día": "Day",
     "Hora": "Time",
-    "La ceremonia empieza puntual a las": "The ceremony starts promptly at",
-    "en la Iglesia Vida Nueva Rinconada, La Molina. Te esperamos desde las": "at Vida Nueva Rinconada Church, La Molina. Doors open at",
-    "para acomodarnos con calma.": "so we can all settle in calmly.",
+    "Llegada": "Arrival",
+    "Te esperamos a las": "We'll be expecting you at",
+    "en la Iglesia Vida Nueva Rinconada, La Molina. Te recomendamos llegar a esa hora para ubicarte con calma y no perderte nada.":
+      "at Vida Nueva Rinconada Church, La Molina. We recommend arriving at that time so you can find your seat calmly and not miss a thing.",
+    "Desde las 2:00 p.m.": "From 2:00 p.m.",
+    "Llegada: 2:00 p.m.": "Arrival: 2:00 p.m.",
     "días": "days",
     "horas": "hours",
     "min": "min",
@@ -293,8 +296,8 @@
     "Preguntas y respuestas": "Questions and answers",
     "Lo que suelen preguntarnos": "What people usually ask us",
     "¿A qué hora debo llegar?": "What time should I arrive?",
-    "Las puertas abren a las 2:30 p.m. y la ceremonia empieza puntual a las 4:00 p.m. Te recomendamos llegar a más tardar a las 3:30 p.m. para ubicarte con calma.":
-      "Doors open at 2:30 p.m. and the ceremony starts promptly at 4:00 p.m. We recommend arriving by 3:30 p.m. at the latest so you can find your seat calmly.",
+    "Te recomendamos llegar a la iglesia a las 2:00 p.m. para ubicarte con calma y no perderte nada.":
+      "We recommend arriving at the church at 2:00 p.m. so you can find your seat calmly and not miss a thing.",
     "¿Puedo llevar niños?": "Can I bring children?",
     "La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.":
       "The celebration is adults only, except for the children who are part of the ceremony.",
@@ -379,15 +382,9 @@
     // — el pase (js/pase.js) —
     "Invitación a nombre de": "Invitation for",
     "Invitado": "Guest",
-    "Llegada": "Arrival",
-    "La ceremonia empieza puntual.": "The ceremony starts promptly.",
     "Blanco reservado para la novia.": "White is reserved for the bride.",
     "Código de pase": "Pass code",
-    "Solo de referencia.": "For reference only.",
     "Recomendaciones": "Good to know",
-    "Código QR con el link a la invitación": "QR code linking to the invitation",
-    "Escanéalo para volver": "Scan it to go back",
-    "a tu invitación": "to your invitation",
     "Mesa de regalos y mapa en la invitación web.": "Gift registry and map in the web invitation.",
     "Hay estacionamiento alrededor del recinto, con personal de seguridad.": "There's parking around the venue, with security staff.",
     "Este pase es personal y es válido para la ceremonia.": "This pass is personal and valid for the ceremony.",
@@ -482,8 +479,8 @@
     [/^foto de (.+)$/, function (m) { return "photo of " + nombre(m[1]); }],
     [/^Continuar con (.+)$/, function (m) { return "Continue with " + nombre(m[1]); }],
     [/^Gracias por este regalo, (.+)$/, function (m) { return "Thank you for this gift, " + m[1]; }],
-    [/^Las puertas abren a las 2:30 p\.m\.; la ceremonia empieza puntual a las (.+)\.$/, function (m) {
-      return "Doors open at 2:30 p.m.; the ceremony starts promptly at " + fechas(m[1]) + "."; }],
+    [/^Te recomendamos llegar a la iglesia a las (.+) para ubicarte con calma\.$/, function (m) {
+      return "We recommend arriving at the church at " + fechas(m[1]) + " so you can find your seat calmly."; }],
     [/^André & Krisli — (.+)$/, function (m) { return "André & Krisli — " + fechas(m[1]); }],
   ];
 

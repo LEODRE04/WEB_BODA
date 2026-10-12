@@ -82,7 +82,6 @@
     // Las tarjetas de cada sección entran al llegar a la pantalla.
     if (window.Efectos) window.Efectos.revelar("main .envelope-card, main .prayer-card");
     initGiftListLink(codigo);
-    initTransferencia(guestPromise);
   }
 
   // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
@@ -722,7 +721,7 @@
 
     btn.addEventListener("click", function () {
       if (audio.paused) {
-        audio.play().then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () {});
+        window.Efectos.musica.sonar(audio).then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () {});
       } else {
         audio.pause();
         setPlayingUI(false);
@@ -735,7 +734,7 @@
     if (openBtn) {
       openBtn.addEventListener("click", function () {
         btn.hidden = false;
-        audio.play().then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () { setPlayingUI(false); });
+        window.Efectos.musica.sonar(audio).then(function () { setPlayingUI(true); marcarMusica(true); }).catch(function () { setPlayingUI(false); });
       });
     }
 
@@ -768,7 +767,7 @@
         }
       } else if (pausedAutomatically) {
         pausedAutomatically = false;
-        audio.play().then(function () { setPlayingUI(true); }).catch(function () {});
+        window.Efectos.musica.sonar(audio).then(function () { setPlayingUI(true); }).catch(function () {});
       }
     }
     document.addEventListener("visibilitychange", function () { handleAutoPause(document.hidden); });
@@ -931,7 +930,7 @@
     var paseBtn = modal.querySelector("#rsvp-thanks-pase");
     var cambiarBtn = modal.querySelector("#rsvp-thanks-cambiar");
 
-    // "Sábado 9 de enero · 4:00 p.m.", armado desde config.js para que no
+    // "Sábado 9 de enero · 2:00 p.m.", armado desde config.js para que no
     // pueda decir una hora distinta a la del resto de la invitación.
     var cuando = "";
     var inicio = new Date(W.weddingDateISO);
@@ -1347,183 +1346,6 @@
   // pudimos cargar la lista de regalos" — que es justo lo que pasaba.
   var API_TIMEOUT_MS = 30000;
   var PENDIENTE_KEY = "rsvp_pendiente";
-
-  // — aviso de transferencia (bloques 3a y 6g de claude.ai/design) —
-  // Tres estados de la misma tarjeta, sin modal: la pregunta, el
-  // agradecimiento —que es también el formulario— y el acuse. El
-  // mensaje es obligatorio (así lo pidió André en el diseño); la
-  // constancia es opcional. Se guarda en la misma hoja de Aportes que
-  // la lista de regalos, con regalo_id "deposito" (ver APORTE_DEPOSITO
-  // en docs/apps-script/Code.gs). El nombre sale del ?codigo= de la
-  // invitación, así que no hay campo que llenar para eso. —
-  function initTransferencia(guestPromise) {
-    var card = document.querySelector("#transferencia-card");
-    if (!card) return;
-
-    var paso1 = card.querySelector("#transferencia-paso1");
-    var paso2 = card.querySelector("#transferencia-paso2");
-    var paso3 = card.querySelector("#transferencia-paso3");
-    var abrirBtn = card.querySelector("#transferencia-btn");
-    var enviarBtn = card.querySelector("#transferencia-enviar");
-    var mensajeEl = card.querySelector("#transferencia-mensaje");
-    var errorEl = card.querySelector("#transferencia-error");
-    var tituloEl = card.querySelector("#transferencia-titulo");
-    var acuseEl = card.querySelector("#transferencia-acuse");
-    var fileInput = card.querySelector("#transferencia-constancia");
-    var uploadLabel = card.querySelector("#transferencia-upload");
-    var etiquetaEnvio = enviarBtn.textContent;
-
-    var nombreInvitado = "";
-    var nombreField = card.querySelector("#transferencia-nombre-field");
-    var nombreInput = card.querySelector("#transferencia-nombre");
-    function pedirNombre() { if (nombreField) nombreField.hidden = false; }
-    if (guestPromise) {
-      guestPromise.then(function (guest) {
-        if (guest && guest.nombre) {
-          nombreInvitado = guest.nombre;
-          tituloEl.textContent = "¡Gracias, " + nombreInvitado.split(" ")[0] + "!";
-        } else {
-          // Sin link personal (o sin respuesta de la API) no sabemos quién
-          // es: se le pide el nombre para que el aviso no llegue anónimo.
-          pedirNombre();
-        }
-      }, pedirNombre);
-    } else {
-      pedirNombre();
-    }
-
-    // En cuanto escribe algo, el campo deja de marcarse como error.
-    mensajeEl.addEventListener("input", function () {
-      if (mensajeEl.value.trim()) {
-        mensajeEl.removeAttribute("aria-invalid");
-        errorEl.hidden = true;
-      }
-    });
-
-    abrirBtn.addEventListener("click", function () {
-      // La fecha se pone al abrir, no al cargar la página: es la fecha
-      // del aviso, no la de la visita.
-      var fechaEl = card.querySelector("#transferencia-fecha");
-      if (fechaEl) {
-        fechaEl.textContent = "Aviso del " + new Date().toLocaleDateString("es-PE", {
-          day: "numeric", month: "long", year: "numeric", timeZone: "America/Lima",
-        }) + ".";
-      }
-      paso1.hidden = true;
-      paso2.hidden = false;
-      mensajeEl.focus();
-    });
-
-    // Misma compresión que la lista de regalos: una foto de celular sin
-    // reescalar hace que el request se caiga por tamaño.
-    function comprimirImagen(file) {
-      return new Promise(function (resolve, reject) {
-        var reader = new FileReader();
-        reader.onerror = reject;
-        reader.onload = function () {
-          var img = new Image();
-          img.onerror = reject;
-          img.onload = function () {
-            var scale = Math.min(1, 1000 / img.width);
-            var canvas = document.createElement("canvas");
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL("image/jpeg", 0.72));
-          };
-          img.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    var constanciaDataUrl = "";
-    fileInput.addEventListener("change", function () {
-      var file = fileInput.files && fileInput.files[0];
-      if (!file) return;
-      errorEl.hidden = true;
-      // El botón lleva un clip (SVG) adentro: escribirle textContent lo
-      // borraría. Solo se cambia el <span> del texto.
-      var uploadTxt = uploadLabel.querySelector(".gift-upload-txt") || uploadLabel;
-      uploadTxt.textContent = "Cargando…";
-      comprimirImagen(file)
-        .then(function (dataUrl) {
-          constanciaDataUrl = dataUrl;
-          uploadTxt.textContent = file.name.length > 22 ? file.name.slice(0, 20) + "…" : file.name;
-          uploadLabel.classList.add("has-file");
-        })
-        .catch(function () {
-          constanciaDataUrl = "";
-          uploadTxt.textContent = "No se pudo leer, prueba con otra";
-          uploadLabel.classList.remove("has-file");
-          uploadLabel.classList.remove("has-file");
-        });
-    });
-
-    enviarBtn.addEventListener("click", function () {
-      var nombreAviso = nombreInvitado || (nombreInput ? nombreInput.value.trim() : "");
-      if (!nombreAviso && nombreField && !nombreField.hidden) {
-        enfocarCampoFaltante(nombreInput);
-        errorEl.textContent = "Escribe tu nombre para que sepan de quién es el regalo.";
-        errorEl.hidden = false;
-        nombreInput.focus();
-        return;
-      }
-      var mensaje = mensajeEl.value.trim();
-      if (!mensaje) {
-        enfocarCampoFaltante(mensajeEl);
-        errorEl.textContent = "Escríbeles un mensaje, aunque sea corto — es lo que les llega.";
-        errorEl.hidden = false;
-        mensajeEl.setAttribute("aria-invalid", "true");
-        mensajeEl.focus();
-        return;
-      }
-      errorEl.hidden = true;
-      enviarBtn.disabled = true;
-      enviarBtn.textContent = "Enviando…";
-      var quitarAviso = avisoEnvioLento(enviarBtn);
-
-      var url = (W.rsvp && W.rsvp.apiUrl) || "";
-      fetchConTimeout(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // ver docs/RSVP-BACKEND.md: evita el preflight CORS
-        body: JSON.stringify({
-          tipo: "aporte",
-          regalo_id: "deposito",
-          nombre: nombreAviso,
-          monto: 0,
-          mensaje: mensaje,
-          comprobante_base64: constanciaDataUrl || "",
-          comprobante_nombre: (nombreAviso || "invitado").replace(/\s+/g, "-").toLowerCase(),
-        }),
-      }, 45000)
-        .then(function (r) { return r.json().catch(function () { throw new Error("respuesta inesperada"); }); })
-        .then(function (data) {
-          if (data && data.error) {
-            // Un rechazo del servidor (imagen muy pesada, etc.) no es un
-            // problema de conexión: se muestra su motivo en vez de pedir
-            // que reintente algo que va a volver a fallar igual.
-            var errServidor = new Error(data.error);
-            errServidor.servidor = true;
-            throw errServidor;
-          }
-          acuseEl.textContent = "Ya se lo hicimos saber a André y Krisli" +
-            (constanciaDataUrl ? ", con tu constancia adjunta." : ".") +
-            " Gracias de corazón.";
-          paso2.hidden = true;
-          paso3.hidden = false;
-        })
-        .catch(function (err) {
-          console.error("No se pudo enviar el aviso de transferencia:", err);
-          mostrarError(errorEl, "No pudimos enviar tu aviso.", err && err.servidor ? detalleServidor(err.message) : null);
-        })
-        .then(function () {
-          quitarAviso();
-          enviarBtn.disabled = false;
-          enviarBtn.textContent = etiquetaEnvio;
-        });
-    });
-  }
 
   // — llevar la pantalla al campo que falta —
   // El aviso de error vive al pie del formulario, así que con el teclado

@@ -256,11 +256,50 @@
   function estadoMusica() {
     try { return sessionStorage.getItem(CLAVE); } catch (e) { return null; }
   }
+  // — la música entra suave —
+  // Al abrir el sobre la canción arrancaba de golpe a todo volumen. Ahora
+  // empieza en silencio y sube en unos segundos hasta un volumen de
+  // fondo. iPhone ignora audio.volume (siempre suena al máximo), así que
+  // si ya hay contexto de Web Audio (el toque sobre el sello lo crea) la
+  // canción pasa por un nodo de ganancia, que ahí sí funciona; si no, se
+  // sube audio.volume poco a poco.
+  var VOLUMEN_MUSICA = 0.35;
+  var ENTRADA_MUSICA = 4; // segundos
+  function sonarSuave(audio) {
+    var g = audio._ganancia || null;
+    if (!g && ctx && ctx.createMediaElementSource) {
+      try {
+        var fuente = ctx.createMediaElementSource(audio);
+        g = ctx.createGain();
+        fuente.connect(g); g.connect(ctx.destination);
+        audio._ganancia = g;
+      } catch (e) { g = null; }
+    }
+    clearInterval(audio._rampa);
+    if (g) {
+      if (ctx.state !== "running") ctx.resume();
+      audio.volume = 1;
+      var t = ctx.currentTime;
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(VOLUMEN_MUSICA, t + ENTRADA_MUSICA);
+    } else {
+      var inicio = Date.now();
+      audio.volume = 0;
+      audio._rampa = setInterval(function () {
+        var p = Math.min(1, (Date.now() - inicio) / (ENTRADA_MUSICA * 1000));
+        audio.volume = VOLUMEN_MUSICA * p * p; // el oído percibe mejor una subida curva
+        if (p >= 1) clearInterval(audio._rampa);
+      }, 50);
+    }
+    return audio.play();
+  }
+
   // Intenta retomar; alSonar se llama cuando de verdad empieza.
   function continuarMusica(audio, alSonar) {
     if (!audio || estadoMusica() !== "on") return false;
     var intentar = function () {
-      return audio.play().then(function () { if (alSonar) alSonar(); });
+      return sonarSuave(audio).then(function () { if (alSonar) alSonar(); });
     };
     intentar().catch(function () {
       var alPrimerToque = function (e) {
@@ -303,6 +342,6 @@
     confeti: confeti,
     sonido: { desbloquear: desbloquear, roce: roce, papel: papel },
     revelar: revelar,
-    musica: { marcar: marcarMusica, estado: estadoMusica, continuar: continuarMusica },
+    musica: { marcar: marcarMusica, estado: estadoMusica, continuar: continuarMusica, sonar: sonarSuave },
   };
 })();
