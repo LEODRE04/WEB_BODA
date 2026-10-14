@@ -2402,3 +2402,21 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
 @media (max-width: 640px) {
   .rsvp .rsvp-note { padding-right: 56px; }
 }
+
+/* — agregar al calendario (resumen de la confirmación) — */
+.cal-menu > summary { list-style: none; font-size: 13.5px; }
+.cal-menu > summary::-webkit-details-marker { display: none; }
+/* Se despliega dentro de la tarjeta (no flotando encima de la página). */
+.cal-menu[open] { flex-basis: 100%; }
+.cal-menu-opciones {
+  margin-top: 8px; max-width: 320px;
+  display: flex; flex-direction: column; gap: 2px; padding: 8px;
+  background: var(--color-surface); border-radius: 18px;
+}
+.cal-menu-op {
+  display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: none;
+  font: inherit; font-size: 15px; font-weight: 600; text-align: left; color: var(--color-accent-800);
+  text-decoration: none; cursor: pointer;
+}
+.cal-menu-op:hover, .cal-menu-op:focus-visible { background: var(--color-accent-100); }
+.cal-menu-nota { margin: 6px 12px 4px; font-size: 12.5px; line-height: 1.45; color: var(--color-text-muted); }

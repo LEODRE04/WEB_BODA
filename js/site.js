@@ -60,7 +60,7 @@
     initDynamicLinks();
     initMusicToggle();
     initPetals();
-    initSaveDateCalendar();
+    initCalendario();
 
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
@@ -87,45 +87,78 @@
   // "Agregar al calendario" en "Reserva la fecha": arma un .ics al vuelo
   // (funciona con Apple/Google/Outlook Calendar) en vez de depender de un
   // link a un solo proveedor — no requiere backend ni conexión.
-  // Sin uso por ahora: el botón "Agregar al calendario" se quitó de
-  // "Reserva la fecha" (se encimaba con la cuenta regresiva en celular).
-  // La función se conserva armada porque genera el .ics al vuelo: si el
-  // botón vuelve, basta con volver a ponerlo en el HTML.
-  function initSaveDateCalendar() {
-    var btn = document.querySelector("#save-date-calendar");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var start = new Date(W.weddingDateISO);
-      if (isNaN(start.getTime())) return;
-      var end = new Date(start.getTime() + 5 * 60 * 60 * 1000); // 5h: ceremonia + recepción, aprox.
+  // — agregar al calendario (resumen de la confirmación, solo si va) —
+  // Google Calendar y Outlook web se abren con el evento listo para
+  // guardar; el .ics (Apple Calendar, Outlook de escritorio y casi
+  // cualquier otra app) además trae dos avisos, una semana y un día antes.
+  // Google y Outlook web no aceptan avisos desde un link: usan el que cada
+  // persona tenga configurado. La hora es la de llegada (weddingDateISO),
+  // la misma que dice toda la invitación.
+  function datosEvento() {
+    var start = new Date(W.weddingDateISO);
+    if (isNaN(start.getTime())) return null;
+    var nombres = W.couple ? W.couple.a + " & " + W.couple.b : "André & Krisli";
+    var codigo = codigoDelLink();
+    var link = window.location.origin + window.location.pathname.replace(/[^/]*$/, "") +
+      (codigo ? "index.html?codigo=" + encodeURIComponent(codigo) : "");
+    return {
+      start: start,
+      end: new Date(start.getTime() + 5 * 60 * 60 * 1000), // 5h: ceremonia + recepción, aprox.
+      titulo: "Boda de " + nombres,
+      lugar: W.venue ? W.venue.name + ", " + W.venue.area : "",
+      detalle: "Te esperamos a las " + (W.arrivalLabel || "") + " en la iglesia. Tu invitación: " + link,
+    };
+  }
 
-      function toICSDate(d) {
-        return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-      }
-      function icsEscape(s) {
-        return String(s || "").replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;");
-      }
+  function initCalendario() {
+    var menu = document.querySelector("#rsvp-saved-cal");
+    var ev = datosEvento();
+    if (!menu || !ev) return;
+    function utc(d) { return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"; }
 
-      var nombres = W.couple ? W.couple.a + " & " + W.couple.b : "André & Krisli";
-      var lugar = W.venue ? W.venue.name + ", " + W.venue.area : "";
-      var ics = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//Boda " + nombres + "//ES",
+    var google = menu.querySelector('[data-cal="google"]');
+    if (google) google.href = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      "&text=" + encodeURIComponent(ev.titulo) +
+      "&dates=" + utc(ev.start) + "/" + utc(ev.end) +
+      "&ctz=America/Lima" +
+      "&location=" + encodeURIComponent(ev.lugar) +
+      "&details=" + encodeURIComponent(ev.detalle);
+
+    var outlook = menu.querySelector('[data-cal="outlook"]');
+    if (outlook) outlook.href = "https://outlook.live.com/calendar/0/action/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent" +
+      "&subject=" + encodeURIComponent(ev.titulo) +
+      "&startdt=" + encodeURIComponent(ev.start.toISOString()) +
+      "&enddt=" + encodeURIComponent(ev.end.toISOString()) +
+      "&location=" + encodeURIComponent(ev.lugar) +
+      "&body=" + encodeURIComponent(ev.detalle);
+
+    var ics = menu.querySelector('[data-cal="ics"]');
+    if (ics) ics.addEventListener("click", function () {
+      function esc(t) { return String(t || "").replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;"); }
+      function aviso(cuando, texto) {
+        return ["BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + esc(texto), "TRIGGER:" + cuando, "END:VALARM"];
+      }
+      var lineas = [
+        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//" + esc(ev.titulo) + "//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
         "BEGIN:VEVENT",
-        "UID:boda-" + start.getTime() + "@leodre04.github.io",
-        "DTSTAMP:" + toICSDate(new Date()),
-        "DTSTART:" + toICSDate(start),
-        "DTEND:" + toICSDate(end),
-        "SUMMARY:" + icsEscape("Boda de " + nombres),
-        "LOCATION:" + icsEscape(lugar),
-        "DESCRIPTION:" + icsEscape("Nos encantaría contar contigo ese día."),
-        "END:VEVENT",
-        "END:VCALENDAR",
-      ].join("\r\n");
-
-      var blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
+        "UID:boda-" + ev.start.getTime() + "@leodre04.github.io",
+        "DTSTAMP:" + utc(new Date()),
+        "DTSTART:" + utc(ev.start),
+        "DTEND:" + utc(ev.end),
+        "SUMMARY:" + esc(ev.titulo),
+        "LOCATION:" + esc(ev.lugar),
+        "DESCRIPTION:" + esc(ev.detalle),
+      ].concat(aviso("-P7D", "En una semana: " + ev.titulo))
+       .concat(aviso("-P1D", "Mañana: " + ev.titulo))
+       .concat(["END:VEVENT", "END:VCALENDAR"]);
+      var texto = lineas.join("\r\n");
+      // En iPhone/iPad una descarga de .ics no abre el calendario; navegar
+      // al archivo sí muestra "Agregar al calendario".
+      if (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        window.location.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(texto);
+        return;
+      }
+      var url = URL.createObjectURL(new Blob([texto], { type: "text/calendar;charset=utf-8" }));
       var a = document.createElement("a");
       a.href = url;
       a.download = "Boda-Andre-y-Krisli.ics";
@@ -133,6 +166,11 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+
+    // Elegida una opción, el menú se cierra.
+    menu.querySelectorAll(".cal-menu-op").forEach(function (op) {
+      op.addEventListener("click", function () { menu.open = false; });
     });
   }
 
@@ -1339,6 +1377,8 @@
       asistentesWrap.hidden = !attending;
       if (attending) asistentesEl.textContent = asistentes === 1 ? "1 persona" : asistentes + " personas";
       if (paseBtn) paseBtn.hidden = !attending;
+      var calMenu = block.querySelector("#rsvp-saved-cal");
+      if (calMenu) { calMenu.hidden = !attending; calMenu.open = false; }
       var regalosEl = block.querySelector("#rsvp-saved-regalos");
       if (regalosEl) regalosEl.hidden = !attending;
       noteEl.textContent = attending

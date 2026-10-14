@@ -31,14 +31,14 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610140103">
-<link rel="stylesheet" href="css/site.css?v=202610140103">
+<link rel="stylesheet" href="css/tokens.css?v=202610140109">
+<link rel="stylesheet" href="css/site.css?v=202610140109">
 <!-- Prueba de diseño "elegante dorado" (inspirado en festejabonito.com) —
      para volver al diseño anterior, borra esta línea nada más. -->
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610140103">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610140109">
 <!-- Idioma (js/i18n.js): va primero, en el <head>, para traducir al
      inglés la página mientras se lee, antes de que se pinte. -->
-<script src="js/i18n.js?v=202610140103"></script>
+<script src="js/i18n.js?v=202610140109"></script>
 </head>
 <body>
 
@@ -247,9 +247,8 @@
        chico, en "Cuándo y dónde" más abajo. Basado en un mockup de
        claude.ai/design, adaptado a los tokens de color/tipografía del
        sitio en vez del fondo oscuro de página completa que traía ese
-       mockup. El botón "Agregar al calendario" arma un .ics al vuelo
-       (ver initSaveDateCalendar en site.js); "Cómo llegar" reutiliza el
-       mismo data-directions-url que ya arma initDynamicLinks. -->
+       mockup. "Agregar al calendario" vive ahora en el resumen de la
+       confirmación (ver initCalendario en site.js). -->
   <section id="fecha" class="save-date">
     <div class="envelope-card floral-frame">
       <div class="section-kicker">Reserva la fecha</div>
@@ -639,6 +638,20 @@
         </div>
         <div class="rsvp-actions rsvp-actions-saved">
           <button type="button" class="btn btn-secondary" id="rsvp-saved-pase" hidden>Descargar mi pase</button>
+          <!-- Agregar al calendario (initCalendario en site.js): solo si va.
+               Google y Outlook web abren el evento listo para guardar; el
+               .ics además trae avisos una semana y un día antes, que es lo
+               único que una web puede fijar. <details> da el abrir/cerrar
+               y el teclado sin JavaScript. -->
+          <details class="cal-menu" id="rsvp-saved-cal" hidden>
+            <summary class="btn btn-secondary">Agregar a mi calendario</summary>
+            <div class="cal-menu-opciones">
+              <a class="cal-menu-op" data-cal="google" href="#" target="_blank" rel="noopener">Google Calendar</a>
+              <a class="cal-menu-op" data-cal="outlook" href="#" target="_blank" rel="noopener">Outlook</a>
+              <button type="button" class="cal-menu-op" data-cal="ics">Apple Calendar u otro</button>
+              <p class="cal-menu-nota">Con Apple Calendar u otro te avisamos una semana y un día antes. En Google y Outlook se usa el aviso que tengas configurado.</p>
+            </div>
+          </details>
           <button type="button" class="btn btn-ghost" id="rsvp-saved-edit">Editar mi respuesta</button>
         </div>
         <p class="rsvp-note" id="rsvp-saved-note"></p>
@@ -759,10 +772,10 @@
   <div class="when">09 · 01 · 2027 — LA MOLINA, LIMA</div>
 </footer>
 
-<script src="js/config.js?v=202610140103"></script>
-<script src="js/pase.js?v=202610140103"></script>
-<script src="js/efectos.js?v=202610140103"></script>
-<script src="js/site.js?v=202610140103"></script>
-<script src="js/sello-raspable.js?v=202610140103"></script>
+<script src="js/config.js?v=202610140109"></script>
+<script src="js/pase.js?v=202610140109"></script>
+<script src="js/efectos.js?v=202610140109"></script>
+<script src="js/site.js?v=202610140109"></script>
+<script src="js/sello-raspable.js?v=202610140109"></script>
 </body>
 </html>
