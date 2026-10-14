@@ -698,6 +698,9 @@ html:has(#envelope-gate:not([hidden])) { overflow: hidden; height: 100%; }
   body { font-size-adjust: 0.5; }
   .section-lede { font-size: 17px; }
   .welcome-verse blockquote { font-size: 21px; }
+  /* La firma va en manuscrita, que no entra en el ajuste de tamaño, y en
+     computadora se había quedado en 17px (en celular ya iba a 25px). */
+  .prayer-card .prayer-signature { font-size: 28px; line-height: 1.35; }
   input, textarea, select, button { font-size-adjust: inherit; }
   .pase-card, .pase-card * { font-size-adjust: none; }
   .envelope-gate-inner { max-width: 520px; }
