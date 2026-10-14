@@ -110,7 +110,7 @@ function doGet(e) {
       return jsonOut({ regalos: listRegalosCacheado() });
     }
 
-    var codigo = (params.codigo || "").trim();
+    var codigo = normalizarCodigo(params.codigo);
     if (!codigo) return jsonOut({ error: "falta 'codigo'" });
 
     var guest = findGuest(codigo);
@@ -156,7 +156,7 @@ function doPost(e) {
       return jsonOut({ error: "respuesta de asistencia no válida" });
     }
 
-    var codigo = String(data.codigo || "").trim();
+    var codigo = normalizarCodigo(data.codigo);
     var nombre = String(data.nombre).trim().slice(0, MAX_NOMBRE);
     var num = parseInt(data.num_asistentes, 10);
     // Sin link personal no se confirma. Antes se aceptaba cualquier nombre
@@ -174,6 +174,9 @@ function doPost(e) {
     // mano en el navegador.
     var esperado = 1 + guest.acompanantes_permitidos;
     if (isNaN(num) || num < 0) num = asistencia === "si" ? esperado : 0;
+    // Quien no viene ocupa 0 lugares. Antes se guardaba el número que
+    // mandara el formulario (2 o 3 aunque dijera "no") y la hoja confundía.
+    if (asistencia === "no") num = 0;
     if (num > esperado) {
       return jsonOut({ error: "supera los asistentes de tu invitación (" + esperado + ")" });
     }
@@ -197,6 +200,12 @@ function doPost(e) {
 }
 
 // — helpers —
+
+// Mismo criterio que codigoDelLink en js/site.js: minúsculas y sin la
+// puntuación que se pega al copiar el link desde un mensaje.
+function normalizarCodigo(v) {
+  return String(v || "").trim().toLowerCase().replace(/[.,;:!?)\]}'"»”]+$/, "");
+}
 
 // Cualquier excepción inesperada (hoja renombrada, lock que expiró por
 // contención, cuota de Apps Script) se devuelve como error REINTENTABLE:

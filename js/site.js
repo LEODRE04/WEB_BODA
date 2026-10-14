@@ -65,7 +65,7 @@
     // Se resuelve una sola vez el invitado del link (?codigo=...) y se
     // comparte entre el saludo de arriba y el formulario de RSVP, para no
     // consultar la API dos veces.
-    var codigo = new URLSearchParams(window.location.search).get("codigo");
+    var codigo = codigoDelLink();
     var guestPromise = codigo ? fetchGuest(codigo) : Promise.resolve(null);
 
     // thanksModal necesita codigo/guestPromise (tipo_invitacion, nombre del
@@ -989,7 +989,7 @@
     function open(attending, info) {
       info = info || {};
       lastInfo = info;
-      var nombre = (info.nombre || "").trim().split(" ")[0]; // solo el primer nombre, más cercano
+      var nombre = nombreCercano(info.nombre);
       var pases = parseInt(info.num_asistentes, 10) || 1;
 
       modal.querySelectorAll("[data-thanks-attending]").forEach(function (el) { el.hidden = !attending; });
@@ -1315,14 +1315,18 @@
       lastData = data;
       var attending = data.asistencia === "si";
       var nombre = (data.nombre || "").trim();
-      var firstName = nombre.split(" ")[0];
+      var firstName = nombreCercano(nombre);
       var asistentes = parseInt(data.num_asistentes, 10) || 1;
 
       if (titleEl) titleEl.textContent = attending ? "Nos alegra tenerte aquí" : "Te vamos a extrañar";
       if (ledeEl) {
         ledeEl.textContent = attending
           ? (firstName ? "Tu lugar ya está guardado, " + firstName + ". " : "Tu lugar ya está guardado. ") +
-            "Nos vemos el " + (W.weddingDateLabel || "pronto") + ""
+            // "Nos vemos el sábado 9 de enero…": la etiqueta de config.js
+            // empieza con mayúscula y no termina en punto.
+            (W.weddingDateLabel
+              ? ("Nos vemos el " + W.weddingDateLabel.charAt(0).toLowerCase() + W.weddingDateLabel.slice(1)).replace(/\.?$/, ".")
+              : "Nos vemos pronto.")
           : (firstName ? "Gracias por avisarnos, " + firstName + ". " : "Gracias por avisarnos. ") +
             "Te vamos a extrañar ese día, y te agradecemos mucho el cariño de siempre.";
       }
@@ -1352,7 +1356,13 @@
       if (ledeEl) ledeEl.innerHTML = originalLede;
     }
 
-    if (editBtn) editBtn.addEventListener("click", hide);
+    if (editBtn) editBtn.addEventListener("click", function () {
+      // Al editar una respuesta ya guardada el botón dice "Actualizar", no
+      // "Confirmar" (antes solo lo decía si la página cargó con respuesta).
+      var submit = document.querySelector("#rsvp-submit");
+      if (submit) submit.textContent = "Actualizar";
+      hide();
+    });
 
     return { show: show, hide: hide };
   }
@@ -1443,12 +1453,48 @@
 
   // Busca a un invitado por su código (?codigo=...). Devuelve null si la API
   // no responde: el formulario sigue abierto, sin restricciones.
+  // El código tal como llega en el link, limpio: en minúsculas y sin la
+  // puntuación que se pega al copiarlo de un mensaje ("…?codigo=ana-ruiz."
+  // o con un paréntesis al final). Los códigos de la hoja son minúsculas
+  // El nombre para un saludo cercano ("Gracias, Lucía."). Se usaba siempre
+  // la primera palabra, y con "Familia García" o "Pastor Ruiz" salía
+  // "Gracias, Familia." / "Gracias, Pastor.": si empieza con un título o
+  // con "Familia", va el nombre completo.
+  var TITULOS = /^(familia|flia\.?|pastor|pastora|pr\.?|hno\.?|hna\.?|hermano|hermana|sr\.?|sra\.?|srta\.?|se[ñn]or|se[ñn]ora|dr\.?|dra\.?|ing\.?|lic\.?|t[ií]o|t[ií]a|abuelo|abuela)$/i;
+  function nombreCercano(nombre) {
+    var limpio = String(nombre || "").trim().replace(/\s+/g, " ");
+    if (!limpio) return "";
+    var primera = limpio.split(" ")[0];
+    return TITULOS.test(primera) ? limpio : primera;
+  }
+
+  // con guiones, así que esto nunca rompe uno bueno.
+  function codigoDelLink() {
+    var c = new URLSearchParams(window.location.search).get("codigo");
+    if (!c) return null;
+    c = c.trim().toLowerCase().replace(/[.,;:!?)\]}'"»”]+$/, "");
+    return c || null;
+  }
+
+  // null = "no se pudo saber" (sin red, API caída): la página no afirma
+  // nada sobre el link. Un error del backend ({error, reintentable}, p. ej.
+  // la hoja lenta o sin cuota) se trataba como un invitado sin "found" y
+  // terminaba en "No reconocemos este link", aunque el link fuera bueno.
+  // Ahora se reintenta una vez y, si sigue fallando, también es null.
   function fetchGuest(codigo) {
     var url = W.rsvp && W.rsvp.apiUrl;
     if (!url) return Promise.resolve(null);
-    return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; });
+    function pedir() {
+      return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    }
+    return pedir().then(function (body) {
+      if (!body || !body.error) return body;
+      return new Promise(function (ok) { setTimeout(ok, 1500); })
+        .then(pedir)
+        .then(function (otra) { return otra && !otra.error ? otra : null; });
+    });
   }
 
   // Punto único de integración con el backend. El éxito/error se decide

@@ -15,8 +15,31 @@
     else document.addEventListener("DOMContentLoaded", fn);
   }
 
+  // Mismo criterio que codigoDelLink en site.js. El código tal como llega en el link, limpio: en minúsculas y sin la
+  // puntuación que se pega al copiarlo de un mensaje ("…?codigo=ana-ruiz."
+  // o con un paréntesis al final). Los códigos de la hoja son minúsculas
+  // El nombre para un saludo cercano ("Gracias, Lucía."). Se usaba siempre
+  // la primera palabra, y con "Familia García" o "Pastor Ruiz" salía
+  // "Gracias, Familia." / "Gracias, Pastor.": si empieza con un título o
+  // con "Familia", va el nombre completo.
+  var TITULOS = /^(familia|flia\.?|pastor|pastora|pr\.?|hno\.?|hna\.?|hermano|hermana|sr\.?|sra\.?|srta\.?|se[ñn]or|se[ñn]ora|dr\.?|dra\.?|ing\.?|lic\.?|t[ií]o|t[ií]a|abuelo|abuela)$/i;
+  function nombreCercano(nombre) {
+    var limpio = String(nombre || "").trim().replace(/\s+/g, " ");
+    if (!limpio) return "";
+    var primera = limpio.split(" ")[0];
+    return TITULOS.test(primera) ? limpio : primera;
+  }
+
+  // con guiones, así que esto nunca rompe uno bueno.
+  function codigoDelLink() {
+    var c = new URLSearchParams(window.location.search).get("codigo");
+    if (!c) return null;
+    c = c.trim().toLowerCase().replace(/[.,;:!?)\]}'"»”]+$/, "");
+    return c || null;
+  }
+
   function init() {
-    var codigo = new URLSearchParams(window.location.search).get("codigo");
+    var codigo = codigoDelLink();
 
     // Si llegó con ?codigo=, se lo lleva de vuelta al volver a la
     // invitación (para no perder el saludo/precarga del RSVP) y se usa
@@ -413,11 +436,28 @@
     // se le acaba de aportar.
     function finishAndReturnToList() {
       if (!isMobileFlow()) return;
-      seleccionadoId = null;
-      renderGrid();
-      panel.hidden = true;
       if (mobileContinueBar) mobileContinueBar.hidden = true;
       showListStep();
+    }
+
+    // Tras un aporte enviado, el formulario se vacía y el regalo deja de
+    // estar elegido. Antes quedaba todo cargado (regalo, monto, mensaje y
+    // constancia) con el botón activo, y un segundo clic —o volver a
+    // tocar "Ya transferí" por duda— registraba el mismo aporte otra vez.
+    // El nombre se conserva: es la misma persona.
+    function limpiarFormularioAporte() {
+      seleccionadoId = null;
+      montoNumInput.value = "";
+      mensajeInput.value = "";
+      comprobanteDataUrl = null;
+      fileInput.value = "";
+      uploadTxt.textContent = "Adjuntar constancia";
+      uploadLabel.classList.remove("has-file");
+      errorEl.hidden = true;
+      if (completeHintEl) completeHintEl.hidden = true;
+      panel.hidden = true;
+      if (mobileContinueBar) mobileContinueBar.hidden = true;
+      renderGrid();
     }
     if (mobileContinueBtn) {
       mobileContinueBtn.addEventListener("click", function () {
@@ -778,11 +818,16 @@
     }
 
     function initSlider(falta) {
-      var min = Math.min(10, falta);
+      // Sin mínimo: la explicación de la lista dice que no lo hay, y antes
+      // un S/ 3 se cambiaba solo a S/ 10.
+      var min = 1;
       var max = Math.max(min, falta);
       montoNumInput.min = min;
       montoNumInput.max = max;
-      montoNumInput.value = max; // arranca en lo que falta para completarlo
+      // Arranca vacío: antes venía con lo que falta para completarlo, y
+      // quien solo escribía su nombre y enviaba daba el regalo por completo
+      // sin haber decidido cuánto aportar.
+      montoNumInput.value = "";
       renderMontos(max);
     }
 
@@ -919,7 +964,7 @@
         return;
       }
       if (!monto || monto <= 0) {
-        errorEl.textContent = "El monto tiene que ser mayor a 0.";
+        errorEl.textContent = "Elige o escribe cuánto quieres aportar.";
         errorEl.hidden = false;
         enfocarCampoFaltante(montoNumInput);
         return;
@@ -977,6 +1022,7 @@
           // Avance optimista (este aporte como "por confirmar") para el
           // modal de agradecimiento — cargarRegalos() abajo trae el valor
           // real en cuanto responde el backend.
+          limpiarFormularioAporte();
           if (thanksModal && g) thanksModal.open(g, monto, mensaje, nombre);
           cargarRegalos(); // refresca el avance para todos los regalos
         })
@@ -1013,7 +1059,7 @@
     // monto, el estado, la barra de avance y el mensaje en recuadros; el
     // avance lo ven igual al volver a la lista.
     function open(g, monto, mensaje, nombre) {
-      var firstName = (nombre || "").trim().split(" ")[0];
+      var firstName = nombreCercano(nombre);
       titleEl.textContent = firstName ? "Gracias por este regalo, " + firstName : "Gracias por este regalo";
       abrirDialogo(modal);
     }

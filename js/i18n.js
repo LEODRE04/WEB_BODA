@@ -366,7 +366,8 @@
     "Ver los que faltan": "See the remaining ones",
     "Elige un regalo de la lista de arriba.": "Choose a gift from the list above.",
     "Escribe tu nombre para que sepamos de parte de quién es.": "Write your name so we know who it's from.",
-    "El monto tiene que ser mayor a 0.": "The amount has to be greater than 0.",
+    "Si transfieres en dólares, escribe el equivalente aproximado en soles.": "If you transfer in US dollars, enter the approximate equivalent in soles.",
+    "Elige o escribe cuánto quieres aportar.": "Choose or type how much you'd like to contribute.",
     "No pudimos enviar tu aporte.": "We couldn't send your contribution.",
 
     // — el pase (js/pase.js) —
@@ -443,8 +444,8 @@
     [/^Gracias, (.+)\. Tu lugar ya está guardado\.$/, function (m) { return "Thank you, " + m[1] + ". Your seat is saved."; }],
     [/^Gracias por avisarnos, (.+)\. Te tendremos presente ese día\.$/, function (m) {
       return "Thank you for letting us know, " + m[1] + ". We'll be thinking of you that day."; }],
-    [/^Tu lugar ya está guardado(?:, (.+))?\. Nos vemos el (.+)$/, function (m) {
-      return "Your seat is saved" + (m[1] ? ", " + m[1] : "") + ". See you on " + fechas(m[2]); }],
+    [/^Tu lugar ya está guardado(?:, (.+))?\. Nos vemos el (.+?)\.?$/, function (m) {
+      return "Your seat is saved" + (m[1] ? ", " + m[1] : "") + ". See you on " + fechas(m[2]) + "."; }],
     [/^Gracias por avisarnos(?:, (.+))?\. Te vamos a extrañar ese día, y te agradecemos mucho el cariño de siempre\.$/, function (m) {
       return "Thank you for letting us know" + (m[1] ? ", " + m[1] : "") + ". We'll miss you that day, and we're grateful for your love as always."; }],
     [/^Respondiste el (.+)$/, function (m) { return "You replied on " + fechas(m[1]); }],

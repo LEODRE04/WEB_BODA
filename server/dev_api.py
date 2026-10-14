@@ -17,6 +17,7 @@ Uso:
 """
 import base64
 import json
+import re
 import sys
 import threading
 import uuid
@@ -40,11 +41,20 @@ _lock = threading.Lock()
 
 
 def load_guests():
-    # Si existe invitados.real.json (generado localmente, nunca commiteado)
-    # se usa esa; si no, la lista de prueba de siempre.
-    guests_file = GUESTS_FILE_REAL if GUESTS_FILE_REAL.exists() else GUESTS_FILE_TEST
-    data = json.loads(guests_file.read_text(encoding="utf-8"))
-    return {g["codigo"]: g for g in data["invitados"]}
+    # La lista de prueba va siempre (los códigos de la documentación, como
+    # familia-garcia, tienen que funcionar), y si existe invitados.real.json
+    # (generado localmente, nunca commiteado) se suma encima.
+    guests = {}
+    for guests_file in (GUESTS_FILE_TEST, GUESTS_FILE_REAL):
+        if guests_file.exists():
+            data = json.loads(guests_file.read_text(encoding="utf-8"))
+            guests.update({g["codigo"]: g for g in data["invitados"]})
+    return guests
+
+
+def normalizar_codigo(v):
+    # Igual que normalizarCodigo en Code.gs.
+    return re.sub(r"""[.,;:!?)\]}'"»”]+$""", "", str(v or "").strip().lower())
 
 
 def load_responses():
@@ -147,7 +157,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _handle_get_rsvp(self, parsed):
         qs = parse_qs(parsed.query)
-        codigo = (qs.get("codigo") or [""])[0].strip()
+        codigo = normalizar_codigo((qs.get("codigo") or [""])[0])
         if not codigo:
             return self._json(400, {"error": "falta 'codigo'"})
 
@@ -180,7 +190,7 @@ class Handler(SimpleHTTPRequestHandler):
         if data.get("tipo") == "aporte":
             return self._handle_aporte(data)
 
-        codigo = (data.get("codigo") or "").strip()
+        codigo = normalizar_codigo(data.get("codigo"))
         # Igual que Code.gs: sin link personal no se confirma.
         if not codigo:
             return self._json(200, {"error": "Para confirmar necesitas tu link personal de invitación. Escríbenos por WhatsApp y te lo enviamos."})
@@ -218,6 +228,8 @@ class Handler(SimpleHTTPRequestHandler):
             num = 1 if asistencia == "si" else 0
         else:
             num = min(num, 10)
+        if asistencia == "no":
+            num = 0  # igual que Code.gs: quien no viene ocupa 0 lugares
         limpio = {"codigo": codigo, "nombre": nombre, "num_asistentes": str(num), "asistencia": asistencia}
         ahora = datetime.now(timezone.utc).isoformat()
 
@@ -252,17 +264,17 @@ class Handler(SimpleHTTPRequestHandler):
         if not regalo_id:
             return self._json(400, {"error": "falta el regalo"})
 
-        # Igual que en Code.gs: el aviso de depósito no pide nombre ni
-        # monto y no corresponde a ningún regalo, así que se salta las
-        # tres validaciones.
-        if regalo_id != APORTE_DEPOSITO:
-            if not nombre:
-                return self._json(400, {"error": "falta el nombre"})
-            if monto <= 0:
-                return self._json(400, {"error": "el monto tiene que ser mayor a 0"})
-            gift_ids = {g["id"] for g in load_gifts()}
-            if regalo_id not in gift_ids:
-                return self._json(400, {"error": "ese regalo ya no existe"})
+        # Mismas validaciones que handleAporte en Code.gs (el aviso de
+        # depósito ya no se acepta: es un id que no está en la lista).
+        if not nombre:
+            return self._json(400, {"error": "falta el nombre"})
+        if monto <= 0:
+            return self._json(400, {"error": "el monto tiene que ser mayor a 0"})
+        precios = {g["id"]: float(g.get("precio") or 0) for g in load_gifts()}
+        if regalo_id not in precios:
+            return self._json(400, {"error": "ese regalo ya no existe"})
+        if precios[regalo_id] > 0 and monto > precios[regalo_id]:
+            return self._json(400, {"error": "el aporte no puede ser mayor al precio del regalo (S/ %g)" % precios[regalo_id]})
 
         comprobante_url = ""
         b64 = data.get("comprobante_base64") or ""

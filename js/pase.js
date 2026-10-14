@@ -92,10 +92,16 @@ window.WeddingPase = (function () {
     var start = new Date(W.weddingDateISO);
     var diaSemana = start.toLocaleDateString(I.locale, { weekday: "long", timeZone: "America/Lima" });
     diaSemana = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
-    var dia = pad2(start.getDate());
+    // Día y año en hora de Lima, igual que el día de la semana y el mes:
+    // con getDate() un invitado en Asia u Oceanía veía "10" en vez de "09".
+    var enLima = function (campo) {
+      var o = { timeZone: "America/Lima" }; o[campo] = "numeric";
+      return Number(start.toLocaleDateString("en-US", o));
+    };
+    var dia = pad2(enLima("day"));
     var mesAnio = start.toLocaleDateString(I.locale, { month: "long", year: "numeric", timeZone: "America/Lima" });
     mesAnio = mesAnio.charAt(0).toUpperCase() + mesAnio.slice(1);
-    var year = start.getFullYear();
+    var year = enLima("year");
     var pases = opts.numAsistentes || 1;
 
     // Diseño minimalista: papel blanco con un filete fino, los ramos de

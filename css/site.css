@@ -1696,7 +1696,7 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
    de leer incluso con el contraste ya corregido. */
 @media (max-width: 640px) {
   .section-kicker, .hero-eyebrow, .details-label,
-  .save-date-label, .gift-list-band-kicker { font-size: 12.5px; }
+  .save-date-label, .gift-list-band-kicker { font-size: 13px; }
   .field-tag { font-size: 11.5px; }
   .save-date-month { font-size: 12px; }
   .pay-row-label { font-size: 14px; }
@@ -1705,8 +1705,8 @@ body.solo-ceremonia [data-reception-only] { display: none !important; }
   .gift-list-band-note { font-size: 14px; }
   /* Nada por debajo de 12px en un teléfono: las etiquetas de la cuenta
      regresiva estaban en 10px y la marca "por confirmar" en 11. */
-  .countdown-lbl { font-size: 12px; }
-  .tag { font-size: 12px; }
+  .countdown-lbl { font-size: 13px; }
+  .tag { font-size: 13px; }
 }
 
 /* Línea de "puede tardar unos segundos" bajo un botón de envío que lleva
@@ -2396,3 +2396,9 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
 .rsvp-note.nota-aporte { margin-top: 12px; }
 .dialog-actions.dialog-actions-centro { justify-content: center; }
 #gift-intro-close { font-size: 14px; }
+.gift-monto-nota { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--color-text-muted); }
+/* En celular el botón flotante de música (abajo a la derecha) tapaba el
+   final de "Puedes editar tu respuesta hasta…". */
+@media (max-width: 640px) {
+  .rsvp .rsvp-note { padding-right: 56px; }
+}
