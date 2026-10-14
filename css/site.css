@@ -2420,3 +2420,28 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
 }
 .cal-menu-op:hover, .cal-menu-op:focus-visible { background: var(--color-accent-100); }
 .cal-menu-nota { margin: 6px 12px 4px; font-size: 12.5px; line-height: 1.45; color: var(--color-text-muted); }
+
+/* — cuentas como desplegables (mesa de regalos de la invitación) —
+   Cerrado: banco, moneda y titular, con una flecha. Abierto: los números.
+   Mismo dibujo de flecha que las preguntas frecuentes. */
+details.pay-bank { padding: 0; }
+.pay-bank-head {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px;
+  padding: 16px 18px; min-height: 44px; box-sizing: border-box;
+  list-style: none; cursor: pointer; border-radius: 20px;
+}
+.pay-bank-head::-webkit-details-marker { display: none; }
+.pay-bank-head:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+.pay-bank-head::after {
+  content: ""; grid-column: 2; grid-row: 1 / span 2; width: 9px; height: 9px; margin-top: -4px;
+  border-right: 2px solid var(--color-accent-700); border-bottom: 2px solid var(--color-accent-700);
+  transform: rotate(45deg); transition: transform .2s ease;
+}
+details.pay-bank[open] > .pay-bank-head::after { transform: rotate(-135deg); margin-top: 4px; }
+.pay-bank-titulo { grid-column: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 0; }
+.pay-bank-head .pay-bank-tag, .pay-bank-head .pay-bank-moneda { margin-bottom: 0; }
+.pay-bank-head .pay-bank-owner { grid-column: 1; margin: 4px 0 0; }
+.pay-bank-cuerpo { padding: 0 18px 16px; }
+.pay-bank-cuerpo > .pay-row:first-child {
+  padding-top: 12px; border-top: 1px dashed var(--color-divider);
+}
