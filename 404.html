@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>André &amp; Krisli — página no encontrada</title>
+<!-- GitHub Pages sirve este archivo para cualquier dirección que no
+     existe dentro del sitio (p. ej. un link de WhatsApp copiado a medias),
+     y puede ser a cualquier profundidad: /WEB_BODA/algo/otra-cosa. Por eso
+     todas las rutas cuelgan de <base> y no son relativas a la dirección. -->
+<base href="/WEB_BODA/">
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="css/tokens.css?v=202610140005">
+<link rel="stylesheet" href="css/site.css?v=202610140005">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610140005">
+<style>
+  .no-encontrada {
+    min-height: 100dvh; box-sizing: border-box; padding: 48px 20px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--color-surface);
+  }
+  .no-encontrada .envelope-card { max-width: 520px; text-align: center; padding-top: 64px; }
+  .no-encontrada p { margin: 12px auto 0; max-width: 40ch; color: var(--color-text-soft); line-height: 1.6; text-wrap: pretty; }
+  .no-encontrada .btn { margin-top: 26px; }
+</style>
+</head>
+<body>
+<main class="no-encontrada">
+  <div class="envelope-card floral-frame">
+    <div class="section-kicker">André &amp; Krisli · 09 · 01 · 2027</div>
+    <h1 class="section-title">Esta página no existe</h1>
+    <p>Puede que el link se haya copiado incompleto. Si te llegó por WhatsApp, vuelve a abrirlo desde el mensaje o entra directo a la invitación.</p>
+    <a class="btn btn-primary" id="ir-invitacion" href="index.html">Ir a la invitación</a>
+  </div>
+</main>
+<script>
+  // Si el link roto traía el código del invitado (…?codigo=familia-garcia),
+  // se conserva: así llega a SU invitación y no a la genérica.
+  (function () {
+    var codigo = new URLSearchParams(location.search).get("codigo");
+    if (codigo) document.getElementById("ir-invitacion").href = "index.html?codigo=" + encodeURIComponent(codigo);
+  })();
+</script>
+</body>
+</html>

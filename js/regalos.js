@@ -924,6 +924,15 @@
         enfocarCampoFaltante(montoNumInput);
         return;
       }
+      // El campo ya se ajusta solo al salir de él (evento change), pero se
+      // vuelve a revisar acá por si se escribió y se tocó Enviar directo.
+      var tope = Number(montoNumInput.max);
+      if (tope > 0 && monto > tope) {
+        errorEl.textContent = "El aporte no puede ser mayor a lo que falta para este regalo (S/ " + tope + ").";
+        errorEl.hidden = false;
+        enfocarCampoFaltante(montoNumInput);
+        return;
+      }
       errorEl.hidden = true;
 
       var g = regalos.filter(function (r) { return r.id === seleccionadoId; })[0];

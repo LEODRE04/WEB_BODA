@@ -628,7 +628,25 @@
       });
     }
 
+    // El día de la boda (en hora de Lima, aunque el invitado esté en otro
+    // país) la cuenta regresiva deja paso a un "¡Hoy es el día!": contar
+    // horas y minutos esa misma mañana se siente frío. Solo ese día; antes
+    // y después se queda la cuenta como siempre.
+    var grid = document.querySelector(".countdown-grid");
+    var hoyEl = document.querySelector("#countdown-hoy");
+    function diaLima(t) { return new Date(t).toLocaleDateString("en-CA", { timeZone: "America/Lima" }); }
+    var diaBoda = diaLima(target);
+    function esElDia() { return diaLima(Date.now()) === diaBoda; }
+    function mostrarHoy() {
+      if (!hoyEl || !grid) return false;
+      grid.hidden = true;
+      hoyEl.hidden = false;
+      return true;
+    }
+    if (esElDia() && mostrarHoy()) return;
+
     function tick() {
+      if (esElDia() && mostrarHoy()) { clearInterval(intervalo); return; }
       var diff = Math.max(0, target - Date.now());
       var s = Math.floor(diff / 1000);
       var d = Math.floor(s / 86400);
@@ -642,8 +660,8 @@
       setAll(els.mins, pad2(m));
       setAll(els.segs, pad2(s));
     }
+    var intervalo = setInterval(tick, 1000);
     tick();
-    setInterval(tick, 1000);
   }
 
   function pad2(n) {

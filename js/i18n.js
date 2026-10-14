@@ -184,6 +184,8 @@
     "Abrir en Waze": "Open in Waze",
     "La recepción será después de la ceremonia.": "The reception will follow the ceremony.",
     "Mapa de la ceremonia": "Ceremony map",
+    "¡Hoy es el día!": "Today is the day!",
+    "en la iglesia.": "at the church.",
     "Mapa de la recepción": "Reception map",
     // mesa de regalos
     "Mesa de regalos": "Gift registry",
@@ -425,6 +427,8 @@
 
   /* ——— frases que los scripts arman con nombres, números y fechas ——— */
   var PATRONES = [
+    [/^El aporte no puede ser mayor a lo que falta para este regalo \(S\/ (\d+)\)\.$/, function (m) {
+      return "The contribution can't be more than what's left for this gift (S/ " + m[1] + ")."; }],
     [/^Tienes (\d+) pases? reservados? para nuestra boda$/, function (m) {
       return "You have " + m[1] + (m[1] === "1" ? " seat" : " seats") + " reserved for our wedding"; }],
     [/^Estamos muy felices de poder invitarte\. Guardamos (un lugar|(\d+) lugares) pensando en ti, para (.+)\.$/, function (m) {

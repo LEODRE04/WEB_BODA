@@ -487,10 +487,6 @@ function sumAportesPorRegalo() {
 // Valida que el regalo exista leyendo SOLO la columna de ids. Antes esto
 // llamaba a listRegalos(), que además se traía la hoja de aportes entera
 // solo para descartar el resultado.
-function existeRegalo(regaloId) {
-  return precioDeRegalo(regaloId) !== null;
-}
-
 // El precio del regalo (columna E), o null si no existe. Lee la columna
 // de ids y una sola celda, no la hoja entera.
 function precioDeRegalo(regaloId) {
@@ -517,8 +513,16 @@ function handleAporte(data) {
   }
 
   if (!nombre) return jsonOut({ error: "falta el nombre" });
-  if (!monto || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
-  if (!existeRegalo(regaloId)) return jsonOut({ error: "ese regalo ya no existe" });
+  if (!monto || !isFinite(monto) || monto <= 0) return jsonOut({ error: "el monto tiene que ser mayor a 0" });
+  var precio = precioDeRegalo(regaloId);
+  if (precio === null) return jsonOut({ error: "ese regalo ya no existe" });
+  // Tope: un aporte no puede superar el precio del regalo. Sin esto, un
+  // error de tipeo (15000 en vez de 150) daba el regalo por completo. No
+  // se topa contra "lo que falta": dos personas aportando a la vez
+  // podrían rechazarse entre sí, y pasarse un poco no le hace daño a nadie.
+  if (precio > 0 && monto > precio) {
+    return jsonOut({ error: "el aporte no puede ser mayor al precio del regalo (S/ " + precio + ")" });
+  }
 
   // Subir la captura a Drive es lo más lento de todo el request (varios
   // segundos con una foto de celular), así que se hace FUERA del lock —

@@ -17,12 +17,12 @@
 <!-- Solo los pesos que se usan: 400, 500, 600 y la cursiva 400. El 300
      se pedía y no lo usa ninguna regla. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610132352">
-<link rel="stylesheet" href="css/site.css?v=202610132352">
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610132352">
+<link rel="stylesheet" href="css/tokens.css?v=202610140005">
+<link rel="stylesheet" href="css/site.css?v=202610140005">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610140005">
 <!-- Idioma (js/i18n.js): va primero, en el <head>, para traducir al
      inglés la página mientras se lee, antes de que se pinte. -->
-<script src="js/i18n.js?v=202610132352"></script>
+<script src="js/i18n.js?v=202610140005"></script>
 </head>
 <body>
 <!-- Música que sigue desde la invitación (js/efectos.js): si venía
@@ -57,7 +57,7 @@
        sobre de apertura, etc.) en una página que no los necesita. El
        link de vuelta a index.html y el ?codigo= se resuelven en
        js/regalos.js. -->
-  <section class="gifts" style="padding-top:56px">
+  <section class="gifts gifts-page">
     <div class="envelope-card floral-frame">
       <div class="details-head">
         <div class="section-kicker sage">Mesa de regalos</div>
@@ -134,7 +134,7 @@
         <div class="gift-contribute-head">
           <div>
             <div class="details-label">Tu regalo</div>
-            <div class="details-heading" id="gift-picked-name" style="font-size:24px">—</div>
+            <div class="details-heading" id="gift-picked-name">—</div>
           </div>
           <div class="gift-progress" id="gift-picked-progress"></div>
         </div>
@@ -174,7 +174,7 @@
               </div>
               <div class="field"><label for="gift-mensaje">Mensaje <span class="field-tag is-opt">opcional</span></label><input class="input" id="gift-mensaje" placeholder="Un mensaje para los novios, si quieres…"></div>
             </div>
-            <p class="rsvp-note" style="margin-top:12px">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
+            <p class="rsvp-note nota-aporte">Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.</p>
           </div>
 
           <div class="gift-contribute-howto">
@@ -249,7 +249,7 @@
             <span class="gift-upload-txt">Adjuntar constancia</span>
             <span class="gift-upload-opt">· opcional</span>
           </label>
-          <input type="file" id="gift-comprobante" accept="image/*" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">
+          <input type="file" id="gift-comprobante" accept="image/*" class="visually-hidden">
 
           <p class="gift-error" id="gift-error" role="alert" hidden></p>
           <button class="btn btn-primary btn-block" type="button" id="gift-submit">Ya transferí, avisar a los novios</button>
@@ -275,8 +275,8 @@
       <div class="gift-intro-step sage"><span class="gift-intro-num">3</span><div><strong class="gift-intro-step-title">Los novios reciben el aporte</strong><p>El dinero se entrega directamente a André y Krisli, quienes se encargarán de realizar la compra.</p></div></div>
       <div class="gift-intro-step sage"><span class="gift-intro-num">4</span><div><strong class="gift-intro-step-title">Deja un mensaje</strong><p>Puedes acompañar tu aporte con un mensaje para André y Krisli. Lo recibirán junto con el regalo.</p></div></div>
     </div>
-    <div class="dialog-actions" style="justify-content:center">
-      <button type="button" class="btn btn-primary" id="gift-intro-close" style="font-size:14px">Ver la lista de regalos</button>
+    <div class="dialog-actions dialog-actions-centro">
+      <button type="button" class="btn btn-primary" id="gift-intro-close">Ver la lista de regalos</button>
     </div>
   </div>
 </div>
@@ -288,7 +288,7 @@
 <div class="dialog-backdrop gift-thanks" id="gift-thanks" hidden>
   <div class="dialog gift-thanks-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-thanks-title">
     <button type="button" class="gift-thanks-close" id="gift-thanks-close" aria-label="Cerrar">✕</button>
-    <div class="gift-thanks-photo"><picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli"></picture></div>
+    <div class="gift-thanks-photo"><picture><source srcset="img/p1.webp" type="image/webp"><img src="img/p1.jpg" alt="André y Krisli" loading="lazy" decoding="async"></picture></div>
     <div class="gift-thanks-content">
       <div class="gift-thanks-icon" aria-hidden="true">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
@@ -297,15 +297,15 @@
            barra de avance. El avance lo ven al volver a la lista. -->
       <div class="dialog-title" id="gift-thanks-title">Gracias por este regalo</div>
       <p class="dialog-body">Tu aporte ya suma en la lista. ¡Muchas gracias por acompañarnos!</p>
-      <div class="dialog-actions" style="justify-content:center">
+      <div class="dialog-actions dialog-actions-centro">
         <button type="button" class="btn btn-primary" id="gift-thanks-back">Volver a la lista</button>
       </div>
     </div>
   </div>
 </div>
 
-<script src="js/config.js?v=202610132352"></script>
-<script src="js/efectos.js?v=202610132352"></script>
-<script src="js/regalos.js?v=202610132352"></script>
+<script src="js/config.js?v=202610140005"></script>
+<script src="js/efectos.js?v=202610140005"></script>
+<script src="js/regalos.js?v=202610140005"></script>
 </body>
 </html>

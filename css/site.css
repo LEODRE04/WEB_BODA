@@ -1178,6 +1178,16 @@ body { background: var(--color-neutral-100); }
 
 /* — cuenta regresiva: mismo componente en la portada y en el pie — */
 .countdown-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.countdown-hoy {
+  margin: 24px auto 0; max-width: 360px; padding: 18px 22px; border-radius: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+  background: var(--color-accent-100);
+}
+.countdown-hoy-titulo {
+  font-family: var(--font-script); font-size: 38px; line-height: 1.2; color: var(--color-accent-800);
+  font-size-adjust: none; /* la manuscrita queda fuera del ajuste, ver theme-elegante.css */
+}
+.countdown-hoy-txt { font-size: 16px; color: var(--color-text-soft); text-wrap: balance; }
 .countdown-box {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-width: 66px; padding: 14px 8px; border-radius: var(--radius-md);
@@ -2361,3 +2371,28 @@ body.has-rsvp-bar .music-toggle { bottom: 88px; }
   position: absolute; z-index: 30;
   top: max(14px, env(safe-area-inset-top)); right: 14px;
 }
+
+/* — antes eran estilos escritos en el HTML (style="…") —
+   Pasados acá para poder cambiar el diseño en un solo lugar. Van al
+   final del archivo para conservar la prioridad que tenían en línea. */
+.welcome-lede { max-width: 48ch; }
+.section-lede-centro { margin: 10px auto 0; text-align: center; }
+.venue-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Si el mapa no llega a cargar (sin JavaScript, o Google bloqueado) queda
+   este recuadro; los botones de abajo ya traen el enlace real. */
+.map-fallback {
+  display: flex; align-items: center; justify-content: center; height: 100%;
+  background: var(--color-accent-2-200); color: var(--color-accent-2-800);
+  font-size: 15px; text-align: center;
+}
+#rsvp-lede { margin: 0 0 10px; font-size: 15.5px; line-height: 1.7; color: var(--color-text-soft); }
+.rsvp-contact { margin: 0 0 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rsvp-contact-label { font-size: 13.5px; color: var(--color-text-muted); }
+.rsvp-actions-saved { margin-top: 20px; }
+.rsvp-actions-saved .btn { font-size: 13.5px; }
+#rsvp-saved-note { margin-top: 14px; }
+.gifts.gifts-page { padding-top: 56px; }
+#gift-picked-name { font-size: 24px; }
+.rsvp-note.nota-aporte { margin-top: 12px; }
+.dialog-actions.dialog-actions-centro { justify-content: center; }
+#gift-intro-close { font-size: 14px; }
