@@ -176,7 +176,8 @@ def admin_datos(quien):
     return {"quien": quien, "invitados": invitados, "mesas": _load_json(MESAS_FILE, []),
             "regalos": gifts_with_totals(), "aportes": aportes,
             "historial": list(reversed(_load_json(HISTORIAL_FILE, [])))[:300],
-            "cierre": "2026-11-07T05:00:00.000Z", "urlInvitacion": "http://localhost:5177/"}
+            "cierre": "2026-11-07T05:00:00.000Z", "urlInvitacion": "http://localhost:5177/",
+            "sufijosAplicados": False}
 
 
 def gifts_with_totals():

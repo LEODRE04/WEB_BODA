@@ -1187,6 +1187,7 @@ function adminDatos(quien) {
     historial: historial,
     cierre: FECHA_CIERRE.toISOString(),
     urlInvitacion: URL_INVITACION,
+    sufijosAplicados: !!PropertiesService.getScriptProperties().getProperty("sufijos_aplicados"),
   };
 }
 

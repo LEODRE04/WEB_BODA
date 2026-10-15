@@ -197,8 +197,14 @@
       b.setAttribute("aria-selected", activo ? "true" : "false");
       b.classList.toggle("is-activo", activo);
     });
+    // Aviso mientras los códigos no tengan el sufijo aleatorio. Solo cuando
+    // el backend lo informa explícitamente (false); uno viejo no lo manda.
+    var aviso = estado.datos.sufijosAplicados === false && (estado.vista === "resumen" || estado.vista === "invitados")
+      ? '<p class="adm-aviso adm-aviso-alerta"><b>Los links todavía no tienen el sufijo de seguridad.</b> Antes de enviar las invitaciones, en la hoja: menú <b>Boda › Agregar sufijo aleatorio a los códigos</b>. Luego toca "Actualizar" aquí.</p>'
+      : "";
     var vistas = { resumen: vistaResumen, invitados: vistaInvitados, mesas: vistaMesas, entrada: vistaEntrada, regalos: vistaRegalos, historial: vistaHistorial };
     (vistas[estado.vista] || vistaResumen)($("#adm-vista"));
+    if (aviso) $("#adm-vista").insertAdjacentHTML("afterbegin", aviso);
   }
 
   // ————— RESUMEN —————
