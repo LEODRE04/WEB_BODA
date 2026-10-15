@@ -59,11 +59,26 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // sin preflight CORS, igual que el RSVP
       body: JSON.stringify(body),
-    }).then(function (r) { return r.json(); }).then(function (res) {
+    }).catch(function () {
+      var e = new Error("sin conexión");
+      e.conexion = true;
+      throw e;
+    }).then(function (r) {
+      // Si Apps Script devuelve una página de error (HTML) en vez de JSON,
+      // se dice así y no "sin conexión": son problemas distintos.
+      return r.json().catch(function () { throw new Error("el servidor respondió algo inesperado (HTTP " + r.status + ")"); });
+    }).then(function (res) {
       if (res && res.noAutorizado) { salir("Tu clave ya no es válida. Vuelve a ingresarla."); throw new Error("no autorizado"); }
       if (res && res.error) throw new Error(res.error);
       return res;
     });
+  }
+
+  // Mensaje del ingreso según qué falló: sin internet, o el servidor dijo algo.
+  function mensajeDeError(err) {
+    return err && err.conexion
+      ? "No pudimos conectar. Revisa tu internet e intenta de nuevo."
+      : "No se pudo cargar el panel: " + (err && err.message ? err.message : "error desconocido");
   }
 
   // ————— datos derivados —————
@@ -135,7 +150,7 @@
       guardar(CLAVE_KEY, estado.clave);
       $("#adm-clave").value = "";
     }).catch(function (err) {
-      if (err.message !== "no autorizado") mostrarLogin("No pudimos conectar. Revisa tu internet e intenta de nuevo.");
+      if (err.message !== "no autorizado") mostrarLogin(mensajeDeError(err));
     }).finally(function () {
       btn.disabled = false;
       btn.textContent = "Entrar";
@@ -801,7 +816,7 @@
     mostrarLogin("Falta la dirección del backend (rsvp.apiUrl en js/config.js).");
   } else if (estado.clave) {
     cargar().catch(function (err) {
-      if (err.message !== "no autorizado") mostrarLogin("No pudimos conectar. Revisa tu internet e intenta de nuevo.");
+      if (err.message !== "no autorizado") mostrarLogin(mensajeDeError(err));
     });
   } else {
     mostrarLogin();
