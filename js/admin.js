@@ -18,6 +18,7 @@
     datos: null,
     vista: leer(VISTA_KEY) || "resumen",
     filtros: { q: "", grupo: "", estado: "", tipo: "", mesa: "" },
+    filtrosMesa: { grupo: "", estado: "" },
     mesaSel: null,       // id de la mesa abierta en el plano
     elegido: null,       // código del invitado "en la mano" para soltar en una mesa
     editando: null,      // código con el formulario de respuesta abierto
@@ -431,9 +432,21 @@
     }, 600);
   }
 
+  // Filtros del plano: por grupo y por respuesta. Acotan la lista "Sin
+  // mesa" y atenúan en el plano las mesas sin nadie que cumpla el filtro.
+  function cumpleFiltroMesa(g) {
+    var f = estado.filtrosMesa, e = estadoDe(g);
+    if (f.grupo && g.grupo !== f.grupo) return false;
+    if (f.estado === "confirmado" && e !== "confirmado") return false;
+    if (f.estado === "pendiente" && (e === "confirmado" || e === "rechazado")) return false;
+    return true;
+  }
+  function hayFiltroMesa() { return !!(estado.filtrosMesa.grupo || estado.filtrosMesa.estado); }
+
   function vistaMesas(el) {
     var mesas = estado.datos.mesas;
-    var sinMesa = estado.datos.invitados.filter(function (g) { return !g.mesa && estadoDe(g) !== "rechazado"; })
+    var fm = estado.filtrosMesa;
+    var sinMesa = estado.datos.invitados.filter(function (g) { return !g.mesa && estadoDe(g) !== "rechazado" && cumpleFiltroMesa(g); })
       .sort(function (a, b) {
         var ea = estadoDe(a) === "confirmado" ? 0 : 1, eb = estadoDe(b) === "confirmado" ? 0 : 1;
         return ea - eb || a.nombre.localeCompare(b.nombre, "es");
@@ -444,8 +457,13 @@
 
     el.innerHTML =
       '<div class="adm-mesas-barra">' +
-        '<p><b>' + mesas.length + '</b> mesas · <b>' + sentados + '</b>/' + capacidad + ' lugares ocupados · <b>' + sinMesa.length + '</b> invitaciones sin mesa</p>' +
+        '<p><b>' + mesas.length + '</b> mesas · <b>' + sentados + '</b>/' + capacidad + ' lugares ocupados · <b>' + sinMesa.length + '</b> invitaciones sin mesa' + (hayFiltroMesa() ? " con este filtro" : "") + '</p>' +
         '<button type="button" class="adm-btn adm-btn-primary" id="mesa-nueva">+ Agregar mesa</button>' +
+      '</div>' +
+      '<div class="adm-filtros adm-filtros-mesas">' +
+        '<select id="fm-grupo" aria-label="Filtrar por grupo">' + opciones(grupos(), fm.grupo, "Todos los grupos") + '</select>' +
+        '<select id="fm-estado" aria-label="Filtrar por respuesta">' + opciones([["confirmado", "Confirmaron"], ["pendiente", "Sin responder"]], fm.estado, "Confirmados y sin responder") + '</select>' +
+        (hayFiltroMesa() ? '<button type="button" class="adm-link" id="fm-limpiar">Quitar filtros</button>' : "") +
       '</div>' +
       (estado.elegido ? '<p class="adm-aviso">Toca una mesa para sentar a <b>' + esc(invitado(estado.elegido).nombre) + '</b>. <button type="button" class="adm-link" id="soltar">Cancelar</button></p>' : "") +
       '<div class="adm-mesas-layout">' +
@@ -466,6 +484,11 @@
     });
     var soltar = $("#soltar", el);
     if (soltar) soltar.addEventListener("click", function () { estado.elegido = null; render(); });
+    ["grupo", "estado"].forEach(function (k) {
+      $("#fm-" + k, el).addEventListener("change", function (e) { fm[k] = e.target.value; render(); });
+    });
+    var limpiar = $("#fm-limpiar", el);
+    if (limpiar) limpiar.addEventListener("click", function () { estado.filtrosMesa = { grupo: "", estado: "" }; render(); });
 
     ajustarEscala(el);
     activarPlano($("#plano", el));
@@ -515,8 +538,17 @@
       }
       puntos += '<i class="adm-asiento' + (i < ocup ? " is-ocupado" : "") + '" style="left:' + px.toFixed(1) + '%;top:' + py.toFixed(1) + '%"></i>';
     }
-    var nombres = invs.slice(0, 6).map(function (g) { return esc(g.nombre.split(" ").slice(0, 2).join(" ")) + (asientosDe(g) > 1 ? " ×" + asientosDe(g) : ""); });
+    // Con un filtro activo, los que lo cumplen van primero y en negrita, y
+    // la mesa sin ninguno se atenúa.
+    var filtro = hayFiltroMesa();
+    var cumplen = filtro ? invs.filter(cumpleFiltroMesa) : invs;
+    if (filtro) invs = cumplen.concat(invs.filter(function (g) { return !cumpleFiltroMesa(g); }));
+    var nombres = invs.slice(0, 6).map(function (g) {
+      var txt = esc(g.nombre.split(" ").slice(0, 2).join(" ")) + (asientosDe(g) > 1 ? " ×" + asientosDe(g) : "");
+      return filtro && cumpleFiltroMesa(g) ? "<b>" + txt + "</b>" : txt;
+    });
     if (invs.length > 6) nombres.push("+" + (invs.length - 6) + " más");
+    if (filtro && !cumplen.length) estadoMesa += " is-atenuada";
     return '<div class="adm-mesa ' + (m.forma === "rectangular" ? "is-rect " : "") + estadoMesa + (estado.mesaSel === m.id ? " is-sel" : "") + '" data-mesa="' + esc(m.id) + '" ' +
       'style="left:' + m.x + 'px;top:' + m.y + 'px;width:' + t.w + 'px;height:' + t.h + 'px" tabindex="0" role="button" aria-label="' + esc(m.nombre) + ', ' + ocup + ' de ' + m.capacidad + ' lugares">' +
       puntos +
