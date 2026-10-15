@@ -615,7 +615,7 @@
         reintentar.addEventListener("click", cargarRegalos);
         emptyEl.appendChild(reintentar);
       } else {
-        emptyEl.textContent = "Todavía no hay regalos en la lista — vuelve a intentarlo más tarde, " +
+        emptyEl.textContent = "Todavía no hay regalos en la lista. Vuelve a intentarlo más tarde " +
           "o escríbenos por WhatsApp si tienes dudas.";
       }
     }

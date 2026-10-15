@@ -297,7 +297,7 @@
     "Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.":
       "Only if your invitation says so. When you confirm you'll see how many seats are reserved for you.",
     "¿Hasta cuándo puedo confirmar?": "When is the RSVP deadline?",
-    "Nos ayudaría mucho en la organización que sea lo antes posible; sin embargo la fecha límite es hasta el 7 de noviembre de 2026. Después ya no podremos agregar cubiertos.":
+    "Puedes confirmar hasta el 7 de noviembre de 2026, pero si lo haces antes nos ayudas mucho a organizarnos. Después de esa fecha ya no podremos agregar cubiertos.":
       "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 7, 2026. After that we won't be able to add more seats.",
     "¿Hay estacionamiento?": "Is there parking?",
     "Sí, alrededor del recinto y contaremos con personal de seguridad.": "Yes, around the venue, and there will be security staff.",
@@ -330,8 +330,8 @@
     "Completo": "Completed",
     "Preparando la lista de regalos": "Preparing the gift list",
     "Sigue cargando, gracias por la paciencia": "Still loading, thanks for your patience",
-    "Todavía no hay regalos en la lista — vuelve a intentarlo más tarde, o escríbenos por WhatsApp si tienes dudas.":
-      "There are no gifts on the list yet — try again later, or message us on WhatsApp if you have questions.",
+    "Todavía no hay regalos en la lista. Vuelve a intentarlo más tarde o escríbenos por WhatsApp si tienes dudas.":
+      "There are no gifts on the list yet. Try again later or message us on WhatsApp if you have questions.",
     "No pudimos cargar la lista de regalos.": "We couldn't load the gift list.",
     "Reintentar": "Try again",
     "Continuar": "Continue",
@@ -342,20 +342,20 @@
     "Con esto completas el regalo. ¡Muchas gracias!": "This completes the gift. Thank you so much!",
     "De parte de": "From",
     "Un mensaje para los novios, si quieres…": "A message for the couple, if you like…",
-    "Si alguien más aporta al mismo regalo, se suma — el avance de arriba se actualiza para todos.":
-      "If someone else contributes to the same gift, it adds up — the progress above updates for everyone.",
+    "Si alguien más aporta al mismo regalo, se suma y el avance de arriba se actualiza para todos.":
+      "If someone else contributes to the same gift, it adds up and the progress above updates for everyone.",
     "Transfiere a cualquiera": "Transfer to any of these",
     "Antes de elegir": "Before you choose",
     "Elige el que más te guste. Todos están disponibles hasta completar su monto y no hay un orden de elección ni un mínimo de aporte.":
       "Choose your favorite. They're all available until their amount is reached, and there's no order to follow or minimum contribution.",
     "Aporta lo que prefieras": "Contribute what you like",
-    "No es necesario cubrir el monto completo. Puedes aportar la cantidad que desees.": "You don't need to cover the full amount. You can contribute any amount you wish.",
+    "No hace falta cubrir el monto completo: aporta lo que quieras.": "You don't need to cover the full amount. You can contribute any amount you wish.",
     "Los novios reciben el aporte": "The couple receives the contribution",
-    "El dinero se entrega directamente a André y Krisli, quienes se encargarán de realizar la compra.":
+    "El dinero llega directo a André y Krisli, y ellos hacen la compra.":
       "The money goes directly to André and Krisli, who will make the purchase.",
     "Deja un mensaje": "Leave a message",
-    "Puedes acompañar tu aporte con un mensaje para André y Krisli. Lo recibirán junto con el regalo.":
-      "You can add a message for André and Krisli with your contribution. They'll receive it along with the gift.",
+    "Puedes acompañar tu aporte con un mensaje para André y Krisli. Lo recibirán junto con tu aporte.":
+      "You can add a message for André and Krisli with your contribution. They'll receive it along with your contribution.",
     "Gracias por este regalo": "Thank you for this gift",
     "Tu aporte ya suma en la lista. ¡Muchas gracias por acompañarnos!": "Your contribution already counts on the list. Thank you so much for being part of this!",
     "Mostrar regalos": "Show gifts",
