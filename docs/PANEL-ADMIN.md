@@ -39,7 +39,11 @@ no se indexa; sin una clave válida el backend no devuelve ningún dato.
 - **Resumen:** respondieron, vienen (y cuántos a la recepción), no asisten,
   sin abrir, días al cierre, sentados en mesa, regalos; avance por grupo
   (toca un grupo para ver sus invitados) y respuestas por día.
-- **Invitados:** búsqueda y filtros (grupo, estado, tipo, mesa). Por cada
+- **Invitados:** "+ Agregar invitado" (nombre, pases, tipo de invitación,
+  grupo, prioridad y teléfono; el código del link se genera solo) y
+  "Editar datos" en cada uno (el código no cambia, así su link sigue
+  sirviendo). La fila nueva copia de la de arriba las fórmulas fila por
+  fila que tenga la hoja. Búsqueda y filtros (grupo, estado, tipo, mesa). Por cada
   uno: cuándo abrió el link, su respuesta, mesa, copiar link, recordar por
   WhatsApp y cargar una respuesta a mano (queda en el Historial con quién
   la cargó).

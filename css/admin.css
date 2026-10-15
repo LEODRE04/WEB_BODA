@@ -143,9 +143,10 @@ h2 small { font-family: var(--sans); font-size: 12.5px; font-weight: 400; color:
 .adm-inv-acciones { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; }
 /* En pantallas anchas cada invitado va en una sola fila: con 160
    tarjetas de tres líneas había que bajar demasiado. */
-@media (min-width: 1000px) {
-  /* anchos fijos: con o sin el botón de WhatsApp, las columnas quedan alineadas */
-  .adm-inv { grid-template-columns: minmax(0, 1fr) 150px 210px 420px; padding: 10px 14px; }
+@media (min-width: 1180px) {
+  /* anchos fijos: con o sin el botón de WhatsApp, las columnas quedan
+     alineadas. Por debajo de 1180px las acciones bajan a su propia línea. */
+  .adm-inv { grid-template-columns: minmax(0, 1fr) 140px 190px 540px; padding: 10px 14px; }
   .adm-inv .adm-chip { justify-self: start; }
   .adm-inv-acciones { grid-column: auto; flex-wrap: nowrap; justify-content: flex-end; }
 }
@@ -154,6 +155,14 @@ h2 small { font-family: var(--sans); font-size: 12.5px; font-weight: 400; color:
   background: var(--accent-100); border-radius: 12px; padding: 10px 12px; font-size: 14px;
 }
 .adm-form-resp select { min-height: 34px; }
+.adm-form-datos {
+  grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 12px;
+  background: var(--accent-100); border-radius: 14px; padding: 14px; margin-bottom: 12px;
+}
+.adm-form-datos h2 { grid-column: 1 / -1; margin: 0; font-size: 19px; }
+.adm-form-datos label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--text-soft); }
+.adm-form-datos input, .adm-form-datos select { min-height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--divider); background: var(--bg); font-weight: 400; }
+.adm-campo-ancho { grid-column: 1 / -1; }
 
 /* — mesas — */
 .adm-mesas-barra { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }

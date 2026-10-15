@@ -1071,6 +1071,7 @@ function handleAdmin(data) {
       case "asignarMesa": return jsonOut(adminAsignarMesa(quien, data));
       case "guardarMesas": return jsonOut(adminGuardarMesas(quien, data));
       case "marcarAporte": return jsonOut(adminMarcarAporte(quien, data));
+      case "guardarInvitado": return jsonOut(adminGuardarInvitado(quien, data));
       default: return jsonOut({ error: "acción desconocida" });
     }
   } catch (err) {
@@ -1288,6 +1289,83 @@ function adminGuardarMesas(quien, data) {
     lock.releaseLock();
   }
   return { ok: true };
+}
+
+// — agregar o editar un invitado desde el panel —
+// Sin data.codigo: invitado nuevo, al final de Invitados, con un código
+// armado del nombre (y sufijo aleatorio si los códigos ya lo tienen). Con
+// data.codigo: edita esa fila (el código no cambia: es su link).
+// Las columnas se ubican por encabezado; las fijas son A código, B
+// nombre, C acompañantes y D tipo, igual que en el resto del script.
+function slugCodigo(nombre) {
+  return String(nombre || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "invitado";
+}
+
+function adminGuardarInvitado(quien, data) {
+  var nombre = String(data.nombre || "").trim().slice(0, MAX_NOMBRE);
+  if (!nombre) throw new Error("falta el nombre");
+  var pases = Math.max(1, Math.min(10, parseInt(data.pases, 10) || 1));
+  var tipo = data.tipo_invitacion === "ceremonia" ? "ceremonia" : "completa";
+  var grupo = String(data.grupo || "").trim().slice(0, 60);
+  var prioridad = String(data.prioridad == null ? "" : data.prioridad).trim().slice(0, 10);
+  var telefono = String(data.telefono || "").replace(/[^\d]/g, "").slice(0, 15);
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_ESPERA_MS);
+  try {
+    var sheet = requireSheet(SHEET_INVITADOS);
+    var cols = {
+      grupo: asegurarColumna(sheet, "grupo"),
+      prioridad: asegurarColumna(sheet, "prioridad"),
+      telefono: asegurarColumna(sheet, "telefono"),
+    };
+    var codigo = normalizarCodigo(data.codigo), fila, antes = "";
+    if (codigo) {
+      fila = buscarFilaPorClave(sheet, codigo);
+      if (!fila) throw new Error("ese invitado no existe");
+      var v = sheet.getRange(fila, 1, 1, 4).getValues()[0];
+      antes = v[1] + " · " + (1 + Number(v[2] || 0)) + " pases · " + (v[3] || "completa");
+    } else {
+      // código nuevo y único
+      var base = slugCodigo(nombre), usados = mapaInvitados();
+      codigo = base;
+      if (PropertiesService.getScriptProperties().getProperty("sufijos_aplicados")) {
+        var abc = "abcdefghjkmnpqrstuvwxyz23456789";
+        do {
+          var suf = "";
+          for (var i = 0; i < 4; i++) suf += abc.charAt(Math.floor(Math.random() * abc.length));
+          codigo = base + "-" + suf;
+        } while (usados[codigo] || buscarFilaPorClave(sheet, codigo));
+      } else {
+        for (var n = 2; usados[codigo] || buscarFilaPorClave(sheet, codigo); n++) codigo = base + "-" + n;
+      }
+      fila = sheet.getLastRow() + 1;
+      if (sheet.getMaxRows() < fila) sheet.insertRowsAfter(sheet.getMaxRows(), 1);
+      // Columnas con fórmula fila por fila (p. ej. los links armados): la
+      // fila nueva las copia de la de arriba. Las ARRAYFORMULA del
+      // encabezado se extienden solas y no se tocan.
+      if (fila > 2) {
+        var ultimaCol = sheet.getLastColumn();
+        var arriba = sheet.getRange(fila - 1, 1, 1, ultimaCol).getFormulasR1C1()[0];
+        arriba.forEach(function (f, j) {
+          if (f && j > 3) sheet.getRange(fila, j + 1).setFormulaR1C1(f);
+        });
+      }
+      sheet.getRange(fila, 1).setValue(codigo);
+    }
+    sheet.getRange(fila, 2, 1, 3).setValues([[celda(nombre), pases - 1, tipo]]);
+    sheet.getRange(fila, cols.grupo).setValue(celda(grupo));
+    sheet.getRange(fila, cols.prioridad).setValue(prioridad === "" ? "" : (isNaN(Number(prioridad)) ? celda(prioridad) : Number(prioridad)));
+    // como texto, para que la hoja no le quite ceros ni lo vuelva número
+    sheet.getRange(fila, cols.telefono).setNumberFormat("@").setValue(telefono);
+  } finally {
+    lock.releaseLock();
+  }
+  try { CacheService.getScriptCache().remove("invitados"); } catch (err) {}
+  registrarHistorial(quien, codigo, nombre, antes ? "editó los datos del invitado" : "agregó un invitado",
+    antes, nombre + " · " + pases + " pases · " + tipo);
+  return { ok: true, codigo: codigo };
 }
 
 function adminMarcarAporte(quien, data) {

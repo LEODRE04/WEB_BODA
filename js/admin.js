@@ -22,6 +22,7 @@
     mesaSel: null,       // id de la mesa abierta en el plano
     elegido: null,       // código del invitado "en la mano" para soltar en una mesa
     editando: null,      // código con el formulario de respuesta abierto
+    editandoDatos: null, // código con el formulario de datos abierto, o "nuevo"
   };
 
   // ————— utilidades —————
@@ -309,6 +310,12 @@
   function vistaInvitados(el) {
     var f = estado.filtros;
     el.innerHTML =
+      '<div class="adm-mesas-barra">' +
+        '<p class="adm-nota">Los cambios se guardan en la pestaña Invitados de la hoja.</p>' +
+        '<button type="button" class="adm-btn adm-btn-primary" id="inv-agregar">+ Agregar invitado</button>' +
+      '</div>' +
+      '<div id="inv-nuevo">' + (estado.editandoDatos === "nuevo" ? formDatos(null) : "") + '</div>' +
+      '<datalist id="dl-grupos">' + grupos().map(function (g) { return '<option value="' + esc(g) + '">'; }).join("") + '</datalist>' +
       '<div class="adm-filtros">' +
         '<input type="search" id="f-q" placeholder="Buscar por nombre" value="' + esc(f.q) + '" aria-label="Buscar invitado">' +
         '<select id="f-grupo" aria-label="Grupo">' + opciones(grupos(), f.grupo, "Todos los grupos") + '</select>' +
@@ -348,8 +355,10 @@
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="copiar">Copiar link</button>' +
             (e !== "confirmado" && e !== "rechazado" ? '<a class="adm-btn adm-btn-mini" target="_blank" rel="noopener" href="' + esc(whatsappDe(g)) + '">Recordar por WhatsApp</a>' : "") +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="editar" aria-expanded="' + editando + '">Cargar respuesta</button>' +
+            '<button type="button" class="adm-btn adm-btn-mini" data-accion="datos" aria-expanded="' + (estado.editandoDatos === g.codigo) + '">Editar datos</button>' +
           '</div>' +
           (editando ? formRespuesta(g) : "") +
+          (estado.editandoDatos === g.codigo ? formDatos(g) : "") +
         '</article>';
       }).join("") : '<p class="adm-vacio">No hay invitados con esos filtros.</p>';
     }
@@ -367,6 +376,64 @@
       '</form>';
     }
 
+    // Formulario de datos del invitado (nuevo o existente). El código del
+    // link no se edita: lo genera el backend y es el que ya recibió.
+    function formDatos(g) {
+      var d = g || { nombre: "", pases: 1, tipo: "completa", grupo: estado.filtros.grupo || "", prioridad: "", telefono: "" };
+      return '<form class="adm-form-datos" data-accion="guardar-datos"' + (g ? ' data-cod="' + esc(g.codigo) + '"' : "") + '>' +
+        (g ? "" : '<h2>Nuevo invitado</h2>') +
+        '<label class="adm-campo-ancho">Nombre como aparecerá en la invitación <input name="nombre" required maxlength="120" value="' + esc(d.nombre) + '" placeholder="Ej.: Familia Rodríguez"></label>' +
+        '<label>Pases <input name="pases" type="number" min="1" max="10" value="' + esc(d.pases) + '"></label>' +
+        '<label>Invitación <select name="tipo"><option value="completa"' + (d.tipo !== "ceremonia" ? " selected" : "") + '>Ceremonia y recepción</option><option value="ceremonia"' + (d.tipo === "ceremonia" ? " selected" : "") + '>Solo ceremonia</option></select></label>' +
+        '<label>Grupo <input name="grupo" list="dl-grupos" maxlength="60" value="' + esc(d.grupo) + '" placeholder="Ej.: Familia Novia"></label>' +
+        '<label>Prioridad <input name="prioridad" maxlength="10" value="' + esc(d.prioridad) + '" placeholder="0, 1, 2…"></label>' +
+        '<label>Teléfono <input name="telefono" inputmode="tel" maxlength="20" value="' + esc(d.telefono) + '" placeholder="987654321"></label>' +
+        '<div class="adm-fila adm-campo-ancho"><button type="submit" class="adm-btn adm-btn-primary adm-btn-mini">' + (g ? "Guardar cambios" : "Agregar") + '</button>' +
+        '<button type="button" class="adm-btn adm-btn-mini" data-accion="cerrar-datos">Cancelar</button></div>' +
+      '</form>';
+    }
+
+    function guardarDatos(form) {
+      var codigo = form.getAttribute("data-cod") || "";
+      var val = function (n) { return form.querySelector('[name="' + n + '"]').value; };
+      // "tipo_invitacion" y no "tipo": "tipo" ya es el campo que le dice al
+      // backend que la consulta es del panel ("admin").
+      var datos = { codigo: codigo, nombre: val("nombre").trim(), pases: Number(val("pases")) || 1, tipo_invitacion: val("tipo"),
+        grupo: val("grupo").trim(), prioridad: val("prioridad").trim(), telefono: val("telefono") };
+      if (!datos.nombre) { toast("Escribe el nombre.", true); return; }
+      if (codigo) {
+        var g = invitado(codigo);
+        if (g && g.mesa && datos.tipo_invitacion === "ceremonia") datos.quitarMesa = true;
+      }
+      var btn = form.querySelector('[type="submit"]');
+      btn.disabled = true;
+      sync("Guardando…");
+      api("guardarInvitado", datos).then(function (res) {
+        estado.editandoDatos = null;
+        if (datos.quitarMesa) return api("asignarMesa", { codigo: codigo, mesa: "" }).then(function () { return res; });
+        return res;
+      }).then(function (res) {
+        toast(codigo ? "Datos de " + datos.nombre + " guardados." : datos.nombre + " agregado. Su link ya está listo.");
+        if (!codigo) estado.filtros = { q: datos.nombre, grupo: "", estado: "", tipo: "", mesa: "" };
+        return cargar();
+      }).catch(function (err) {
+        btn.disabled = false;
+        sync("");
+        toast("No se pudo guardar: " + err.message, true);
+      });
+    }
+
+    $("#inv-agregar", el).addEventListener("click", function () {
+      estado.editandoDatos = estado.editandoDatos === "nuevo" ? null : "nuevo";
+      render();
+      var primero = $("#inv-nuevo input", el);
+      if (primero) primero.focus();
+    });
+    $("#inv-nuevo", el).addEventListener("submit", function (e) { e.preventDefault(); guardarDatos(e.target); });
+    $("#inv-nuevo", el).addEventListener("click", function (e) {
+      if (e.target.closest('[data-accion="cerrar-datos"]')) { estado.editandoDatos = null; render(); }
+    });
+
     var lista = $("#inv-lista", el);
     lista.addEventListener("click", function (e) {
       var art = e.target.closest("[data-codigo]");
@@ -382,6 +449,12 @@
       } else if (accion === "cancelar") {
         estado.editando = null;
         pintarLista();
+      } else if (accion === "datos") {
+        estado.editandoDatos = estado.editandoDatos === g.codigo ? null : g.codigo;
+        pintarLista();
+      } else if (accion === "cerrar-datos") {
+        estado.editandoDatos = null;
+        pintarLista();
       }
     });
     lista.addEventListener("change", function (e) {
@@ -391,6 +464,8 @@
       asignarMesa(g, sel.value);
     });
     lista.addEventListener("submit", function (e) {
+      var formDatosEl = e.target.closest('[data-accion="guardar-datos"]');
+      if (formDatosEl) { e.preventDefault(); guardarDatos(formDatosEl); return; }
       var form = e.target.closest('[data-accion="guardar-resp"]');
       if (!form) return;
       e.preventDefault();

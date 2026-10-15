@@ -40,15 +40,21 @@ COMPROBANTES_DIR = ROOT / "server" / "comprobantes.local"  # no está en git —
 _lock = threading.Lock()
 
 
+GUESTS_PANEL_FILE = ROOT / "server" / "invitados_panel.local.json"  # agregados/editados desde el panel
+
+
 def load_guests():
     # La lista de prueba va siempre (los códigos de la documentación, como
     # familia-garcia, tienen que funcionar), y si existe invitados.real.json
-    # (generado localmente, nunca commiteado) se suma encima.
+    # (generado localmente, nunca commiteado) se suma encima, y encima de
+    # todo lo agregado o editado desde el panel.
     guests = {}
     for guests_file in (GUESTS_FILE_TEST, GUESTS_FILE_REAL):
         if guests_file.exists():
             data = json.loads(guests_file.read_text(encoding="utf-8"))
             guests.update({g["codigo"]: g for g in data["invitados"]})
+    if GUESTS_PANEL_FILE.exists():
+        guests.update(json.loads(GUESTS_PANEL_FILE.read_text(encoding="utf-8") or "{}"))
     return guests
 
 
@@ -374,6 +380,32 @@ class Handler(SimpleHTTPRequestHandler):
                 _save_json(ADMIN_EXTRA_FILE, extra)
                 _save_json(MESAS_FILE, mesas)
                 return self._json(200, {"ok": True})
+            if accion == "guardarInvitado":
+                nombre = str(data.get("nombre") or "").strip()[:120]
+                if not nombre:
+                    return self._json(200, {"error": "falta el nombre"})
+                codigo = normalizar_codigo(data.get("codigo"))
+                if codigo and codigo not in guests:
+                    return self._json(200, {"error": "ese invitado no existe"})
+                if not codigo:
+                    import unicodedata
+                    base = re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize("NFD", nombre).encode("ascii", "ignore").decode().lower()).strip("-")[:40] or "invitado"
+                    codigo, n = base, 2
+                    while codigo in guests:
+                        codigo, n = "%s-%d" % (base, n), n + 1
+                antes = guests.get(codigo)
+                panel = _load_json(GUESTS_PANEL_FILE, {})
+                panel[codigo] = dict(antes or {}, codigo=codigo, nombre=nombre,
+                                     acompanantes_permitidos=max(1, min(10, int(data.get("pases") or 1))) - 1,
+                                     tipo_invitacion="ceremonia" if data.get("tipo_invitacion") == "ceremonia" else "completa",
+                                     grupo=str(data.get("grupo") or "").strip()[:60],
+                                     prioridad=str(data.get("prioridad") or "").strip()[:10])
+                _save_json(GUESTS_PANEL_FILE, panel)
+                extra = _load_json(ADMIN_EXTRA_FILE, {})
+                extra.setdefault(codigo, {})["telefono"] = re.sub(r"\D", "", str(data.get("telefono") or ""))[:15]
+                _save_json(ADMIN_EXTRA_FILE, extra)
+                registrar_historial(quien, codigo, nombre, "editó los datos del invitado" if antes else "agregó un invitado", "", nombre)
+                return self._json(200, {"ok": True, "codigo": codigo})
             if accion == "marcarAporte":
                 rows = load_contributions()
                 i = int(data.get("fila") or 0) - 2
