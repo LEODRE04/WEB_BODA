@@ -1244,6 +1244,8 @@ function adminAsignarMesa(quien, data) {
   var col = asegurarColumna(sheet, "mesa");
   var antes = String(sheet.getRange(fila, col).getValue() || "");
   var mesa = String(data.mesa || "").trim();
+  // Las invitaciones "solo ceremonia" no van a la recepción: sin mesa.
+  if (mesa && findGuest(codigo).tipo_invitacion === "ceremonia") throw new Error("invitación solo a la ceremonia: no lleva mesa");
   sheet.getRange(fila, col).setValue(celda(mesa));
   registrarHistorial(quien, codigo, sheet.getRange(fila, 2).getValue(), "asignó mesa", antes || "sin mesa", mesa || "sin mesa");
   return { ok: true };

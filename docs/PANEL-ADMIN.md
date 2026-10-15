@@ -49,6 +49,8 @@ no se indexa; sin una clave válida el backend no devuelve ningún dato.
   son los asientos (llenos = ocupados); la mesa se pone roja si se pasa de
   su capacidad. Quien todavía no responde ocupa provisionalmente todos sus
   pases; quien dijo que no, ninguno.
+  Solo se sientan las invitaciones a la recepción: las de "solo ceremonia"
+  no aparecen para sentar ni se les puede asignar mesa.
 - **Entrada:** confirmados en orden alfabético con personas, mesa y grupo.
   Se descarga para Excel o se imprime con una casilla por invitado.
   También se puede descargar la lista completa de invitados.

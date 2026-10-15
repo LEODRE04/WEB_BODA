@@ -102,6 +102,9 @@
     if (e === "rechazado") return 0;
     return g.pases;
   }
+  // Solo quien va a la recepción se sienta en una mesa: las invitaciones
+  // "solo ceremonia" no aparecen para sentar ni ocupan lugares.
+  function vaARecepcion(g) { return g.tipo !== "ceremonia"; }
   function mesaPorId(id) { return (estado.datos.mesas || []).filter(function (m) { return m.id === id; })[0] || null; }
   function nombreMesa(id) { var m = mesaPorId(id); return m ? m.nombre : ""; }
   function ocupadosEn(idMesa) {
@@ -214,7 +217,7 @@
     var total = inv.length || 1;
     var respondieron = c.confirmado + c.rechazado;
     var dias = Math.max(0, Math.ceil((new Date(estado.datos.cierre).getTime() - Date.now()) / 86400000));
-    var asignados = inv.filter(function (g) { return g.mesa && estadoDe(g) === "confirmado"; })
+    var asignados = inv.filter(function (g) { return g.mesa && vaARecepcion(g) && estadoDe(g) === "confirmado"; })
       .reduce(function (s, g) { return s + asientosDe(g); }, 0);
     var aportado = estado.datos.aportes.filter(function (a) { return a.estado !== "duplicado"; })
       .reduce(function (s, a) { return s + a.monto; }, 0);
@@ -226,7 +229,7 @@
       ["No asisten", c.rechazado, "invitaciones"],
       ["Sin responder", c.leido + c.sin_abrir, c.sin_abrir + " ni abrieron el link"],
       ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "7 de noviembre"],
-      ["Sentados", asignados + "/" + personas, "confirmados con mesa"],
+      ["Sentados", asignados + "/" + personasRecepcion, "confirmados de la recepción con mesa"],
       ["Regalos", soles(aportado), estado.datos.aportes.length + " aportes"],
     ];
 
@@ -338,7 +341,9 @@
               (r && r.enviado_en ? " · respondió " + esc(fechaCorta(r.actualizado_en || r.enviado_en)) : "") + '</div>' +
           '</div>' +
           '<span class="adm-chip is-' + ESTADOS[e].cls + '">' + ESTADOS[e].txt + (e === "confirmado" ? " · " + r.num_asistentes : "") + '</span>' +
-          '<label class="adm-inv-mesa"><span>Mesa</span><select data-accion="mesa"' + (e === "rechazado" ? " disabled" : "") + '>' + opciones(mesas, g.mesa, "Sin mesa") + '</select></label>' +
+          (vaARecepcion(g)
+            ? '<label class="adm-inv-mesa"><span>Mesa</span><select data-accion="mesa"' + (e === "rechazado" ? " disabled" : "") + '>' + opciones(mesas, g.mesa, "Sin mesa") + '</select></label>'
+            : '<span class="adm-inv-mesa">Sin mesa · solo ceremonia</span>') +
           '<div class="adm-inv-acciones">' +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="copiar">Copiar link</button>' +
             (e !== "confirmado" && e !== "rechazado" ? '<a class="adm-btn adm-btn-mini" target="_blank" rel="noopener" href="' + esc(whatsappDe(g)) + '">Recordar por WhatsApp</a>' : "") +
@@ -413,6 +418,10 @@
   }
 
   function asignarMesa(g, idMesa) {
+    if (idMesa && !vaARecepcion(g)) {
+      toast(g.nombre + " tiene invitación solo a la ceremonia: no se le asigna mesa.", true);
+      return Promise.resolve();
+    }
     var antes = g.mesa;
     g.mesa = idMesa;
     sync("Guardando…");
@@ -461,7 +470,7 @@
   function vistaMesas(el) {
     var mesas = estado.datos.mesas;
     var fm = estado.filtrosMesa;
-    var sinMesa = estado.datos.invitados.filter(function (g) { return !g.mesa && estadoDe(g) !== "rechazado" && cumpleFiltroMesa(g); })
+    var sinMesa = estado.datos.invitados.filter(function (g) { return !g.mesa && vaARecepcion(g) && estadoDe(g) !== "rechazado" && cumpleFiltroMesa(g); })
       .sort(function (a, b) {
         var ea = estadoDe(a) === "confirmado" ? 0 : 1, eb = estadoDe(b) === "confirmado" ? 0 : 1;
         return ea - eb || a.nombre.localeCompare(b.nombre, "es");

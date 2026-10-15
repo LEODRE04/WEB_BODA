@@ -349,6 +349,8 @@ class Handler(SimpleHTTPRequestHandler):
                 codigo = normalizar_codigo(data.get("codigo"))
                 if codigo not in guests:
                     return self._json(200, {"error": "ese invitado no existe"})
+                if data.get("mesa") and guests[codigo].get("tipo_invitacion") == "ceremonia":
+                    return self._json(200, {"error": "invitación solo a la ceremonia: no lleva mesa"})
                 extra = _load_json(ADMIN_EXTRA_FILE, {})
                 antes = extra.get(codigo, {}).get("mesa", "")
                 extra.setdefault(codigo, {})["mesa"] = str(data.get("mesa") or "")
