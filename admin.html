@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Panel de administración de la boda. No tiene enlaces desde la
+     invitación y no se indexa. Los datos solo llegan con una clave válida
+     (ver "PANEL DE ADMINISTRACIÓN" en docs/apps-script/Code.gs). -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Panel · André &amp; Krisli</title>
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/admin.css?v=202610150200">
+</head>
+<body>
+
+<!-- Ingreso con la clave de cada uno -->
+<main class="adm-login" id="adm-login" hidden>
+  <form class="adm-login-card" id="adm-login-form">
+    <div class="adm-script">André &amp; Krisli</div>
+    <h1>Panel de la boda</h1>
+    <label for="adm-clave">Tu clave</label>
+    <input id="adm-clave" type="password" autocomplete="current-password" required>
+    <p class="adm-error" id="adm-login-error" role="alert" hidden></p>
+    <button type="submit" class="adm-btn adm-btn-primary" id="adm-login-btn">Entrar</button>
+    <p class="adm-nota">La clave se guarda en este dispositivo. Usa "Salir" si es un equipo compartido.</p>
+  </form>
+</main>
+
+<div class="adm-app" id="adm-app" hidden>
+  <header class="adm-header">
+    <div class="adm-brand"><span class="adm-script">A &amp; K</span> <span>Panel</span></div>
+    <div class="adm-header-acciones">
+      <span class="adm-quien" id="adm-quien"></span>
+      <span class="adm-sync" id="adm-sync" aria-live="polite"></span>
+      <button type="button" class="adm-btn adm-btn-ghost" id="adm-refrescar">Actualizar</button>
+      <button type="button" class="adm-btn adm-btn-ghost" id="adm-salir">Salir</button>
+    </div>
+  </header>
+  <nav class="adm-tabs" id="adm-tabs" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" data-vista="resumen">Resumen</button>
+    <button type="button" role="tab" data-vista="invitados">Invitados</button>
+    <button type="button" role="tab" data-vista="mesas">Mesas</button>
+    <button type="button" role="tab" data-vista="entrada">Entrada</button>
+    <button type="button" role="tab" data-vista="regalos">Regalos</button>
+    <button type="button" role="tab" data-vista="historial">Historial</button>
+  </nav>
+  <main class="adm-main" id="adm-vista" tabindex="-1"></main>
+</div>
+
+<div class="adm-toast" id="adm-toast" role="status" hidden></div>
+
+<script src="js/config.js?v=202610150200"></script>
+<script src="js/admin.js?v=202610150200"></script>
+</body>
+</html>

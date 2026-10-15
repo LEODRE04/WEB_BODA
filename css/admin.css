@@ -1,0 +1,252 @@
+/* admin.css — panel de administración (admin.html).
+   Misma paleta que la invitación (theme-elegante.css); para los datos se
+   usa la letra del sistema, más legible en tablas y números que la
+   Cormorant de la invitación. */
+:root {
+  --bg: #ffffff;
+  --surface: #f7f4ea;
+  --text: #364c2f;
+  --text-soft: color-mix(in srgb, #364c2f 80%, transparent);
+  --muted: color-mix(in srgb, #364c2f 62%, transparent);
+  --divider: color-mix(in srgb, #c9b894 55%, transparent);
+  --accent: #5a7350;
+  --accent-100: #eef2e6;
+  --accent-200: #dfe8d4;
+  --accent-700: #4a6242;
+  --oro: #b8964d;
+  --rojo: #9a3b2a;
+  --rojo-100: #f8e7e2;
+  --shadow: 0 4px 16px color-mix(in srgb, #2f4429 10%, transparent);
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --script: "Parisienne", cursive;
+  --serif: "Cormorant Garamond", Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--surface); color: var(--text); font-family: var(--sans);
+  font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2 { font-family: var(--serif); font-weight: 700; margin: 0; }
+h2 { font-size: 21px; margin-bottom: 12px; }
+h2 small { font-family: var(--sans); font-size: 12.5px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+.adm-script { font-family: var(--script); font-size: 26px; line-height: 1; color: var(--accent-700); }
+
+/* — botones — */
+.adm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--divider); background: var(--bg); color: var(--accent-700);
+  font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap;
+  transition: background-color .15s ease, transform .1s ease;
+}
+.adm-btn:hover { background: var(--accent-100); }
+.adm-btn:active { transform: scale(.97); }
+.adm-btn:disabled { opacity: .6; cursor: default; }
+.adm-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.adm-btn-primary:hover { background: var(--accent-700); }
+.adm-btn-ghost { border-color: transparent; background: none; }
+.adm-btn-mini { min-height: 34px; padding: 0 12px; font-size: 13px; }
+.adm-btn-peligro { color: var(--rojo); border-color: color-mix(in srgb, var(--rojo) 35%, transparent); }
+.adm-btn-peligro:hover { background: var(--rojo-100); }
+.adm-link { background: none; border: 0; padding: 4px 2px; color: var(--accent-700); font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+/* — ingreso — */
+.adm-login { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+.adm-login-card {
+  width: 100%; max-width: 380px; background: var(--bg); border-radius: 24px; padding: 32px 28px;
+  box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; text-align: center;
+}
+.adm-login-card h1 { font-size: 28px; margin-bottom: 8px; }
+.adm-login-card label { text-align: left; font-size: 13px; font-weight: 600; color: var(--text-soft); }
+.adm-login-card input, .adm-filtros input, .adm-filtros select, .adm-mesa-edicion input, .adm-mesa-edicion select, .adm-inv-mesa select, .adm-form-resp select {
+  min-height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--divider); background: var(--bg);
+}
+.adm-error { color: var(--rojo); font-size: 13.5px; margin: 0; }
+.adm-nota { color: var(--muted); font-size: 12.5px; margin: 0; }
+
+/* — estructura — */
+.adm-header {
+  position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--divider);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; flex-wrap: wrap;
+}
+.adm-brand { display: flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-weight: 700; font-size: 20px; }
+.adm-header-acciones { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.adm-quien { font-size: 13.5px; font-weight: 600; margin-right: 6px; }
+.adm-sync { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.adm-tabs {
+  position: sticky; top: var(--alto-header, 61px); z-index: 25; display: flex; gap: 4px; overflow-x: auto; padding: 8px 12px;
+  background: var(--surface); border-bottom: 1px solid var(--divider); scrollbar-width: none;
+}
+.adm-tabs::-webkit-scrollbar { display: none; }
+.adm-tabs button {
+  flex: none; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 0; background: none;
+  font-weight: 600; font-size: 14px; color: var(--text-soft); cursor: pointer;
+}
+.adm-tabs button.is-activo { background: var(--accent); color: #fff; }
+.adm-main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 60px; outline: none; }
+.adm-card { background: var(--bg); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.adm-vacio { color: var(--muted); margin: 6px 0; }
+.adm-fila { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.adm-toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
+  background: var(--text); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; box-shadow: var(--shadow);
+}
+.adm-toast.is-error { background: var(--rojo); }
+.adm-aviso { background: var(--accent-100); border-radius: 12px; padding: 10px 14px; margin: 0 0 12px; }
+
+/* — resumen — */
+.adm-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.adm-kpi { background: var(--bg); border-radius: 18px; padding: 14px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px; }
+.adm-kpi span { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.adm-kpi strong { font-size: 26px; font-variant-numeric: tabular-nums; }
+.adm-kpi small { font-size: 12.5px; color: var(--muted); }
+.adm-barra { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--accent-100); }
+.adm-barra span { display: block; min-width: 3px; }
+.is-ok { background: var(--accent); }
+.is-no { background: var(--rojo); }
+.is-leido { background: var(--oro); }
+.is-nada { background: color-mix(in srgb, #364c2f 18%, transparent); }
+.adm-leyenda { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; }
+.adm-leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.adm-grupos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.adm-grupo {
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; text-align: left; cursor: pointer;
+  padding: 12px; border-radius: 14px; border: 1px solid var(--divider); background: var(--bg);
+}
+.adm-grupo:hover { background: var(--accent-100); }
+.adm-grupo .adm-barra { grid-column: 1 / -1; height: 8px; }
+.adm-grupo-nombre { font-weight: 700; }
+.adm-grupo-num { font-size: 12.5px; color: var(--muted); }
+.adm-dias { display: grid; grid-template-columns: repeat(21, 1fr); gap: 4px; align-items: end; height: 120px; }
+.adm-dia { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.adm-dia span { width: 100%; min-height: 2px; background: var(--accent); border-radius: 4px 4px 0 0; }
+.adm-dia small { font-size: 10px; color: var(--muted); }
+
+/* — invitados — */
+.adm-filtros { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.adm-cuenta { margin: 0 0 10px; color: var(--muted); font-size: 13.5px; }
+.adm-lista { display: flex; flex-direction: column; gap: 8px; }
+.adm-inv {
+  background: var(--bg); border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 1fr auto auto; gap: 8px 14px; align-items: center;
+}
+.adm-inv-nombre { font-weight: 700; font-size: 15.5px; }
+.adm-inv-meta { font-size: 12.5px; color: var(--muted); }
+.adm-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; color: #fff; white-space: nowrap; }
+.adm-chip.is-nada { color: var(--text); }
+.adm-inv-mesa { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.adm-inv-mesa select { min-height: 34px; max-width: 150px; }
+.adm-inv-acciones { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; }
+/* En pantallas anchas cada invitado va en una sola fila: con 160
+   tarjetas de tres líneas había que bajar demasiado. */
+@media (min-width: 1000px) {
+  /* anchos fijos: con o sin el botón de WhatsApp, las columnas quedan alineadas */
+  .adm-inv { grid-template-columns: minmax(0, 1fr) 150px 210px 420px; padding: 10px 14px; }
+  .adm-inv .adm-chip { justify-self: start; }
+  .adm-inv-acciones { grid-column: auto; flex-wrap: nowrap; justify-content: flex-end; }
+}
+.adm-form-resp {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+  background: var(--accent-100); border-radius: 12px; padding: 10px 12px; font-size: 14px;
+}
+.adm-form-resp select { min-height: 34px; }
+
+/* — mesas — */
+.adm-mesas-barra { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.adm-mesas-barra p { margin: 0; }
+.adm-mesas-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.adm-plano-wrap { overflow: auto; border-radius: 20px; background: var(--bg); box-shadow: var(--shadow); }
+.adm-plano {
+  position: relative; touch-action: none;
+  background-image: radial-gradient(circle, color-mix(in srgb, #364c2f 12%, transparent) 1px, transparent 1.2px);
+  background-size: 25px 25px;
+}
+.adm-plano-vacio { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); margin: 0; }
+.adm-mesa {
+  position: absolute; transform: translate(-50%, -50%); border-radius: 50%; cursor: grab; user-select: none;
+  background: var(--accent-100); border: 2px solid var(--accent); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 6px;
+}
+.adm-mesa:active { cursor: grabbing; }
+.adm-mesa.is-rect { border-radius: 14px; }
+.adm-mesa.is-sel { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent); }
+.adm-mesa.is-llena { background: var(--accent-200); }
+.adm-mesa.is-excedida { border-color: var(--rojo); background: var(--rojo-100); }
+.adm-mesa-nombre { font-weight: 700; font-size: 13px; line-height: 1.15; }
+.adm-mesa-cap { font-size: 12px; color: var(--accent-700); font-weight: 700; font-variant-numeric: tabular-nums; }
+.adm-mesa-gente {
+  position: absolute; top: calc(100% + 24px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 170px;
+  font-size: 11px; line-height: 1.35; color: var(--text-soft); text-align: center; pointer-events: none;
+}
+/* debajo de la fila de asientos de abajo, no encima */
+.adm-mesa.is-rect .adm-mesa-gente { top: calc(100% + 28px); }
+.adm-asiento {
+  position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: var(--bg); border: 1.5px solid var(--accent);
+}
+.adm-asiento.is-ocupado { background: var(--accent); }
+.adm-mesa.is-excedida .adm-asiento { border-color: var(--rojo); }
+.adm-mesa.is-excedida .adm-asiento.is-ocupado { background: var(--rojo); }
+.adm-mesas-lado { background: var(--bg); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); max-height: 680px; overflow: auto; }
+.adm-personas { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 6px; }
+.adm-persona {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--divider); border-radius: 12px; padding: 8px 10px; background: var(--bg); cursor: grab;
+}
+.adm-persona span { display: flex; flex-direction: column; min-width: 0; }
+.adm-persona b { font-size: 14px; overflow-wrap: anywhere; }
+.adm-persona small { font-size: 12px; color: var(--muted); }
+.adm-mesa-edicion { display: flex; flex-direction: column; gap: 10px; }
+.adm-mesa-edicion label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--text-soft); flex: 1; }
+.adm-mesa-edicion .adm-link { align-self: flex-start; }
+
+/* — entrada — */
+.adm-entrada { background: var(--bg); border-radius: 20px; padding: 8px 16px 16px; box-shadow: var(--shadow); overflow-x: auto; }
+.adm-entrada table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.adm-entrada th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 10px 8px; border-bottom: 1px solid var(--divider); }
+.adm-entrada td { padding: 9px 8px; border-bottom: 1px solid color-mix(in srgb, var(--divider) 60%, transparent); }
+.adm-check { width: 28px; font-size: 18px; color: var(--muted); }
+.solo-imprimir { display: none; }
+
+/* — regalos e historial — */
+.adm-regalos, .adm-aportes, .adm-historial { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.adm-regalos li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; }
+.adm-regalo-num { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.adm-progreso { grid-column: 1 / -1; height: 8px; background: var(--accent-100); border-radius: 999px; overflow: hidden; }
+.adm-progreso span { display: block; height: 100%; background: var(--accent); }
+.adm-aportes li { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--divider); }
+.adm-aportes li small { display: block; color: var(--muted); font-size: 12.5px; }
+.adm-aportes li p { margin: 4px 0 0; font-style: italic; color: var(--text-soft); }
+.adm-aportes li.is-duplicado { opacity: .55; }
+.adm-aportes li.is-duplicado b { text-decoration: line-through; }
+.adm-historial li { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--divider); font-size: 14px; }
+.adm-historial li small { color: var(--muted); font-size: 12px; }
+.adm-historial li.is-alerta { background: var(--rojo-100); border-radius: 10px; padding: 8px 10px; }
+
+/* — celular — */
+@media (max-width: 860px) {
+  .adm-filtros { grid-template-columns: 1fr 1fr; }
+  .adm-filtros input { grid-column: 1 / -1; }
+  .adm-mesas-layout { grid-template-columns: 1fr; }
+  .adm-mesas-lado { max-height: none; }
+}
+@media (max-width: 560px) {
+  .adm-inv { grid-template-columns: 1fr auto; }
+  .adm-inv-mesa { grid-column: 1 / -1; }
+  .adm-quien { display: none; }
+}
+
+/* — imprimir la lista de entrada — */
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .adm-header, .adm-tabs, .no-imprimir, .adm-toast { display: none !important; }
+  .adm-main { padding: 0; max-width: none; }
+  .adm-entrada { box-shadow: none; padding: 0; }
+  .solo-imprimir { display: block; font-size: 18px; margin: 0 0 10px; }
+  .adm-entrada td, .adm-entrada th { padding: 6px; }
+  tr { break-inside: avoid; }
+}

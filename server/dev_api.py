@@ -114,9 +114,70 @@ def save_contributions(rows):
     CONTRIBUTIONS_FILE.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# — panel de administración (espejo de handleAdmin en Code.gs) —
+# Claves de prueba fijas; en producción viven en Propiedades del script.
+ADMIN_CLAVES = {"prueba-andre": "André", "prueba-krisli": "Krisli"}
+ADMIN_EXTRA_FILE = ROOT / "server" / "admin_invitados.local.json"  # telefono/mesa por código
+MESAS_FILE = ROOT / "server" / "mesas.local.json"
+HISTORIAL_FILE = ROOT / "server" / "historial.local.json"
+
+
+def _load_json(path, vacio):
+    if not path.exists():
+        return vacio
+    return json.loads(path.read_text(encoding="utf-8") or json.dumps(vacio))
+
+
+def _save_json(path, data):
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def registrar_historial(quien, codigo, nombre, accion, antes, despues):
+    h = _load_json(HISTORIAL_FILE, [])
+    h.append({"fecha": datetime.now(timezone.utc).isoformat(), "quien": quien, "codigo": codigo,
+              "nombre": nombre, "accion": accion, "antes": antes, "despues": despues})
+    _save_json(HISTORIAL_FILE, h)
+
+
+def texto_respuesta(r):
+    if not r:
+        return "sin respuesta"
+    if r.get("asistencia") == "si":
+        return "sí (%s)" % int(float(r.get("num_asistentes") or 0))
+    return "no" if r.get("asistencia") == "no" else "sin respuesta"
+
+
+def admin_datos(quien):
+    extra = _load_json(ADMIN_EXTRA_FILE, {})
+    aperturas = load_aperturas()
+    respuestas = {r.get("codigo"): r for r in load_responses() if r.get("codigo")}
+    invitados = []
+    for codigo, g in load_guests().items():
+        a = aperturas.get(codigo, {})
+        r = respuestas.get(codigo)
+        e = extra.get(codigo, {})
+        invitados.append({
+            "codigo": codigo, "nombre": g["nombre"], "pases": 1 + int(g.get("acompanantes_permitidos", 0)),
+            "tipo": g.get("tipo_invitacion", "completa"), "grupo": g.get("grupo", ""),
+            "prioridad": "" if g.get("prioridad") is None else str(g.get("prioridad")),
+            "telefono": e.get("telefono", ""), "mesa": e.get("mesa", ""),
+            "abierto_en": a.get("abierto_en", ""), "ultima_apertura": a.get("ultima_apertura", ""),
+            "aperturas": int(a.get("aperturas", 0)),
+            "respuesta": {"asistencia": r.get("asistencia", ""), "num_asistentes": int(float(r.get("num_asistentes") or 0)),
+                          "enviado_en": r.get("enviado_en", ""), "actualizado_en": r.get("actualizado_en", "")} if r else None,
+        })
+    aportes = [dict(c, fila=i + 2, estado=c.get("estado", "")) for i, c in enumerate(load_contributions())]
+    return {"quien": quien, "invitados": invitados, "mesas": _load_json(MESAS_FILE, []),
+            "regalos": gifts_with_totals(), "aportes": aportes,
+            "historial": list(reversed(_load_json(HISTORIAL_FILE, [])))[:300],
+            "cierre": "2026-11-07T05:00:00.000Z", "urlInvitacion": "http://localhost:5177/"}
+
+
 def gifts_with_totals():
     totals = {}
     for c in load_contributions():
+        if c.get("estado") == "duplicado":
+            continue  # igual que sumAportesPorRegalo en Code.gs
         totals[c["regalo_id"]] = totals.get(c["regalo_id"], 0) + float(c.get("monto", 0))
     out = []
     for g in load_gifts():
@@ -189,6 +250,8 @@ class Handler(SimpleHTTPRequestHandler):
 
         if data.get("tipo") == "aporte":
             return self._handle_aporte(data)
+        if data.get("tipo") == "admin":
+            return self._handle_admin(data)
 
         codigo = normalizar_codigo(data.get("codigo"))
         # Igual que Code.gs: sin link personal no se confirma.
@@ -252,6 +315,72 @@ class Handler(SimpleHTTPRequestHandler):
             save_responses(rows)
 
         return self._json(200, {"ok": True})
+
+    def _handle_admin(self, data):
+        quien = ADMIN_CLAVES.get(str(data.get("clave") or ""))
+        if not quien:
+            return self._json(200, {"error": "clave incorrecta", "noAutorizado": True})
+        accion = data.get("accion")
+        guests = load_guests()
+        with _lock:
+            if accion == "datos":
+                return self._json(200, admin_datos(quien))
+            if accion == "guardarRespuesta":
+                codigo = normalizar_codigo(data.get("codigo"))
+                g = guests.get(codigo)
+                if not g or data.get("asistencia") not in ("si", "no"):
+                    return self._json(200, {"error": "datos no válidos"})
+                maximo = 1 + int(g.get("acompanantes_permitidos", 0))
+                num = 0 if data["asistencia"] == "no" else max(1, min(maximo, int(data.get("num_asistentes") or maximo)))
+                rows = load_responses()
+                idx = next((i for i, r in enumerate(rows) if r.get("codigo") == codigo), None)
+                previa = rows[idx] if idx is not None else None
+                ahora = datetime.now(timezone.utc).isoformat()
+                nueva = {"codigo": codigo, "nombre": g["nombre"], "num_asistentes": str(num), "asistencia": data["asistencia"],
+                         "enviado_en": previa.get("enviado_en", ahora) if previa else ahora, "actualizado_en": ahora if previa else ""}
+                if idx is None:
+                    rows.append(nueva)
+                else:
+                    rows[idx] = nueva
+                save_responses(rows)
+                registrar_historial(quien, codigo, g["nombre"], "cargó la respuesta a mano", texto_respuesta(previa), texto_respuesta(nueva))
+                return self._json(200, {"ok": True})
+            if accion == "asignarMesa":
+                codigo = normalizar_codigo(data.get("codigo"))
+                if codigo not in guests:
+                    return self._json(200, {"error": "ese invitado no existe"})
+                extra = _load_json(ADMIN_EXTRA_FILE, {})
+                antes = extra.get(codigo, {}).get("mesa", "")
+                extra.setdefault(codigo, {})["mesa"] = str(data.get("mesa") or "")
+                _save_json(ADMIN_EXTRA_FILE, extra)
+                registrar_historial(quien, codigo, guests[codigo]["nombre"], "asignó mesa", antes or "sin mesa", extra[codigo]["mesa"] or "sin mesa")
+                return self._json(200, {"ok": True})
+            if accion == "guardarMesas":
+                mesas = []
+                for m in (data.get("mesas") or [])[:200]:
+                    if not str(m.get("id") or "").strip():
+                        continue
+                    mesas.append({"id": str(m["id"])[:40], "nombre": str(m.get("nombre") or "")[:60],
+                                  "forma": "rectangular" if m.get("forma") == "rectangular" else "redonda",
+                                  "capacidad": max(1, min(40, int(m.get("capacidad") or 10))),
+                                  "x": round(float(m.get("x") or 0)), "y": round(float(m.get("y") or 0))})
+                vigentes = {m["id"] for m in mesas}
+                extra = _load_json(ADMIN_EXTRA_FILE, {})
+                for e in extra.values():
+                    if e.get("mesa") and e["mesa"] not in vigentes:
+                        e["mesa"] = ""
+                _save_json(ADMIN_EXTRA_FILE, extra)
+                _save_json(MESAS_FILE, mesas)
+                return self._json(200, {"ok": True})
+            if accion == "marcarAporte":
+                rows = load_contributions()
+                i = int(data.get("fila") or 0) - 2
+                if i < 0 or i >= len(rows):
+                    return self._json(200, {"error": "ese aporte no existe"})
+                rows[i]["estado"] = "duplicado" if data.get("estado") == "duplicado" else ""
+                save_contributions(rows)
+                return self._json(200, {"ok": True})
+        return self._json(200, {"error": "acción desconocida"})
 
     def _handle_aporte(self, data):
         regalo_id = str(data.get("regalo_id") or "").strip()

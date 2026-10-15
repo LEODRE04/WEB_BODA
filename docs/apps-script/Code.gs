@@ -141,6 +141,7 @@ function doPost(e) {
     }
 
     if (data.tipo === "aporte") return handleAporte(data);
+    if (data.tipo === "admin") return handleAdmin(data);
 
     // Se valida ANTES de tocar la hoja: si falta algo, no gastamos una
     // lectura de Invitados para nada.
@@ -187,12 +188,14 @@ function doPost(e) {
     // Se arma la fila con los campos permitidos y nada más: antes se
     // copiaba el objeto del navegador entero, y con él las fechas
     // enviado_en/actualizado_en, que cualquiera podía falsear.
+    var previa = findRespuesta(codigo);
     upsertRespuesta(codigo, {
       codigo: codigo,
       nombre: nombre,
       num_asistentes: num,
       asistencia: asistencia,
     });
+    registrarCambioRespuesta(codigo, nombre, previa, { asistencia: asistencia, num_asistentes: num });
     return jsonOut({ ok: true });
   } catch (err) {
     return errorReintentable(err);
@@ -482,12 +485,15 @@ function sumAportesPorRegalo() {
   var ultimaFila = sheet.getLastRow();
   if (ultimaFila < 2) return totales;
 
-  // Solo regalo_id y monto (columnas A-C): la hoja de aportes crece sin
-  // techo y el mensaje/comprobante no se usan para sumar.
+  // Solo regalo_id y monto (columnas A-C), más "estado" si existe: un
+  // aporte marcado "duplicado" desde el panel deja de sumar.
   var rows = sheet.getRange(2, 1, ultimaFila - 1, 3).getValues();
+  var colEstado = columnaPorEncabezado(sheet, "estado");
+  var estados = colEstado ? sheet.getRange(2, colEstado, ultimaFila - 1, 1).getValues() : null;
   for (var i = 0; i < rows.length; i++) {
     var id = String(rows[i][0]).trim();
     if (!id) continue;
+    if (estados && String(estados[i][0]).trim() === "duplicado") continue;
     totales[id] = (totales[id] || 0) + Number(rows[i][2] || 0);
   }
   return totales;
@@ -1017,4 +1023,381 @@ function mandarResumen(moverFecha) {
       soles(aportado) + " aportados.",
   });
   if (moverFecha) props.setProperty(PROP_ULTIMO_RESUMEN, String(ahora.getTime()));
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANEL DE ADMINISTRACIÓN (admin.html)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Todo pasa por POST con {tipo: "admin", clave, accion, ...}. Nunca por GET:
+// así la clave no queda en la URL ni en el historial del navegador.
+//
+// Las claves viven en Propiedades del script (ADMIN_CLAVES = {clave:
+// nombre}), nunca en el código ni en el repositorio público. Se crean con
+// el menú Boda > "Crear claves del panel" y se pueden regenerar cuando
+// quieran (las anteriores dejan de servir).
+//
+// Hojas y columnas que usa (las crea solas el menú Boda > "Preparar el
+// panel"; si ya existen no se tocan):
+//   Invitados:  grupo | prioridad | telefono | mesa   (por encabezado)
+//   Mesas:      id | nombre | forma | capacidad | x | y
+//   Historial:  fecha | quien | codigo | nombre | accion | antes | despues
+//   Aportes:    estado  ("duplicado" deja de sumar al avance)
+
+var SHEET_MESAS = "Mesas";
+var SHEET_HISTORIAL = "Historial";
+var MESAS_COLUMNAS = ["id", "nombre", "forma", "capacidad", "x", "y"];
+var HISTORIAL_COLUMNAS = ["fecha", "quien", "codigo", "nombre", "accion", "antes", "despues"];
+var PROP_ADMIN_CLAVES = "ADMIN_CLAVES";
+
+function adminQuien(clave) {
+  if (!clave) return null;
+  try {
+    var claves = JSON.parse(PropertiesService.getScriptProperties().getProperty(PROP_ADMIN_CLAVES) || "{}");
+    return Object.prototype.hasOwnProperty.call(claves, clave) ? claves[clave] : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function handleAdmin(data) {
+  var quien = adminQuien(String(data.clave || ""));
+  if (!quien) return jsonOut({ error: "clave incorrecta", noAutorizado: true });
+  try {
+    switch (data.accion) {
+      case "datos": return jsonOut(adminDatos(quien));
+      case "guardarRespuesta": return jsonOut(adminGuardarRespuesta(quien, data));
+      case "asignarMesa": return jsonOut(adminAsignarMesa(quien, data));
+      case "guardarMesas": return jsonOut(adminGuardarMesas(quien, data));
+      case "marcarAporte": return jsonOut(adminMarcarAporte(quien, data));
+      default: return jsonOut({ error: "acción desconocida" });
+    }
+  } catch (err) {
+    try { console.error(err && err.stack ? err.stack : err); } catch (e) {}
+    return jsonOut({ error: "No se pudo completar: " + (err && err.message ? err.message : err) });
+  }
+}
+
+// Lee una hoja entera como objetos usando la fila de encabezados.
+function filasComoObjetos(sheet) {
+  var ultimaFila = sheet.getLastRow(), ultimaCol = sheet.getLastColumn();
+  if (ultimaFila < 2 || ultimaCol < 1) return [];
+  var valores = sheet.getRange(1, 1, ultimaFila, ultimaCol).getValues();
+  var enc = valores[0].map(function (h) { return String(h).trim().toLowerCase(); });
+  var out = [];
+  for (var i = 1; i < valores.length; i++) {
+    var o = { _fila: i + 1 };
+    enc.forEach(function (h, j) { if (h) o[h] = valores[i][j]; });
+    out.push(o);
+  }
+  return out;
+}
+
+function fechaIso(v) {
+  return v instanceof Date && !isNaN(v.getTime()) ? v.toISOString() : (v ? String(v) : "");
+}
+
+// Agrega una columna con ese encabezado al final si no existe; devuelve
+// su número. Nunca escribe sobre una columna ocupada.
+function asegurarColumna(sheet, nombre) {
+  var col = columnaPorEncabezado(sheet, nombre);
+  if (col) return col;
+  col = sheet.getLastColumn() + 1;
+  if (sheet.getMaxColumns() < col) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
+  sheet.getRange(1, col).setValue(nombre).setFontWeight("bold");
+  return col;
+}
+
+function asegurarHoja(nombre, columnas) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(nombre);
+  if (!sheet) {
+    sheet = ss.insertSheet(nombre);
+    sheet.getRange(1, 1, 1, columnas.length).setValues([columnas]).setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function adminDatos(quien) {
+  var invitados = filasComoObjetos(requireSheet(SHEET_INVITADOS));
+  var respuestas = {};
+  filasComoObjetos(requireSheet(SHEET_RESPUESTAS)).forEach(function (r) {
+    var c = String(r.codigo || "").trim();
+    if (c) respuestas[c] = r;
+  });
+  var lista = [];
+  invitados.forEach(function (g) {
+    // La primera columna es el código aunque su encabezado tenga tilde.
+    var codigo = String(g["código"] || g.codigo || "").trim();
+    if (!codigo) return;
+    var r = respuestas[codigo];
+    lista.push({
+      codigo: codigo,
+      nombre: String(g.nombre || ""),
+      pases: 1 + Number(g["acompañantes_permitidos"] || g.acompanantes_permitidos || 0),
+      tipo: String(g.tipo_invitacion || "completa").trim() || "completa",
+      grupo: String(g.grupo || "").trim(),
+      prioridad: g.prioridad === "" || g.prioridad == null ? "" : String(g.prioridad),
+      telefono: String(g.telefono || "").replace(/[^\d]/g, ""),
+      mesa: String(g.mesa || "").trim(),
+      abierto_en: fechaIso(g.abierto_en),
+      ultima_apertura: fechaIso(g.ultima_apertura),
+      aperturas: Number(g.aperturas || 0),
+      respuesta: r ? {
+        asistencia: String(r.asistencia || ""),
+        num_asistentes: Number(r.num_asistentes || 0),
+        enviado_en: fechaIso(r.enviado_en),
+        actualizado_en: fechaIso(r.actualizado_en),
+      } : null,
+    });
+  });
+
+  var mesasSheet = getSheet(SHEET_MESAS);
+  var mesas = mesasSheet ? filasComoObjetos(mesasSheet).filter(function (m) { return String(m.id || "").trim(); }).map(function (m) {
+    return {
+      id: String(m.id).trim(), nombre: String(m.nombre || ""), forma: String(m.forma || "redonda"),
+      capacidad: Number(m.capacidad || 0), x: Number(m.x || 0), y: Number(m.y || 0),
+    };
+  }) : [];
+
+  var aportesSheet = getSheet(SHEET_APORTES);
+  var aportes = aportesSheet ? filasComoObjetos(aportesSheet).filter(function (a) { return String(a.regalo_id || "").trim(); }).map(function (a) {
+    return {
+      fila: a._fila, regalo_id: String(a.regalo_id), nombre: String(a.nombre || ""), monto: Number(a.monto || 0),
+      mensaje: String(a.mensaje || ""), comprobante_url: String(a.comprobante_url || ""),
+      fecha: fechaIso(a.fecha), estado: String(a.estado || "").trim(),
+    };
+  }) : [];
+
+  var histSheet = getSheet(SHEET_HISTORIAL);
+  var historial = histSheet ? filasComoObjetos(histSheet).slice(-300).reverse().map(function (h) {
+    return { fecha: fechaIso(h.fecha), quien: String(h.quien || ""), codigo: String(h.codigo || ""),
+      nombre: String(h.nombre || ""), accion: String(h.accion || ""), antes: String(h.antes || ""), despues: String(h.despues || "") };
+  }) : [];
+
+  return {
+    quien: quien,
+    invitados: lista,
+    mesas: mesas,
+    regalos: listRegalos(),
+    aportes: aportes,
+    historial: historial,
+    cierre: FECHA_CIERRE.toISOString(),
+    urlInvitacion: URL_INVITACION,
+  };
+}
+
+function registrarHistorial(quien, codigo, nombre, accion, antes, despues) {
+  try {
+    var sheet = asegurarHoja(SHEET_HISTORIAL, HISTORIAL_COLUMNAS);
+    sheet.appendRow([new Date(), celda(quien), celda(codigo), celda(nombre), celda(accion), celda(String(antes || "")), celda(String(despues || ""))]);
+  } catch (err) {
+    // El historial nunca puede tumbar una respuesta o una acción.
+  }
+}
+
+function textoRespuesta(r) {
+  if (!r) return "sin respuesta";
+  var a = String(r.asistencia || r.data && r.data.asistencia || "");
+  var n = Number(r.num_asistentes || r.data && r.data.num_asistentes || 0);
+  return a === "si" ? "sí (" + n + ")" : a === "no" ? "no" : "sin respuesta";
+}
+
+// Llamada desde doPost después de guardar la respuesta de un invitado.
+function registrarCambioRespuesta(codigo, nombre, previa, nueva) {
+  var antes = textoRespuesta(previa ? previa.data : null);
+  var despues = textoRespuesta(nueva);
+  if (antes === despues) return;
+  registrarHistorial("invitado", codigo, nombre, previa ? "cambió su respuesta" : "respondió", antes, despues);
+  // Aviso a los novios cuando alguien que venía pasa a "no".
+  if (previa && previa.data && previa.data.asistencia === "si" && nueva.asistencia === "no") {
+    try {
+      MailApp.sendEmail(Session.getEffectiveUser().getEmail(),
+        "Boda A&K · " + nombre + " cambió su respuesta a NO",
+        nombre + " (" + codigo + ") había confirmado y ahora respondió que no asistirá.\n\n" +
+        "Si no fue ella/él, revisa el Historial en el panel.");
+    } catch (err) {}
+  }
+}
+
+function adminGuardarRespuesta(quien, data) {
+  var codigo = normalizarCodigo(data.codigo);
+  var guest = findGuest(codigo);
+  if (!guest) throw new Error("ese invitado no existe");
+  var asistencia = String(data.asistencia || "");
+  if (asistencia !== "si" && asistencia !== "no") throw new Error("respuesta no válida");
+  var max = 1 + guest.acompanantes_permitidos;
+  var num = asistencia === "no" ? 0 : Math.max(1, Math.min(max, parseInt(data.num_asistentes, 10) || max));
+  var previa = findRespuesta(codigo);
+  upsertRespuesta(codigo, { codigo: codigo, nombre: String(guest.nombre).trim(), num_asistentes: num, asistencia: asistencia });
+  registrarHistorial(quien, codigo, guest.nombre, "cargó la respuesta a mano", textoRespuesta(previa ? previa.data : null), textoRespuesta({ asistencia: asistencia, num_asistentes: num }));
+  return { ok: true };
+}
+
+function adminAsignarMesa(quien, data) {
+  var codigo = normalizarCodigo(data.codigo);
+  var sheet = requireSheet(SHEET_INVITADOS);
+  var fila = buscarFilaPorClave(sheet, codigo);
+  if (!fila) throw new Error("ese invitado no existe");
+  var col = asegurarColumna(sheet, "mesa");
+  var antes = String(sheet.getRange(fila, col).getValue() || "");
+  var mesa = String(data.mesa || "").trim();
+  sheet.getRange(fila, col).setValue(celda(mesa));
+  registrarHistorial(quien, codigo, sheet.getRange(fila, 2).getValue(), "asignó mesa", antes || "sin mesa", mesa || "sin mesa");
+  return { ok: true };
+}
+
+// Reemplaza el plano completo de mesas (lo manda el panel al mover,
+// crear, editar o borrar una mesa). Una mesa borrada deja a sus
+// invitados "sin mesa".
+function adminGuardarMesas(quien, data) {
+  var mesas = Array.isArray(data.mesas) ? data.mesas : [];
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_ESPERA_MS);
+  try {
+    var sheet = asegurarHoja(SHEET_MESAS, MESAS_COLUMNAS);
+    var anteriores = filasComoObjetos(sheet).map(function (m) { return String(m.id || "").trim(); }).filter(String);
+    if (sheet.getLastRow() > 1) sheet.getRange(2, 1, sheet.getLastRow() - 1, MESAS_COLUMNAS.length).clearContent();
+    var filas = mesas.slice(0, 200).map(function (m) {
+      return [celda(String(m.id || "").slice(0, 40)), celda(String(m.nombre || "").slice(0, 60)),
+        m.forma === "rectangular" ? "rectangular" : "redonda",
+        Math.max(1, Math.min(40, parseInt(m.capacidad, 10) || 10)),
+        Math.round(Number(m.x) || 0), Math.round(Number(m.y) || 0)];
+    }).filter(function (f) { return f[0]; });
+    if (filas.length) sheet.getRange(2, 1, filas.length, MESAS_COLUMNAS.length).setValues(filas);
+
+    // Invitados de mesas que ya no existen quedan sin mesa.
+    var vigentes = {};
+    filas.forEach(function (f) { vigentes[f[0]] = true; });
+    var borradas = anteriores.filter(function (id) { return !vigentes[id]; });
+    if (borradas.length) {
+      var inv = requireSheet(SHEET_INVITADOS);
+      var col = columnaPorEncabezado(inv, "mesa");
+      if (col && inv.getLastRow() > 1) {
+        var rango = inv.getRange(2, col, inv.getLastRow() - 1, 1);
+        var v = rango.getValues().map(function (r) { return [borradas.indexOf(String(r[0]).trim()) !== -1 ? "" : r[0]]; });
+        rango.setValues(v);
+      }
+      registrarHistorial(quien, "", "", "borró mesas", borradas.join(", "), "");
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true };
+}
+
+function adminMarcarAporte(quien, data) {
+  var sheet = requireSheet(SHEET_APORTES);
+  var fila = parseInt(data.fila, 10);
+  if (!fila || fila < 2 || fila > sheet.getLastRow()) throw new Error("ese aporte no existe");
+  var col = asegurarColumna(sheet, "estado");
+  var estado = data.estado === "duplicado" ? "duplicado" : "";
+  var antes = String(sheet.getRange(fila, col).getValue() || "");
+  sheet.getRange(fila, col).setValue(estado);
+  invalidarCacheRegalos();
+  var fila1 = sheet.getRange(fila, 1, 1, 3).getValues()[0];
+  registrarHistorial(quien, "", fila1[1], "marcó aporte a " + fila1[0] + " (S/ " + fila1[2] + ")", antes || "válido", estado || "válido");
+  return { ok: true };
+}
+
+// — menú "Boda" en la hoja —
+// Acciones de una sola vez, cada una con confirmación.
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu("Boda")
+    .addItem("Preparar el panel (columnas y pestañas)", "prepararPanel")
+    .addItem("Crear claves del panel", "crearClavesAdmin")
+    .addSeparator()
+    .addItem("Agregar sufijo aleatorio a los códigos", "agregarSufijoACodigos")
+    .addItem("Borrar datos de prueba (respuestas, aportes, aperturas)", "borrarDatosDePrueba")
+    .addToUi();
+}
+
+function prepararPanel() {
+  var inv = requireSheet(SHEET_INVITADOS);
+  ["grupo", "prioridad", "telefono", "mesa"].forEach(function (c) { asegurarColumna(inv, c); });
+  var ap = getSheet(SHEET_APORTES);
+  if (ap) asegurarColumna(ap, "estado");
+  asegurarHoja(SHEET_MESAS, MESAS_COLUMNAS);
+  asegurarHoja(SHEET_HISTORIAL, HISTORIAL_COLUMNAS);
+  SpreadsheetApp.getUi().alert("Listo. Se agregaron las columnas y pestañas que faltaban (las que ya existían no se tocaron).");
+}
+
+function claveAleatoria(largo) {
+  var abc = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789", s = "";
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + Utilities.getUuid() + Date.now());
+  for (var i = 0; i < largo; i++) s += abc.charAt(((bytes[i % bytes.length] + 256) % 256 + i * 31) % abc.length);
+  return s;
+}
+
+function crearClavesAdmin() {
+  var ui = SpreadsheetApp.getUi();
+  var props = PropertiesService.getScriptProperties();
+  if (props.getProperty(PROP_ADMIN_CLAVES)) {
+    var r = ui.alert("Ya existen claves", "Si creas claves nuevas, las anteriores dejan de funcionar. ¿Continuar?", ui.ButtonSet.YES_NO);
+    if (r !== ui.Button.YES) return;
+  }
+  var claves = {};
+  var andre = claveAleatoria(24), krisli = claveAleatoria(24);
+  claves[andre] = "André";
+  claves[krisli] = "Krisli";
+  props.setProperty(PROP_ADMIN_CLAVES, JSON.stringify(claves));
+  ui.alert("Claves del panel",
+    "André:  " + andre + "\nKrisli:  " + krisli +
+    "\n\nCópienlas ahora y guárdenlas en un lugar seguro (no se vuelven a mostrar). Cada uno entra al panel con la suya.",
+    ui.ButtonSet.OK);
+}
+
+// Convierte "andre-leon" en "andre-leon-k7q2" en toda la columna de
+// códigos, para que nadie pueda adivinar el link de otro invitado. Solo
+// corre una vez (queda anotado en Propiedades). Hacerlo ANTES de enviar
+// las invitaciones: los links viejos dejan de funcionar.
+function agregarSufijoACodigos() {
+  var ui = SpreadsheetApp.getUi();
+  var props = PropertiesService.getScriptProperties();
+  if (props.getProperty("sufijos_aplicados")) { ui.alert("Los códigos ya tienen sufijo. No se hizo nada."); return; }
+  var r = ui.alert("Agregar sufijo a los códigos",
+    "Cada código pasará de \"andre-leon\" a \"andre-leon-k7q2\". Los links actuales dejarán de funcionar, así que hazlo antes de enviar las invitaciones. ¿Continuar?",
+    ui.ButtonSet.YES_NO);
+  if (r !== ui.Button.YES) return;
+  var sheet = requireSheet(SHEET_INVITADOS);
+  var n = sheet.getLastRow() - 1;
+  if (n < 1) return;
+  var rango = sheet.getRange(2, 1, n, 1);
+  var abc = "abcdefghjkmnpqrstuvwxyz23456789", usados = {};
+  var v = rango.getValues().map(function (fila) {
+    var c = String(fila[0]).trim();
+    if (!c) return [fila[0]];
+    var nuevo;
+    do {
+      var suf = "";
+      for (var i = 0; i < 4; i++) suf += abc.charAt(Math.floor(Math.random() * abc.length));
+      nuevo = c + "-" + suf;
+    } while (usados[nuevo]);
+    usados[nuevo] = true;
+    return [nuevo];
+  });
+  rango.setValues(v);
+  props.setProperty("sufijos_aplicados", new Date().toISOString());
+  try { CacheService.getScriptCache().remove("invitados"); } catch (err) {}
+  ui.alert("Listo: " + n + " códigos actualizados. Los links de la hoja se actualizan solos.");
+}
+
+function borrarDatosDePrueba() {
+  var ui = SpreadsheetApp.getUi();
+  var r = ui.alert("Borrar datos de prueba",
+    "Se borran TODAS las filas de Respuestas, Aportes e Historial, y las aperturas de Invitados. Los invitados, regalos y mesas se conservan. ¿Continuar?",
+    ui.ButtonSet.YES_NO);
+  if (r !== ui.Button.YES) return;
+  [SHEET_RESPUESTAS, SHEET_APORTES, SHEET_HISTORIAL].forEach(function (nombre) {
+    var s = getSheet(nombre);
+    if (s && s.getLastRow() > 1) s.deleteRows(2, s.getLastRow() - 1);
+  });
+  var inv = requireSheet(SHEET_INVITADOS);
+  if (inv.getLastRow() > 1 && inv.getMaxColumns() >= APERTURA_COL + 2) {
+    inv.getRange(2, APERTURA_COL, inv.getLastRow() - 1, 3).clearContent();
+  }
+  invalidarCacheRegalos();
+  ui.alert("Listo. Datos de prueba borrados.");
 }
