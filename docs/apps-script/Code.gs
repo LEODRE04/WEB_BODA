@@ -1308,6 +1308,7 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu("Boda")
     .addItem("Preparar el panel (columnas y pestañas)", "prepararPanel")
     .addItem("Crear claves del panel", "crearClavesAdmin")
+    .addItem("Actualizar la pestaña Resumen y el estado de Invitados", "prepararHoja")
     .addSeparator()
     .addItem("Agregar sufijo aleatorio a los códigos", "agregarSufijoACodigos")
     .addItem("Borrar datos de prueba (respuestas, aportes, aperturas)", "borrarDatosDePrueba")
