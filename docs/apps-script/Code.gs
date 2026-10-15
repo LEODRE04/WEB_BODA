@@ -1304,6 +1304,24 @@ function adminMarcarAporte(quien, data) {
 
 // — menú "Boda" en la hoja —
 // Acciones de una sola vez, cada una con confirmación.
+//
+// Desde el editor de Apps Script (botón Ejecutar) Google no deja mostrar
+// mensajes: getUi() falla. Las acciones que no borran nada siguen y dejan
+// su resultado en el registro de ejecución; las que cambian o borran datos
+// exigen correrse desde el menú, donde se puede pedir confirmación.
+function uiOpcional() {
+  try { return SpreadsheetApp.getUi(); } catch (err) { return null; }
+}
+function avisar(texto) {
+  var ui = uiOpcional();
+  if (ui) ui.alert(texto); else console.log(texto);
+}
+function exigirMenu() {
+  var ui = uiOpcional();
+  if (!ui) throw new Error("Ejecuta esta acción desde la hoja: menú Boda (así puede pedirte confirmación).");
+  return ui;
+}
+
 function onOpen() {
   SpreadsheetApp.getUi().createMenu("Boda")
     .addItem("Preparar el panel (columnas y pestañas)", "prepararPanel")
@@ -1322,7 +1340,7 @@ function prepararPanel() {
   if (ap) asegurarColumna(ap, "estado");
   asegurarHoja(SHEET_MESAS, MESAS_COLUMNAS);
   asegurarHoja(SHEET_HISTORIAL, HISTORIAL_COLUMNAS);
-  SpreadsheetApp.getUi().alert("Listo. Se agregaron las columnas y pestañas que faltaban (las que ya existían no se tocaron).");
+  avisar("Listo. Se agregaron las columnas y pestañas que faltaban (las que ya existían no se tocaron).");
 }
 
 function claveAleatoria(largo) {
@@ -1333,7 +1351,7 @@ function claveAleatoria(largo) {
 }
 
 function crearClavesAdmin() {
-  var ui = SpreadsheetApp.getUi();
+  var ui = exigirMenu();
   var props = PropertiesService.getScriptProperties();
   if (props.getProperty(PROP_ADMIN_CLAVES)) {
     var r = ui.alert("Ya existen claves", "Si creas claves nuevas, las anteriores dejan de funcionar. ¿Continuar?", ui.ButtonSet.YES_NO);
@@ -1355,7 +1373,7 @@ function crearClavesAdmin() {
 // corre una vez (queda anotado en Propiedades). Hacerlo ANTES de enviar
 // las invitaciones: los links viejos dejan de funcionar.
 function agregarSufijoACodigos() {
-  var ui = SpreadsheetApp.getUi();
+  var ui = exigirMenu();
   var props = PropertiesService.getScriptProperties();
   if (props.getProperty("sufijos_aplicados")) { ui.alert("Los códigos ya tienen sufijo. No se hizo nada."); return; }
   var r = ui.alert("Agregar sufijo a los códigos",
@@ -1386,7 +1404,7 @@ function agregarSufijoACodigos() {
 }
 
 function borrarDatosDePrueba() {
-  var ui = SpreadsheetApp.getUi();
+  var ui = exigirMenu();
   var r = ui.alert("Borrar datos de prueba",
     "Se borran TODAS las filas de Respuestas, Aportes e Historial, y las aperturas de Invitados. Los invitados, regalos y mesas se conservan. ¿Continuar?",
     ui.ButtonSet.YES_NO);
