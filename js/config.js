@@ -15,25 +15,23 @@ window.WEDDING = {
   venue: {
     name: "Iglesia Vida Nueva Rinconada",
     area: "La Rinconada, La Molina — Lima",
-    addressPending: true,
-    // Mapa armado con el nombre del lugar (sin API key) — funciona ya, sin
-    // esperar la dirección exacta. Cuando la tengan, lo más preciso es
-    // reemplazar mapSearchQuery por la dirección completa, o pegar aquí el
-    // <iframe src="..."> que da Google Maps en Compartir > Insertar un mapa.
-    mapSearchQuery: "Iglesia Vida Nueva Rinconada, La Molina, Lima, Perú",
+    // Ubicación exacta tomada del link de Google Maps que pasaron los
+    // novios (https://maps.app.goo.gl/JD1ZnHYcVuXzntrSA). Se usan las
+    // coordenadas y no el nombre: buscar "Iglesia Vida Nueva" por texto
+    // puede llevar a otra sede con el mismo nombre.
+    lat: -12.0853388,
+    lng: -76.9257442,
+    mapsUrl: "https://maps.app.goo.gl/JD1ZnHYcVuXzntrSA",
     get mapEmbedSrc() {
-      return "https://www.google.com/maps?q=" + encodeURIComponent(this.mapSearchQuery) + "&output=embed";
-    },
-    get mapsUrl() {
-      return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(this.mapSearchQuery);
+      return "https://www.google.com/maps?q=" + this.lat + "," + this.lng + "&z=16&output=embed";
     },
     get directionsUrl() {
-      return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(this.mapSearchQuery);
+      return "https://www.google.com/maps/dir/?api=1&destination=" + this.lat + "," + this.lng;
     },
     // Waze, además de Google Maps: son las dos apps de navegación que más
     // se usan en Lima. navigate=yes abre directo la ruta en el celular.
     get wazeUrl() {
-      return "https://waze.com/ul?q=" + encodeURIComponent(this.mapSearchQuery) + "&navigate=yes";
+      return "https://waze.com/ul?ll=" + this.lat + "," + this.lng + "&navigate=yes";
     },
   },
 
