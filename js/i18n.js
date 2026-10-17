@@ -301,10 +301,6 @@
       "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 7, 2026. After that we won't be able to add more seats.",
     "¿Hay estacionamiento?": "Is there parking?",
     "Sí, pero los espacios son limitados. Toma tus precauciones: llega con tiempo o coordina con otros invitados para ir en un solo auto.": "Yes, but spaces are limited. Plan ahead: arrive early or carpool with other guests.",
-    "¿Dónde dejo mi regalo?": "Where do I leave my gift?",
-    "Si quieres hacernos un regalo, lo más práctico para nosotros es un aporte por Yape o transferencia (lo tienes en":
-      "If you'd like to give us a gift, the most practical option for us is a contribution by Yape or bank transfer (you'll find it under",
-    "). El día de la boda no habrá mesa para regalos físicos.": "). There won't be a table for physical gifts on the wedding day.",
     // oración y pie
     "Un pedido especial": "A special request",
     "Oren por nosotros": "Pray for us",
