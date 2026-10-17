@@ -300,7 +300,7 @@
     "Puedes confirmar hasta el 7 de noviembre de 2026, pero si lo haces antes nos ayudas mucho a organizarnos. Después de esa fecha ya no podremos agregar cubiertos.":
       "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 7, 2026. After that we won't be able to add more seats.",
     "¿Hay estacionamiento?": "Is there parking?",
-    "Sí, alrededor del recinto y contaremos con personal de seguridad.": "Yes, around the venue, and there will be security staff.",
+    "Sí, pero los espacios son limitados. Toma tus precauciones: llega con tiempo o coordina con otros invitados para ir en un solo auto.": "Yes, but spaces are limited. Plan ahead: arrive early or carpool with other guests.",
     "¿Dónde dejo mi regalo?": "Where do I leave my gift?",
     "Si quieres hacernos un regalo, lo más práctico para nosotros es un aporte por Yape o transferencia (lo tienes en":
       "If you'd like to give us a gift, the most practical option for us is a contribution by Yape or bank transfer (you'll find it under",
@@ -376,7 +376,7 @@
     "Código de pase": "Pass code",
     "Recomendaciones": "Good to know",
     "Mesa de regalos y mapa en la invitación web.": "Gift registry and map in the web invitation.",
-    "Hay estacionamiento alrededor del recinto, con personal de seguridad.": "There's parking around the venue, with security staff.",
+    "El estacionamiento es limitado: llega con tiempo o coordina para ir en un solo auto.": "Parking is limited: arrive early or carpool if you can.",
     "Este pase es personal y es válido para la ceremonia.": "This pass is personal and valid for the ceremony.",
     "Este pase es personal y cubre los dos momentos: ceremonia y recepción.": "This pass is personal and covers both the ceremony and the reception.",
     "La Rinconada, La Molina — Lima": "La Rinconada, La Molina — Lima",
