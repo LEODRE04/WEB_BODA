@@ -141,7 +141,7 @@
       var lineas = [
         "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//" + esc(ev.titulo) + "//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
         "BEGIN:VEVENT",
-        "UID:boda-" + ev.start.getTime() + "@leodre04.github.io",
+        "UID:boda-" + ev.start.getTime() + "@boda-andre-krisli.vercel.app",
         "DTSTAMP:" + utc(new Date()),
         "DTSTART:" + utc(ev.start),
         "DTEND:" + utc(ev.end),

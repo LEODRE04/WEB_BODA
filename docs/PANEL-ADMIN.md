@@ -1,6 +1,6 @@
 # Panel de administración
 
-`admin.html` (https://leodre04.github.io/WEB_BODA/admin.html) es el panel
+`admin.html` (https://boda-andre-krisli.vercel.app/admin.html) es el panel
 de André y Krisli: resumen y avance, lista de invitados, plano de mesas,
 lista de entrada, regalos e historial de cambios. Lee y escribe la misma
 hoja de Google que la invitación. No tiene enlaces desde la invitación y

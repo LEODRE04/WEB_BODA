@@ -661,7 +661,7 @@ function jsonOut(obj) {
 // Todo son fórmulas de la hoja, no valores: se actualizan solas con cada
 // respuesta nueva, sin volver a correr nada.
 var SHEET_RESUMEN = "Resumen";
-var URL_INVITACION = "https://leodre04.github.io/WEB_BODA/";
+var URL_INVITACION = "https://boda-andre-krisli.vercel.app/";
 
 function prepararHoja() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();

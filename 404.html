@@ -2,21 +2,28 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- La invitación ahora vive en Vercel. Si alguien abre un link viejo de
+     GitHub Pages, lo llevamos a la misma página y con el mismo ?codigo. -->
+<script>
+if (location.hostname === "leodre04.github.io") {
+  location.replace("https://boda-andre-krisli.vercel.app" + location.pathname.replace(/^\/WEB_BODA/, "") + location.search + location.hash);
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>André &amp; Krisli — página no encontrada</title>
-<!-- GitHub Pages sirve este archivo para cualquier dirección que no
-     existe dentro del sitio (p. ej. un link de WhatsApp copiado a medias),
-     y puede ser a cualquier profundidad: /WEB_BODA/algo/otra-cosa. Por eso
+<!-- Vercel sirve este archivo para cualquier dirección que no existe
+     dentro del sitio (p. ej. un link de WhatsApp copiado a medias), y
+     puede ser a cualquier profundidad: /algo/otra-cosa. Por eso
      todas las rutas cuelgan de <base> y no son relativas a la dirección. -->
-<base href="/WEB_BODA/">
+<base href="/">
 <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="css/tokens.css?v=202610162237">
-<link rel="stylesheet" href="css/site.css?v=202610162237">
-<link rel="stylesheet" href="css/theme-elegante.css?v=202610162237">
+<link rel="stylesheet" href="css/tokens.css?v=202610162329">
+<link rel="stylesheet" href="css/site.css?v=202610162329">
+<link rel="stylesheet" href="css/theme-elegante.css?v=202610162329">
 <style>
   .no-encontrada {
     min-height: 100dvh; box-sizing: border-box; padding: 48px 20px;

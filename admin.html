@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- La invitación ahora vive en Vercel. Si alguien abre un link viejo de
+     GitHub Pages, lo llevamos a la misma página y con el mismo ?codigo. -->
+<script>
+if (location.hostname === "leodre04.github.io") {
+  location.replace("https://boda-andre-krisli.vercel.app" + location.pathname.replace(/^\/WEB_BODA/, "") + location.search + location.hash);
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Panel de administración de la boda. No tiene enlaces desde la
      invitación y no se indexa. Los datos solo llegan con una clave válida
