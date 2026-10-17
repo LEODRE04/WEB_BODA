@@ -400,6 +400,7 @@
     "Hervidor eléctrico": "Electric kettle",
     "Batidora de pie": "Stand mixer",
     "Escritorio de oficina": "Office desk",
+    "Escritorio": "Desk",
     "Aspiradora": "Vacuum cleaner",
     "Televisor": "TV",
     "Set de toallas": "Towel set",
