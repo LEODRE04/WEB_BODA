@@ -99,6 +99,10 @@
     return g;
   }
   function ponerSelectores() {
+    // Solo se muestra en inglés, para que quien la recibió así pueda
+    // pasarse al español. En español no aparece: casi todos los invitados
+    // la leen en español y el botón solo estorbaría.
+    if (lang !== "en") return;
     var nav = document.querySelector(".site-nav");
     if (nav && !nav.querySelector(".lang-switch")) {
       var toggle = nav.querySelector(".nav-toggle");
