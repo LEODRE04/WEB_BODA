@@ -5,12 +5,12 @@ window.WEDDING = {
   couple: { a: "André", b: "Krisli" },
 
   // ISO 8601 con offset de Lima (UTC-5, sin horario de verano).
-  // OJO: es la hora a la que pedimos que lleguen (2:00 p.m.), no la del
+  // OJO: es la hora a la que pedimos que lleguen (1:30 p.m.), no la del
   // inicio real de la ceremonia, que a propósito no aparece en ningún
   // lado de la invitación. La cuenta regresiva y el pase usan esta hora.
-  weddingDateISO: "2027-01-09T14:00:00-05:00",
-  weddingDateLabel: "Sábado 9 de enero de 2027, 2:00 p.m.",
-  arrivalLabel: "2:00 p.m.",
+  weddingDateISO: "2027-01-09T13:30:00-05:00",
+  weddingDateLabel: "Sábado 9 de enero de 2027, 1:30 p.m.",
+  arrivalLabel: "1:30 p.m.",
 
   venue: {
     name: "Iglesia Vida Nueva Rinconada",

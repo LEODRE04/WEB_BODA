@@ -75,7 +75,7 @@ window.WeddingPase = (function () {
   function buildRecomendaciones(tipoInvitacion, W) {
     var soloCeremonia = tipoInvitacion === "ceremonia";
     return [
-      "Te recomendamos llegar a la iglesia a las " + W.arrivalLabel + " para ubicarte con calma.",
+      "Te recomendamos llegar a la iglesia a la " + W.arrivalLabel + " para ubicarte con calma.",
       "El estacionamiento es limitado: llega con tiempo o coordina para ir en un solo auto.",
       "La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.",
       soloCeremonia
