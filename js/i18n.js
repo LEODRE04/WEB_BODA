@@ -31,7 +31,7 @@
   // ES | EN y sin mirar el idioma del celular ni ?lang=. Para prenderlo,
   // poner true (y subir la versión ?v= como siempre). Lo demás del
   // archivo queda listo, sin tocar.
-  var ACTIVO = false;
+  var ACTIVO = true;
   if (!ACTIVO) {
     window.I18N = { lang: "es", locale: "es-PE", tr: function (s) { return s; }, traducir: function () {} };
     return;
@@ -390,6 +390,38 @@
     "Refrigeradora": "Refrigerator",
     "Sillón": "Sofa",
     "Luna de miel": "Honeymoon",
+    "Mesa de comedor": "Dining table",
+    "Set de sartenes": "Frying pan set",
+    "Licuadora": "Blender",
+    "Hervidor eléctrico": "Electric kettle",
+    "Batidora de pie": "Stand mixer",
+    "Aspiradora": "Vacuum cleaner",
+    "Televisor": "TV",
+    "Set de toallas": "Towel set",
+    "Juego de copas y vasos": "Glassware set",
+    "Para las cenas de los domingos con toda la familia.": "For Sunday dinners with the whole family.",
+    "Para los postres que André prometió aprender a hacer.": "For the desserts André promised to learn to make.",
+    "Para las recetas de siempre que queremos seguir cocinando.": "For the family recipes we want to keep cooking.",
+    "Para recibir a la familia y amigos en casa.": "For having family and friends over.",
+    "Para las noches tranquilas en nuestro nuevo hogar.": "For quiet nights in our new home.",
+    "Para servir cada comida que compartamos en casa.": "For every meal we share at home.",
+    "Para preparar juntos muchas comidas por venir.": "For the many meals we'll cook together.",
+    "Para hacernos un poco más fácil el día a día.": "To make everyday life a little easier.",
+    "Para las cenas rápidas de los días más ocupados.": "For quick dinners on busy days.",
+    "Para acompañarnos en nuestro día a día durante muchos años.": "To be part of our everyday life for many years.",
+    "Para nuestras tardes de descanso y películas.": "For lazy afternoons and movie nights.",
+    "Para celebrar juntos el comienzo de esta nueva etapa.": "To celebrate the start of this new chapter together.",
+    // saludo de la portada: site.js lo arma en tres pedazos ("Tienes ",
+    // <b>2 pases</b>, " reservados para nuestra boda") y cada uno se
+    // traduce por separado; los números van en PATRONES.
+    "Tienes": "You have",
+    "reservados para nuestra boda": "reserved for our wedding",
+    "reservado para nuestra boda": "reserved for our wedding",
+    "pases": "seats",
+    "pase": "seat",
+    "Datos para transferir": "Transfer details",
+    "Con Apple Calendar u otro te avisamos una semana y un día antes. En Google y Outlook se usa el aviso que tengas configurado.":
+      "With Apple Calendar and others, we'll remind you a week and a day before. Google and Outlook use your own reminder settings.",
   };
 
   /* ——— fechas ——— "30 de octubre de 2026" → "October 30, 2026",
@@ -430,6 +462,9 @@
       return "You have " + m[1] + (m[1] === "1" ? " seat" : " seats") + " reserved for our wedding"; }],
     [/^Estamos muy felices de poder invitarte\. Guardamos (un lugar|(\d+) lugares) pensando en ti, para (.+)\.$/, function (m) {
       return "We're so happy to invite you. We've saved " + (m[2] ? m[2] + " seats" : "a seat") + " for you at " + (EVENTO[m[3]] || m[3]) + "."; }],
+    [/^Estamos muy felices de poder invitarte\. Te esperamos en (.+)\.$/, function (m) {
+      return "We're so happy to invite you. We look forward to seeing you at " + (EVENTO[m[1]] || m[1]) + "."; }],
+    [/^(\d+) pases?$/, function (m) { return m[1] + s_(m[1], " seat", " seats"); }],
     [/^Te esperamos en (.+)\.$/, function (m) { return "We look forward to seeing you at " + (EVENTO[m[1]] || m[1]) + "."; }],
     [/^(\d+) pases? reservados?$/, function (m) { return m[1] + s_(m[1], " seat reserved", " seats reserved"); }],
     [/^(\d+) pases? confirmados?$/, function (m) { return m[1] + s_(m[1], " seat confirmed", " seats confirmed"); }],
