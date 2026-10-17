@@ -17,3 +17,4 @@ server/invitados.real.json
 server/invitados.real.csv
 server/invitados.real-links.csv
 server/*.local.json
+server/invitados.real-importar.tsv

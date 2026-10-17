@@ -1411,6 +1411,7 @@ function onOpen() {
     .addSeparator()
     .addItem("Agregar sufijo aleatorio a los códigos", "agregarSufijoACodigos")
     .addItem("Borrar datos de prueba (respuestas, aportes, aperturas)", "borrarDatosDePrueba")
+    .addItem("Reemplazar invitados con la pestaña Importar", "reemplazarInvitados")
     .addToUi();
 }
 
@@ -1500,4 +1501,104 @@ function borrarDatosDePrueba() {
   }
   invalidarCacheRegalos();
   ui.alert("Listo. Datos de prueba borrados.");
+}
+
+// — Reemplazar la lista de invitados —
+// Para cargar una lista nueva de una vez sin pegar columna por columna en
+// Invitados (donde hay columnas que se llenan solas y fórmulas por fila).
+// Se pega la lista en una pestaña "Importar" con los encabezados
+// nombre | pases | tipo_invitacion | grupo | prioridad, y esto la pasa a
+// Invitados con un código nuevo por invitado. Borra las respuestas, las
+// aperturas y las mesas asignadas, porque eran de los códigos anteriores:
+// solo sirve ANTES de enviar las invitaciones.
+var SHEET_IMPORTAR = "Importar";
+
+function reemplazarInvitados() {
+  var ui = exigirMenu();
+  var imp = getSheet(SHEET_IMPORTAR);
+  if (!imp || imp.getLastRow() < 2) {
+    ui.alert("Primero crea una pestaña llamada \"Importar\" y pega ahí la lista, con su fila de encabezados.");
+    return;
+  }
+  var enc = imp.getRange(1, 1, 1, imp.getLastColumn()).getValues()[0].map(function (h) { return String(h).trim().toLowerCase(); });
+  var c = { nombre: enc.indexOf("nombre"), pases: enc.indexOf("pases"), tipo: enc.indexOf("tipo_invitacion"),
+    grupo: enc.indexOf("grupo"), prioridad: enc.indexOf("prioridad") };
+  if (c.nombre < 0 || c.pases < 0) { ui.alert("La pestaña Importar necesita al menos las columnas \"nombre\" y \"pases\"."); return; }
+
+  var errores = [];
+  var lista = imp.getRange(2, 1, imp.getLastRow() - 1, enc.length).getValues().map(function (r, i) {
+    var nombre = String(r[c.nombre] || "").trim().replace(/\s+/g, " ").slice(0, MAX_NOMBRE);
+    if (!nombre) return null;
+    var pases = parseInt(r[c.pases], 10);
+    if (!(pases >= 1 && pases <= 10)) errores.push("fila " + (i + 2) + " (" + nombre + "): pases debe ser de 1 a 10");
+    return {
+      nombre: nombre, pases: pases,
+      tipo: c.tipo >= 0 && String(r[c.tipo]).trim().toLowerCase() === "ceremonia" ? "ceremonia" : "completa",
+      grupo: c.grupo >= 0 ? String(r[c.grupo] || "").trim() : "",
+      prioridad: c.prioridad >= 0 ? r[c.prioridad] : "",
+    };
+  }).filter(Boolean);
+  if (errores.length) { ui.alert("No se cargó nada. Corrige esto en Importar:\n\n" + errores.slice(0, 15).join("\n")); return; }
+  if (!lista.length) { ui.alert("La pestaña Importar está vacía."); return; }
+
+  var inv = requireSheet(SHEET_INVITADOS);
+  var viejas = Math.max(inv.getLastRow() - 1, 0);
+  var r = ui.alert("Reemplazar invitados",
+    "Se reemplazan los " + viejas + " invitados actuales por los " + lista.length + " de la pestaña Importar. " +
+    "Todos reciben un código (link) nuevo y se borran las respuestas, las aperturas y las mesas asignadas. " +
+    "Hazlo solo si todavía no enviaste las invitaciones. ¿Continuar?", ui.ButtonSet.YES_NO);
+  if (r !== ui.Button.YES) return;
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_ESPERA_MS);
+  try {
+    var cols = {
+      grupo: asegurarColumna(inv, "grupo"), prioridad: asegurarColumna(inv, "prioridad"),
+      telefono: asegurarColumna(inv, "telefono"), mesa: asegurarColumna(inv, "mesa"),
+    };
+    var n = lista.length;
+    if (viejas > n) {
+      inv.deleteRows(n + 2, viejas - n);
+    } else if (n > viejas) {
+      var faltan = n + 1 - inv.getMaxRows();
+      if (faltan > 0) inv.insertRowsAfter(inv.getMaxRows(), faltan);
+      // Columnas con fórmula fila por fila (p. ej. links armados): las
+      // filas nuevas copian la de la última fila que había.
+      if (viejas > 0) {
+        inv.getRange(viejas + 1, 1, 1, inv.getLastColumn()).getFormulasR1C1()[0].forEach(function (f, j) {
+          if (f && j > 3) inv.getRange(viejas + 2, j + 1, n - viejas, 1).setFormulaR1C1(f);
+        });
+      }
+    }
+
+    var abc = "abcdefghjkmnpqrstuvwxyz23456789", usados = {};
+    var datos = lista.map(function (g) {
+      var base = slugCodigo(g.nombre), codigo;
+      do {
+        var suf = "";
+        for (var i = 0; i < 4; i++) suf += abc.charAt(Math.floor(Math.random() * abc.length));
+        codigo = base + "-" + suf;
+      } while (usados[codigo]);
+      usados[codigo] = true;
+      return [codigo, celda(g.nombre), g.pases - 1, g.tipo];
+    });
+    inv.getRange(2, 1, n, 4).setValues(datos);
+    if (inv.getMaxColumns() >= APERTURA_COL + 2) inv.getRange(2, APERTURA_COL, n, 3).clearContent();
+    inv.getRange(2, cols.grupo, n, 1).setValues(lista.map(function (g) { return [celda(g.grupo)]; }));
+    inv.getRange(2, cols.prioridad, n, 1).setValues(lista.map(function (g) {
+      var p = String(g.prioridad).trim();
+      return [p === "" ? "" : (isNaN(Number(p)) ? celda(p) : Number(p))];
+    }));
+    inv.getRange(2, cols.telefono, n, 1).clearContent();
+    inv.getRange(2, cols.mesa, n, 1).clearContent();
+
+    var resp = getSheet(SHEET_RESPUESTAS);
+    if (resp && resp.getLastRow() > 1) resp.deleteRows(2, resp.getLastRow() - 1);
+    PropertiesService.getScriptProperties().setProperty("sufijos_aplicados", new Date().toISOString());
+  } finally {
+    lock.releaseLock();
+  }
+  try { CacheService.getScriptCache().remove("invitados"); } catch (err) {}
+  registrarHistorial("menú", "", "", "reemplazó la lista de invitados", viejas + " invitados", lista.length + " invitados");
+  ui.alert("Listo: " + lista.length + " invitados cargados con su link nuevo. Ya puedes borrar la pestaña Importar.");
 }

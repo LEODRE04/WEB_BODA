@@ -34,6 +34,15 @@ no se indexa; sin una clave válida el backend no devuelve ningún dato.
 - **Boda > Borrar datos de prueba.** Vacía Respuestas, Aportes e Historial
   y las aperturas de Invitados. Conserva invitados, regalos y mesas.
 
+## Cargar una lista de invitados nueva
+
+Antes de enviar las invitaciones se puede reemplazar toda la lista de una
+vez: crea una pestaña **Importar** con los encabezados `nombre`, `pases`,
+`tipo_invitacion` (`completa` o `ceremonia`), `grupo` y `prioridad`, pega
+la lista y ejecuta **Boda > Reemplazar invitados con la pestaña Importar**.
+Cada invitado recibe un código nuevo con sufijo, y se borran respuestas,
+aperturas y mesas asignadas (eran de los códigos anteriores).
+
 ## Qué hace cada sección
 
 - **Resumen:** respondieron, vienen (y cuántos a la recepción), no asisten,
