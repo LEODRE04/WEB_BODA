@@ -82,9 +82,8 @@ def load_aperturas():
 def registrar_apertura(codigo):
     """Espejo de registrarApertura() en docs/apps-script/Code.gs.
 
-    El sitio llama a este GET en cada carga con ?codigo= (para saber el
-    nombre y los pases), así que la apertura se anota acá y el frontend
-    no cambia nada. En producción esto son 3 columnas de la pestaña
+    Se llama cuando el invitado abre el sobre (?tipo=apertura), no en
+    cada carga de la página. En producción esto son 3 columnas de la pestaña
     Invitados; en local, un JSON que no se sube a git.
     """
     ahora = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -234,7 +233,13 @@ class Handler(SimpleHTTPRequestHandler):
         if not guest:
             return self._json(200, {"found": False})
 
-        registrar_apertura(codigo)
+        # Igual que doGet en Code.gs: la apertura se anota al abrir el sobre
+        # (?tipo=apertura); sin sin_apertura=1 (sitio viejo) también al cargar.
+        if (qs.get("tipo") or [""])[0] == "apertura":
+            registrar_apertura(codigo)
+            return self._json(200, {"ok": True})
+        if (qs.get("sin_apertura") or [""])[0] != "1":
+            registrar_apertura(codigo)
 
         with _lock:
             existing = next((r for r in load_responses() if r.get("codigo") == codigo), None)

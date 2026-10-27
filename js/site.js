@@ -339,6 +339,7 @@
       // que al abrir el sobre siempre arranque desde arriba.
       window.scrollTo(0, 0);
       try { sessionStorage.setItem("envelope_opened", "1"); } catch (e) {}
+      avisarApertura(codigo);
       // Si se abrió raspando el sello (js/sello-raspable.js), se deja
       // ver cómo salta el lacre antes de levantar la solapa: sin esta
       // pausa la solapa se va mientras el sello todavía se deshace.
@@ -1527,7 +1528,7 @@
     var url = W.rsvp && W.rsvp.apiUrl;
     if (!url) return Promise.resolve(null);
     function pedir() {
-      return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+      return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo) + "&sin_apertura=1", { cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : null; })
         .catch(function () { return null; });
     }
@@ -1537,6 +1538,20 @@
         .then(pedir)
         .then(function (otra) { return otra && !otra.error ? otra : null; });
     });
+  }
+
+  // "Leyó" en el panel = abrió el sobre, no "cargó la página": las vistas
+  // previas de enlaces (iMessage, la hoja de compartir del iPhone) cargan
+  // la página sin que nadie la lea. Por eso fetchGuest pide los datos con
+  // sin_apertura=1 y la apertura se avisa recién acá, con un toque real.
+  // Tampoco cuenta en un dispositivo donde se entró al panel (tiene la
+  // clave guardada): son los novios revisando links. Telemetría: si falla,
+  // no pasa nada.
+  function avisarApertura(codigo) {
+    var url = W.rsvp && W.rsvp.apiUrl;
+    if (!url || !codigo || storageGet("boda_admin_clave")) return;
+    fetchConTimeout(url + "?tipo=apertura&codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+      .catch(function () {});
   }
 
   // Punto único de integración con el backend. El éxito/error se decide

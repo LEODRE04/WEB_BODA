@@ -116,7 +116,16 @@ function doGet(e) {
     var guest = findGuest(codigo);
     if (!guest) return jsonOut({ found: false });
 
-    registrarApertura(codigo, guest.fila);
+    // Aviso de "abrió el sobre" (ver registrarApertura): solo anota.
+    if ((params.tipo || "") === "apertura") {
+      registrarApertura(codigo, guest.fila);
+      return jsonOut({ ok: true });
+    }
+
+    // El sitio nuevo pide los datos con sin_apertura=1 y avisa aparte al
+    // abrir el sobre. Sin ese parámetro (una versión vieja del sitio que
+    // quedó en caché) se sigue anotando al cargar, como antes.
+    if (params.sin_apertura !== "1") registrarApertura(codigo, guest.fila);
 
     var respuesta = findRespuesta(codigo);
     return jsonOut({
@@ -308,10 +317,12 @@ function findGuest(codigo) {
 }
 
 // — "¿ya abrió el link?" —
-// El sitio llama a este mismo endpoint en CADA carga con ?codigo= (para
-// saber el nombre y cuántos pases tiene), así que la apertura se anota
-// acá y el frontend no cambia ni una línea: no hay pedido extra ni
-// píxel de rastreo.
+// Desde el 2026-10-27 cuenta cuando el invitado abre el sobre (el sitio
+// manda ?tipo=apertura&codigo=… al tocarlo), no cuando carga la página:
+// las vistas previas de enlaces (iMessage, la hoja de compartir del
+// iPhone) y los novios revisando links desde el panel cargaban la página
+// sin que nadie la leyera, y quedaban como "Leyó". Las aperturas
+// anteriores a ese día se contaron a la antigua y no se tocan.
 //
 // Escribe 3 columnas en Invitados: abierto_en (la primera vez, nunca se
 // pisa — es la que dice "ya lo vio"), ultima_apertura y aperturas.

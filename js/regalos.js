@@ -215,7 +215,8 @@
   function fetchGuest(codigo) {
     var url = W.rsvp && W.rsvp.apiUrl;
     if (!url) return Promise.resolve(null);
-    return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo), { cache: "no-store" })
+    // sin_apertura=1: abrir la lista de regalos no cuenta como "Leyó" (ver avisarApertura en site.js).
+    return fetchConTimeout(url + "?codigo=" + encodeURIComponent(codigo) + "&sin_apertura=1", { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
   }
