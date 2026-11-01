@@ -106,7 +106,7 @@
       end: new Date(start.getTime() + 5 * 60 * 60 * 1000), // 5h: ceremonia + recepción, aprox.
       titulo: "Boda de " + nombres,
       lugar: W.venue ? W.venue.name + ", " + W.venue.area : "",
-      detalle: "Te esperamos a la " + (W.arrivalLabel || "") + " en la iglesia. Tu invitación: " + link,
+      detalle: "Te esperamos a las " + (W.arrivalLabel || "") + " en la iglesia. Tu invitación: " + link,
     };
   }
 
@@ -993,7 +993,7 @@
     var paseBtn = modal.querySelector("#rsvp-thanks-pase");
     var cambiarBtn = modal.querySelector("#rsvp-thanks-cambiar");
 
-    // "Sábado 9 de enero · 1:30 p.m.", armado desde config.js para que no
+    // "Sábado 9 de enero · 2:00 p.m.", armado desde config.js para que no
     // pueda decir una hora distinta a la del resto de la invitación.
     var cuando = "";
     var inicio = new Date(W.weddingDateISO);

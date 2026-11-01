@@ -161,11 +161,11 @@
     "Reserva la fecha": "Save the date",
     "Día": "Day",
     "Llegada": "Arrival",
-    "Te esperamos a la": "We'll be expecting you at",
+    "Te esperamos a las": "We'll be expecting you at",
     "en la Iglesia Vida Nueva Rinconada, La Molina. Te recomendamos llegar a esa hora para ubicarte con calma y no perderte nada.":
       "at Vida Nueva Rinconada Church, La Molina. We recommend arriving at that time so you can find your seat calmly and not miss a thing.",
-    "Desde la 1:30 p.m.": "From 1:30 p.m.",
-    "Llegada: 1:30 p.m.": "Arrival: 1:30 p.m.",
+    "Desde las 2:00 p.m.": "From 2:00 p.m.",
+    "Llegada: 2:00 p.m.": "Arrival: 2:00 p.m.",
     "días": "days",
     "horas": "hours",
     "min": "min",
@@ -292,8 +292,8 @@
     "Preguntas y respuestas": "Questions and answers",
     "Lo que suelen preguntarnos": "What people usually ask us",
     "¿A qué hora debo llegar?": "What time should I arrive?",
-    "Te recomendamos llegar a la iglesia a la 1:30 p.m. para ubicarte con calma y no perderte nada.":
-      "We recommend arriving at the church at 1:30 p.m. so you can find your seat calmly and not miss a thing.",
+    "Te recomendamos llegar a la iglesia a las 2:00 p.m. para ubicarte con calma y no perderte nada.":
+      "We recommend arriving at the church at 2:00 p.m. so you can find your seat calmly and not miss a thing.",
     "¿Puedo llevar niños?": "Can I bring children?",
     "La celebración es solo para adultos, con excepción de los niños que forman parte de la ceremonia.":
       "The celebration is adults only, except for the children who are part of the ceremony.",
