@@ -55,7 +55,10 @@ aperturas y mesas asignadas (eran de los códigos anteriores).
   fila que tenga la hoja. Búsqueda y filtros (grupo, estado, tipo, mesa). Por cada
   uno: cuándo abrió el link, su respuesta, mesa, copiar link, recordar por
   WhatsApp y cargar una respuesta a mano (queda en el Historial con quién
-  la cargó).
+  la cargó). "Descargar Excel" baja un `.xlsx` con todos los invitados y sus
+  respuestas (estado, personas, fechas, mesa, teléfono, aperturas y link),
+  sin importar los filtros. Antes de armarlo vuelve a leer la hoja, así sale
+  actualizado; si no puede leerla, no descarga.
 - **Mesas:** plano con mesas redondas o rectangulares, cada una con su
   capacidad. Se arrastran a su lugar. Para sentar a alguien: arrastra su
   nombre a la mesa, o toca "Sentar" y luego la mesa. Los puntos alrededor
@@ -66,7 +69,7 @@ aperturas y mesas asignadas (eran de los códigos anteriores).
   no aparecen para sentar ni se les puede asignar mesa.
 - **Entrada:** confirmados en orden alfabético con personas, mesa y grupo.
   Se descarga para Excel o se imprime con una casilla por invitado.
-  También se puede descargar la lista completa de invitados.
+  También se puede descargar el mismo Excel de invitados de esa sección.
 - **Regalos:** avance por regalo y cada aporte con su mensaje y constancia.
   "Marcar duplicado" lo deja de contar sin borrar la fila.
 - **Historial:** respuestas y cambios de invitados y del panel. Un cambio de

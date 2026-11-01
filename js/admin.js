@@ -318,7 +318,10 @@
     el.innerHTML =
       '<div class="adm-mesas-barra">' +
         '<p class="adm-nota">Los cambios se guardan en la pestaña Invitados de la hoja.</p>' +
-        '<button type="button" class="adm-btn adm-btn-primary" id="inv-agregar">+ Agregar invitado</button>' +
+        '<div class="adm-fila">' +
+          '<button type="button" class="adm-btn" id="inv-excel">Descargar Excel</button>' +
+          '<button type="button" class="adm-btn adm-btn-primary" id="inv-agregar">+ Agregar invitado</button>' +
+        '</div>' +
       '</div>' +
       '<div id="inv-nuevo">' + (estado.editandoDatos === "nuevo" ? formDatos(null) : "") + '</div>' +
       '<datalist id="dl-grupos">' + grupos().map(function (g) { return '<option value="' + esc(g) + '">'; }).join("") + '</datalist>' +
@@ -429,6 +432,7 @@
       });
     }
 
+    $("#inv-excel", el).addEventListener("click", descargarExcelInvitados);
     $("#inv-agregar", el).addEventListener("click", function () {
       estado.editandoDatos = estado.editandoDatos === "nuevo" ? null : "nuevo";
       render();
@@ -808,7 +812,7 @@
         '<div class="adm-fila">' +
           '<button type="button" class="adm-btn adm-btn-primary" id="ent-csv">Descargar lista de entrada</button>' +
           '<button type="button" class="adm-btn" id="ent-imprimir">Imprimir</button>' +
-          '<button type="button" class="adm-btn adm-btn-ghost" id="ent-todos">Descargar todos los invitados</button>' +
+          '<button type="button" class="adm-btn adm-btn-ghost" id="ent-todos">Descargar Excel de invitados</button>' +
         '</div>' +
       '</div>' +
       '<section class="adm-entrada" id="entrada-lista">' +
@@ -824,13 +828,7 @@
         return [g.nombre, g.respuesta.num_asistentes, nombreMesa(g.mesa), g.grupo, g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción", ""];
       }));
     });
-    $("#ent-todos", el).addEventListener("click", function () {
-      descargarCsv("Invitados.csv", ["Nombre", "Código", "Grupo", "Prioridad", "Invitación", "Pases", "Estado", "Personas", "Mesa", "Teléfono", "Aperturas", "Link"],
-        estado.datos.invitados.map(function (g) {
-          return [g.nombre, g.codigo, g.grupo, g.prioridad, g.tipo, g.pases, ESTADOS[estadoDe(g)].txt,
-            estadoDe(g) === "confirmado" ? g.respuesta.num_asistentes : "", nombreMesa(g.mesa), g.telefono, g.aperturas, linkDe(g)];
-        }));
-    });
+    $("#ent-todos", el).addEventListener("click", descargarExcelInvitados);
     $("#ent-imprimir", el).addEventListener("click", function () { window.print(); });
   }
 
@@ -838,7 +836,11 @@
   function descargarCsv(nombre, encabezado, filas) {
     var celda = function (v) { v = String(v == null ? "" : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var texto = "﻿" + [encabezado].concat(filas).map(function (f) { return f.map(celda).join(";"); }).join("\r\n");
-    var url = URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8" }));
+    guardarArchivo(nombre, texto, "text/csv;charset=utf-8");
+  }
+
+  function guardarArchivo(nombre, contenido, tipo) {
+    var url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
     var a = document.createElement("a");
     a.href = url;
     a.download = nombre;
@@ -846,6 +848,115 @@
     a.click();
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  // ————— EXCEL DE INVITADOS —————
+  // Trae los datos de la hoja justo antes de armar el archivo: si no se
+  // pueden actualizar, no descarga (sería una lista vieja sin avisar).
+  var descargandoExcel = false;
+  function descargarExcelInvitados() {
+    if (descargandoExcel) return;
+    descargandoExcel = true;
+    cargar().then(function () {
+      var hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Lima" });
+      guardarArchivo("Invitados-boda-" + hoy + ".xlsx", xlsxInvitados(),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      toast("Excel descargado con los datos de este momento.");
+    }).catch(function (err) {
+      if (err.message !== "no autorizado") toast("No se descargó el Excel: no se pudieron actualizar los datos.", true);
+    }).finally(function () { descargandoExcel = false; });
+  }
+
+  function xlsxInvitados() {
+    var columnas = [["Nombre", 34], ["Grupo", 20], ["Prioridad", 10], ["Invitación", 23], ["Pases", 7], ["Estado", 20],
+      ["Personas confirmadas", 12], ["Respondió el", 17], ["Última actualización", 17], ["Mesa", 16], ["Teléfono", 14],
+      ["Veces que abrió", 10], ["Última apertura", 17], ["Código", 26], ["Link", 60]];
+    var filas = estado.datos.invitados.slice().sort(function (a, b) {
+      return a.nombre.localeCompare(b.nombre, "es");
+    }).map(function (g) {
+      var e = estadoDe(g), r = g.respuesta || {};
+      return [g.nombre, g.grupo, /^\d+$/.test(g.prioridad) ? Number(g.prioridad) : g.prioridad,
+        g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción", g.pases, ESTADOS[e].txt,
+        e === "confirmado" ? r.num_asistentes : e === "rechazado" ? 0 : "",
+        fechaExcel(r.enviado_en), fechaExcel(r.actualizado_en), nombreMesa(g.mesa), g.telefono,
+        g.aperturas, fechaExcel(g.ultima_apertura), g.codigo, linkDe(g)];
+    });
+    return armarXlsx("Invitados", columnas, filas);
+  }
+
+  // Número de serie de Excel en hora de Lima (UTC-5 todo el año), para que
+  // la columna ordene y filtre como fecha.
+  function fechaExcel(iso) {
+    var ms = iso ? new Date(iso).getTime() : NaN;
+    return isNaN(ms) ? String(iso || "") : { serie: (ms - 5 * 3600000) / 86400000 + 25569 };
+  }
+
+  // .xlsx de una sola hoja: encabezado fijo y con filtros. Los textos van
+  // como texto, nunca como fórmula, aunque un nombre empiece con "=".
+  function armarXlsx(hoja, columnas, filas) {
+    var xml = function (s) {
+      return String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, "").replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    };
+    var letra = function (i) { return String.fromCharCode(65 + i); };
+    var celda = function (v, col, fila, estilo) {
+      var ref = letra(col) + fila;
+      if (v === "" || v == null) return "";
+      if (typeof v === "number") return '<c r="' + ref + '"><v>' + v + '</v></c>';
+      if (v.serie) return '<c r="' + ref + '" s="2"><v>' + v.serie + '</v></c>';
+      return '<c r="' + ref + '" t="inlineStr"' + (estilo ? ' s="' + estilo + '"' : "") + '><is><t xml:space="preserve">' + xml(v) + '</t></is></c>';
+    };
+    var fin = letra(columnas.length - 1) + (filas.length + 1);
+    var cabecera = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    var ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+    var rels = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    return zipSinComprimir([
+      ["[Content_Types].xml", cabecera + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ["_rels/.rels", cabecera + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="' + rels + '/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ["xl/workbook.xml", cabecera + '<workbook ' + ns + ' xmlns:r="' + rels + '"><sheets><sheet name="' + xml(hoja) + '" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">' + xml(hoja) + '!$A$1:$' + fin.replace(/(\d+)$/, "$$$1") + '</definedName></definedNames></workbook>'],
+      ["xl/_rels/workbook.xml.rels", cabecera + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="' + rels + '/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="' + rels + '/styles" Target="styles.xml"/></Relationships>'],
+      // Estilos: 0 normal, 1 encabezado, 2 fecha y hora.
+      ["xl/styles.xml", cabecera + '<styleSheet ' + ns + '><numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy\\ hh:mm"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEFE7DA"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+      ["xl/worksheets/sheet1.xml", cabecera + '<worksheet ' + ns + '><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>' +
+        columnas.map(function (c, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + c[1] + '" customWidth="1"/>'; }).join("") +
+        '</cols><sheetData><row r="1">' + columnas.map(function (c, i) { return celda(c[0], i, 1, 1); }).join("") + '</row>' +
+        filas.map(function (f, n) { return '<row r="' + (n + 2) + '">' + f.map(function (v, i) { return celda(v, i, n + 2); }).join("") + '</row>'; }).join("") +
+        '</sheetData><autoFilter ref="A1:' + fin + '"/></worksheet>'],
+    ]);
+  }
+
+  // Un .xlsx es un ZIP. Sin comprimir alcanza para una lista de invitados.
+  function zipSinComprimir(archivos) {
+    var tabla = [];
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      tabla[n] = c >>> 0;
+    }
+    var crc32 = function (b) {
+      var c = 0xffffffff;
+      for (var i = 0; i < b.length; i++) c = tabla[(c ^ b[i]) & 255] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    };
+    var bytes = function (campos) { // [valor, tamaño en bytes], little-endian
+      var out = [];
+      campos.forEach(function (x) { for (var i = 0; i < x[1]; i++) out.push(Math.floor(x[0] / Math.pow(256, i)) & 255); });
+      return new Uint8Array(out);
+    };
+    var enc = new TextEncoder(), partes = [], centro = [], pos = 0, tamCentro = 0;
+    archivos.forEach(function (a) {
+      var nombre = enc.encode(a[0]), datos = enc.encode(a[1]), crc = crc32(datos);
+      // versión 20, UTF-8, sin compresión, fecha fija (1/1/2026)
+      var comun = [[20, 2], [0x0800, 2], [0, 2], [0, 2], [0x5c21, 2], [crc, 4], [datos.length, 4], [datos.length, 4], [nombre.length, 2], [0, 2]];
+      var local = bytes([[0x04034b50, 4]].concat(comun));
+      var central = bytes([[0x02014b50, 4], [20, 2]].concat(comun, [[0, 2], [0, 2], [0, 2], [0, 4], [pos, 4]]));
+      partes.push(local, nombre, datos);
+      centro.push(central, nombre);
+      pos += local.length + nombre.length + datos.length;
+      tamCentro += central.length + nombre.length;
+    });
+    return new Blob(partes.concat(centro, [bytes([[0x06054b50, 4], [0, 2], [0, 2], [archivos.length, 2], [archivos.length, 2], [tamCentro, 4], [pos, 4], [0, 2]])]));
   }
 
   // ————— REGALOS —————
