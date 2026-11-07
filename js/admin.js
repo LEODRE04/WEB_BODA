@@ -288,8 +288,8 @@
         '<ul class="adm-libro">' +
           fila("", "Invitados en teoría", r.teoria, "", tipo ? { tipo: tipo } : {}, "todos los pases") +
           fila("no", "No asisten", r.no, "−", { estado: "rechazado", tipo: tipo }) +
-          (r.menos ? fila("menos", "Confirmaron con menos pases", r.menos, "−", null) : "") +
-          (r.extra ? fila("", "Confirmaron más personas que pases", r.extra, "+", null) : "") +
+          (r.menos ? fila("menos", "Confirmaron con menos pases", r.menos, "−", { estado: "menos", tipo: tipo }) : "") +
+          (r.extra ? fila("", "Confirmaron más personas que pases", r.extra, "+", { estado: "mas", tipo: tipo }) : "") +
           '<li class="adm-libro-fila is-total"><span>' + esc(etiquetaTotal) + '</span><b>' + r.maximo + '</b></li>' +
           fila("ok", "Confirmadas", r.confirmados, "", { estado: "confirmado", tipo: tipo }) +
           fila("leido", "Leyeron, sin responder", r.leido, "", { estado: "leido", tipo: tipo }) +
@@ -376,7 +376,11 @@
     return estado.datos.invitados.filter(function (g) {
       if (q && (g.nombre + " " + g.codigo).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").indexOf(q) === -1) return false;
       if (f.grupo && g.grupo !== f.grupo) return false;
-      if (f.estado && estadoDe(g) !== f.estado) return false;
+      if (f.estado === "menos" || f.estado === "mas") {
+        if (estadoDe(g) !== "confirmado") return false;
+        var n = g.respuesta.num_asistentes || 1;
+        if (f.estado === "menos" ? n >= g.pases : n <= g.pases) return false;
+      } else if (f.estado && estadoDe(g) !== f.estado) return false;
       if (f.tipo && g.tipo !== f.tipo) return false;
       if (f.mesa === "sin" && g.mesa) return false;
       if (f.mesa === "con" && !g.mesa) return false;
@@ -406,7 +410,7 @@
       '<div class="adm-filtros">' +
         '<input type="search" id="f-q" placeholder="Buscar por nombre" value="' + esc(f.q) + '" aria-label="Buscar invitado">' +
         '<select id="f-grupo" aria-label="Grupo">' + opciones(grupos(), f.grupo, "Todos los grupos") + '</select>' +
-        '<select id="f-estado" aria-label="Estado">' + opciones(Object.keys(ESTADOS).map(function (k) { return [k, ESTADOS[k].txt]; }), f.estado, "Todos los estados") + '</select>' +
+        '<select id="f-estado" aria-label="Estado">' + opciones(Object.keys(ESTADOS).map(function (k) { return [k, ESTADOS[k].txt]; }).concat([["menos", "Confirmó con menos pases"], ["mas", "Confirmó con más pases"]]), f.estado, "Todos los estados") + '</select>' +
         '<select id="f-tipo" aria-label="Tipo de invitación">' + opciones([["completa", "Ceremonia y recepción"], ["ceremonia", "Solo ceremonia"]], f.tipo, "Todo tipo") + '</select>' +
         '<select id="f-mesa" aria-label="Mesa">' + opciones([["sin", "Sin mesa"], ["con", "Con mesa"]], f.mesa, "Con y sin mesa") + '</select>' +
       '</div>' +
