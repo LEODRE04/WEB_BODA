@@ -438,14 +438,14 @@
             '<div class="adm-inv-meta">' + (g.aperturas ? "Abrió " + g.aperturas + (g.aperturas === 1 ? " vez" : " veces") + " · última " + esc(fechaCorta(g.ultima_apertura)) : "No abrió el link") +
               (r && r.enviado_en ? " · respondió " + esc(fechaCorta(r.actualizado_en || r.enviado_en)) : "") + '</div>' +
           '</div>' +
-          '<span class="adm-chip is-' + ESTADOS[e].cls + '">' + ESTADOS[e].txt + (e === "confirmado" ? " · " + r.num_asistentes : "") + '</span>' +
+          '<span class="adm-chip is-' + ESTADOS[e].cls + '">' + ESTADOS[e].txt + (e === "confirmado" ? " · " + r.num_asistentes + (r.num_asistentes < g.pases ? " de " + g.pases : "") : "") + '</span>' +
           (vaARecepcion(g)
             ? '<label class="adm-inv-mesa"><span>Mesa</span><select data-accion="mesa"' + (e === "rechazado" ? " disabled" : "") + '>' + opciones(mesas, g.mesa, "Sin mesa") + '</select></label>'
             : '<span class="adm-inv-mesa">Sin mesa · solo ceremonia</span>') +
           '<div class="adm-inv-acciones">' +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="copiar">Copiar link</button>' +
             (e !== "confirmado" && e !== "rechazado" ? '<a class="adm-btn adm-btn-mini" target="_blank" rel="noopener" href="' + esc(whatsappDe(g)) + '">Recordar por WhatsApp</a>' : "") +
-            '<button type="button" class="adm-btn adm-btn-mini" data-accion="editar" aria-expanded="' + editando + '">Cargar respuesta</button>' +
+            '<button type="button" class="adm-btn adm-btn-mini" data-accion="editar" aria-expanded="' + editando + '">' + (r ? "Editar respuesta" : "Cargar respuesta") + '</button>' +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="datos" aria-expanded="' + (estado.editandoDatos === g.codigo) + '">Editar datos</button>' +
           '</div>' +
           (editando ? formRespuesta(g) : "") +
@@ -464,6 +464,7 @@
         '<label>Personas <select name="num">' + nums.map(function (n) { return '<option' + (String(r.num_asistentes || g.pases) === n[0] ? " selected" : "") + '>' + n[0] + '</option>'; }).join("") + '</select></label>' +
         '<button type="submit" class="adm-btn adm-btn-primary adm-btn-mini">Guardar</button>' +
         '<button type="button" class="adm-btn adm-btn-mini" data-accion="cancelar">Cancelar</button>' +
+        '<p class="adm-nota adm-form-resp-nota">Hasta ' + g.pases + (g.pases === 1 ? " pase" : " pases") + '. Para permitir más personas, cambia los pases en "Editar datos".</p>' +
       '</form>';
     }
 
