@@ -165,7 +165,7 @@ def admin_datos(quien):
             "codigo": codigo, "nombre": g["nombre"], "pases": 1 + int(g.get("acompanantes_permitidos", 0)),
             "tipo": g.get("tipo_invitacion", "completa"), "grupo": g.get("grupo", ""),
             "prioridad": "" if g.get("prioridad") is None else str(g.get("prioridad")),
-            "telefono": e.get("telefono", ""), "mesa": e.get("mesa", ""),
+            "telefono": e.get("telefono", ""), "mesa": e.get("mesa", ""), "duda": e.get("duda", ""),
             "abierto_en": a.get("abierto_en", ""), "ultima_apertura": a.get("ultima_apertura", ""),
             "aperturas": int(a.get("aperturas", 0)),
             "respuesta": {"asistencia": r.get("asistencia", ""), "num_asistentes": int(float(r.get("num_asistentes") or 0)),
@@ -369,6 +369,16 @@ class Handler(SimpleHTTPRequestHandler):
                 _save_json(ADMIN_EXTRA_FILE, extra)
                 registrar_historial(quien, codigo, guests[codigo]["nombre"], "asignó mesa", antes or "sin mesa", extra[codigo]["mesa"] or "sin mesa")
                 return self._json(200, {"ok": True})
+            if accion == "marcarDuda":
+                codigo = normalizar_codigo(data.get("codigo"))
+                if codigo not in guests:
+                    return self._json(200, {"error": "ese invitado no existe"})
+                marcar = data.get("duda") in (True, "true")
+                extra = _load_json(ADMIN_EXTRA_FILE, {})
+                extra.setdefault(codigo, {})["duda"] = datetime.now(timezone.utc).isoformat() if marcar else ""
+                _save_json(ADMIN_EXTRA_FILE, extra)
+                registrar_historial(quien, codigo, guests[codigo]["nombre"], "marcó en duda" if marcar else "quitó la duda", "", "")
+                return self._json(200, {"ok": True, "duda": extra[codigo]["duda"]})
             if accion == "guardarMesas":
                 mesas = []
                 for m in (data.get("mesas") or [])[:200]:

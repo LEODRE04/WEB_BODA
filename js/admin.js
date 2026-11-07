@@ -85,12 +85,22 @@
   // ————— datos derivados —————
   // estado de cada invitado: confirmado / rechazado / leido / sin_abrir
   function estadoDe(g) {
+    if (enDuda(g)) return "duda";
     if (g.respuesta && g.respuesta.asistencia === "si") return "confirmado";
     if (g.respuesta && g.respuesta.asistencia === "no") return "rechazado";
     return g.aperturas > 0 ? "leido" : "sin_abrir";
   }
+  // "En duda" lo marcan ustedes desde el panel. Si el invitado responde
+  // después por su link, su respuesta es más nueva y deja de estar en duda.
+  function enDuda(g) {
+    if (!g.duda) return false;
+    var r = g.respuesta;
+    var ultima = r ? Math.max(Date.parse(r.actualizado_en) || 0, Date.parse(r.enviado_en) || 0) : 0;
+    return (Date.parse(g.duda) || 0) > ultima;
+  }
   var ESTADOS = {
     confirmado: { txt: "Confirmó", cls: "ok" },
+    duda: { txt: "En duda", cls: "duda" },
     rechazado: { txt: "No asiste", cls: "no" },
     leido: { txt: "Leyó, sin responder", cls: "leido" },
     sin_abrir: { txt: "Sin abrir", cls: "nada" },
@@ -210,7 +220,7 @@
   // ————— RESUMEN —————
   function vistaResumen(el) {
     var inv = estado.datos.invitados;
-    var c = { confirmado: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
+    var c = { confirmado: 0, duda: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
     inv.forEach(function (g) { c[estadoDe(g)]++; });
     var total = inv.length || 1;
     var respondieron = c.confirmado + c.rechazado;
@@ -230,7 +240,7 @@
 
     var kpis = [
       ["Respondieron", Math.round(respondieron / total * 100) + "%", respondieron + " de " + inv.length + " invitaciones"],
-      ["Sin responder", c.leido + c.sin_abrir, c.sin_abrir + " ni abrieron el link", { estado: c.leido ? "leido" : "sin_abrir" }],
+      ["Sin responder", c.leido + c.sin_abrir + c.duda, (c.duda ? c.duda + " en duda · " : "") + c.sin_abrir + " ni abrieron el link", { estado: c.duda ? "duda" : c.leido ? "leido" : "sin_abrir" }],
       ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "14 de noviembre"],
       ["Sentados", asignados + "/" + rec.confirmados, "confirmados de la recepción con mesa"],
       ["Regalos", soles(aportado), aportes.length + " aportes"],
@@ -238,7 +248,7 @@
 
     var porGrupo = grupos().map(function (gr) {
       var del = inv.filter(function (g) { return g.grupo === gr; });
-      var k = { confirmado: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
+      var k = { confirmado: 0, duda: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
       del.forEach(function (g) { k[estadoDe(g)]++; });
       return { grupo: gr, total: del.length, k: k, p: personasDe(del) };
     });
@@ -262,14 +272,14 @@
     var maxN = Math.max(1, Math.max.apply(null, dias21.map(function (x) { return x.n; })));
 
     function barra(k) {
-      return '<div class="adm-barra" role="img" aria-label="' + k.confirmado + ' confirmaron, ' + k.rechazado + ' no asisten, ' + k.leido + ' leyeron, ' + k.sin_abrir + ' sin abrir">' +
-        ["confirmado", "leido", "sin_abrir", "rechazado"].map(function (e) {
+      return '<div class="adm-barra" role="img" aria-label="' + k.confirmado + ' confirmaron, ' + k.duda + ' en duda, ' + k.rechazado + ' no asisten, ' + k.leido + ' leyeron, ' + k.sin_abrir + ' sin abrir">' +
+        ["confirmado", "duda", "leido", "sin_abrir", "rechazado"].map(function (e) {
           return k[e] ? '<span class="is-' + ESTADOS[e].cls + '" style="flex:' + k[e] + '"></span>' : "";
         }).join("") + '</div>';
     }
     // Barra en personas: confirmadas, pendientes, no vienen, lugares sin usar.
     function barraPersonas(r) {
-      var partes = [["ok", r.confirmados], ["leido", r.leido], ["nada", r.sin_abrir], ["no", r.no], ["menos", r.menos]];
+      var partes = [["ok", r.confirmados], ["duda", r.duda], ["leido", r.leido], ["nada", r.sin_abrir], ["no", r.no], ["menos", r.menos]];
       return '<div class="adm-barra adm-barra-alta" role="img" aria-label="' + r.confirmados + ' confirmadas, ' + r.pendientes + ' por confirmar, ' + (r.no + r.menos) + ' no vienen">' +
         partes.map(function (x) { return x[1] ? '<span class="is-' + x[0] + '" style="flex:' + x[1] + '"></span>' : ""; }).join("") + '</div>';
     }
@@ -292,6 +302,7 @@
           (r.extra ? fila("", "Confirmaron más personas que pases", r.extra, "+", { estado: "mas", tipo: tipo }) : "") +
           '<li class="adm-libro-fila is-total"><span>' + esc(etiquetaTotal) + '</span><b>' + r.maximo + '</b></li>' +
           fila("ok", "Confirmadas", r.confirmados, "", { estado: "confirmado", tipo: tipo }) +
+          fila("duda", "En duda", r.duda, "", { estado: "duda", tipo: tipo }) +
           fila("leido", "Leyeron, sin responder", r.leido, "", { estado: "leido", tipo: tipo }) +
           fila("nada", "Sin abrir", r.sin_abrir, "", { estado: "sin_abrir", tipo: tipo }) +
         '</ul>' +
@@ -311,14 +322,14 @@
         return '<div class="adm-kpi' + (k[3] ? " is-link" : "") + '"' + dato + '><span>' + esc(k[0]) + '</span><strong>' + esc(k[1]) + '</strong><small>' + esc(k[2]) + '</small></div>';
       }).join("") + '</section>' +
       '<section class="adm-card"><h2>Avance de invitaciones</h2>' + barra(c) +
-        '<ul class="adm-leyenda">' + ["confirmado", "leido", "sin_abrir", "rechazado"].map(function (e) {
+        '<ul class="adm-leyenda">' + ["confirmado", "duda", "leido", "sin_abrir", "rechazado"].map(function (e) {
           return '<li><i class="is-' + ESTADOS[e].cls + '"></i>' + ESTADOS[e].txt + ' <b>' + c[e] + '</b></li>';
         }).join("") + '</ul></section>' +
       '<section class="adm-card"><h2>Por grupo <small>personas</small></h2>' + (porGrupo.length ? '<div class="adm-grupos">' + porGrupo.map(function (p) {
         var resp = p.k.confirmado + p.k.rechazado;
         return '<button type="button" class="adm-grupo" data-grupo="' + esc(p.grupo) + '"><span class="adm-grupo-nombre">' + esc(p.grupo) + '</span>' +
           '<span class="adm-grupo-num">' + resp + '/' + p.total + ' respondieron</span>' + barraPersonas(p.p) +
-          '<span class="adm-grupo-det">' + p.p.confirmados + ' vienen · ' + p.p.pendientes + ' por confirmar · ' + p.p.no + ' no</span></button>';
+          '<span class="adm-grupo-det">' + p.p.confirmados + ' vienen · ' + p.p.pendientes + ' por confirmar' + (p.p.duda ? ' (' + p.p.duda + ' en duda)' : '') + ' · ' + p.p.no + ' no</span></button>';
       }).join("") + '</div>' : '<p class="adm-vacio">Agrega la columna "grupo" en la hoja de Invitados para ver el avance por grupo.</p>') + '</section>' +
       (filasPrio.length > 1 || (filasPrio[0] && filasPrio[0].p !== "Sin prioridad")
         ? '<section class="adm-card"><h2>Por prioridad <small>útil si hay que ajustar la lista</small></h2><div class="adm-tabla-scroll"><table class="adm-tabla">' +
@@ -354,7 +365,7 @@
   // los pases; "maximo" descuenta a quienes no vienen y los pases que no se
   // usaron al confirmar con menos personas.
   function personasDe(lista) {
-    var r = { teoria: 0, confirmados: 0, leido: 0, sin_abrir: 0, no: 0, menos: 0, extra: 0 };
+    var r = { teoria: 0, confirmados: 0, duda: 0, leido: 0, sin_abrir: 0, no: 0, menos: 0, extra: 0 };
     lista.forEach(function (g) {
       var e = estadoDe(g);
       r.teoria += g.pases;
@@ -365,7 +376,7 @@
       } else if (e === "rechazado") r.no += g.pases;
       else r[e] += g.pases;
     });
-    r.pendientes = r.leido + r.sin_abrir;
+    r.pendientes = r.duda + r.leido + r.sin_abrir;
     r.maximo = r.confirmados + r.pendientes;
     return r;
   }
@@ -446,6 +457,7 @@
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="copiar">Copiar link</button>' +
             (e !== "confirmado" && e !== "rechazado" ? '<a class="adm-btn adm-btn-mini" target="_blank" rel="noopener" href="' + esc(whatsappDe(g)) + '">Recordar por WhatsApp</a>' : "") +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="editar" aria-expanded="' + editando + '">' + (r ? "Editar respuesta" : "Cargar respuesta") + '</button>' +
+            '<button type="button" class="adm-btn adm-btn-mini" data-accion="duda" aria-pressed="' + (e === "duda") + '">' + (e === "duda" ? "Quitar duda" : "Marcar en duda") + '</button>' +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="datos" aria-expanded="' + (estado.editandoDatos === g.codigo) + '">Editar datos</button>' +
           '</div>' +
           (editando ? formRespuesta(g) : "") +
@@ -536,6 +548,20 @@
       var accion = b.getAttribute("data-accion");
       if (accion === "copiar") {
         copiar(linkDe(g));
+      } else if (accion === "duda") {
+        var marcar = estadoDe(g) !== "duda";
+        b.disabled = true;
+        sync("Guardando…");
+        api("marcarDuda", { codigo: g.codigo, duda: marcar }).then(function (res) {
+          g.duda = marcar ? (res.duda || new Date().toISOString()) : "";
+          toast(g.nombre + (marcar ? " quedó en duda." : " ya no está en duda."));
+          sync("Guardado");
+          pintarLista();
+        }).catch(function (err) {
+          b.disabled = false;
+          sync("");
+          toast("No se pudo guardar: " + (/acci[oó]n/i.test(err.message) ? "falta actualizar el Apps Script (nueva versión)." : err.message), true);
+        });
       } else if (accion === "editar") {
         estado.editando = estado.editando === g.codigo ? null : g.codigo;
         pintarLista();

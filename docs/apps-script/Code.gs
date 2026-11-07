@@ -1082,6 +1082,7 @@ function handleAdmin(data) {
       case "asignarMesa": return jsonOut(adminAsignarMesa(quien, data));
       case "guardarMesas": return jsonOut(adminGuardarMesas(quien, data));
       case "marcarAporte": return jsonOut(adminMarcarAporte(quien, data));
+      case "marcarDuda": return jsonOut(adminMarcarDuda(quien, data));
       case "guardarInvitado": return jsonOut(adminGuardarInvitado(quien, data));
       default: return jsonOut({ error: "acción desconocida" });
     }
@@ -1154,6 +1155,7 @@ function adminDatos(quien) {
       prioridad: g.prioridad === "" || g.prioridad == null ? "" : String(g.prioridad),
       telefono: String(g.telefono || "").replace(/[^\d]/g, ""),
       mesa: String(g.mesa || "").trim(),
+      duda: fechaIso(g.duda),
       abierto_en: fechaIso(g.abierto_en),
       ultima_apertura: fechaIso(g.ultima_apertura),
       aperturas: Number(g.aperturas || 0),
@@ -1247,6 +1249,23 @@ function adminGuardarRespuesta(quien, data) {
   upsertRespuesta(codigo, { codigo: codigo, nombre: String(guest.nombre).trim(), num_asistentes: num, asistencia: asistencia });
   registrarHistorial(quien, codigo, guest.nombre, "cargó la respuesta a mano", textoRespuesta(previa ? previa.data : null), textoRespuesta({ asistencia: asistencia, num_asistentes: num }));
   return { ok: true };
+}
+
+// Marca (o desmarca) a un invitado como "en duda". Se guarda la fecha en
+// la columna "duda" de Invitados: si el invitado responde después por su
+// link, su respuesta es más nueva y el panel deja de mostrarlo en duda.
+function adminMarcarDuda(quien, data) {
+  var codigo = normalizarCodigo(data.codigo);
+  var sheet = requireSheet(SHEET_INVITADOS);
+  var fila = buscarFilaPorClave(sheet, codigo);
+  if (!fila) throw new Error("ese invitado no existe");
+  var col = asegurarColumna(sheet, "duda");
+  var marcar = data.duda === true || data.duda === "true";
+  var ahora = new Date();
+  sheet.getRange(fila, col).setValue(marcar ? ahora : "");
+  if (marcar) sheet.getRange(fila, col).setNumberFormat(FORMATO_FECHA);
+  registrarHistorial(quien, codigo, sheet.getRange(fila, 2).getValue(), marcar ? "marcó en duda" : "quitó la duda", "", "");
+  return { ok: true, duda: marcar ? ahora.toISOString() : "" };
 }
 
 function adminAsignarMesa(quien, data) {
