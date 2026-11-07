@@ -235,7 +235,7 @@
       ["Vienen", personas, personasRecepcion + " a la recepción"],
       ["No asisten", c.rechazado, "invitaciones"],
       ["Sin responder", c.leido + c.sin_abrir, c.sin_abrir + " ni abrieron el link"],
-      ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "7 de noviembre"],
+      ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "14 de noviembre"],
       ["Sentados", asignados + "/" + personasRecepcion, "confirmados de la recepción con mesa"],
       ["Regalos", soles(aportado), estado.datos.aportes.length + " aportes"],
     ];

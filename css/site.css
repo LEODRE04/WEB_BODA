@@ -321,7 +321,7 @@ body { background: var(--color-neutral-100); }
 .details-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--color-accent-700); }
 .details-label.sage { color: var(--color-accent-2-700); }
 .details-heading { font-family: var(--font-heading); font-size: 26px; margin: 10px 0 12px; }
-/* La fecha límite no se parte en dos líneas ("7 de noviembre de / 2026"). */
+/* La fecha límite no se parte en dos líneas ("14 de noviembre de / 2026"). */
 #rsvp-lede strong { white-space: nowrap; }
 .map-embed { border-radius: 28px; overflow: hidden; height: 250px; }
 .map-embed iframe { width: 100%; height: 100%; border: 0; display: block; }

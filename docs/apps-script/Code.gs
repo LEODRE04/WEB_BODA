@@ -834,7 +834,7 @@ function columnasDeSeguimiento(sheet, F) {
   // Las filas de abajo tienen que estar vacías para que la fórmula se
   // extienda; esta columna es nuestra, así que se puede limpiar.
   sheet.getRange(2, colRec, Math.max(sheet.getMaxRows() - 1, 1), 1).clearContent();
-  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 7 de noviembre. ' +
+  var mensaje = '"Hola " & B2:B & ", te recordamos confirmar tu asistencia a nuestra boda antes del 14 de noviembre. ' +
     'Aquí está tu invitación: ' + URL_INVITACION + '?codigo=" & A2:A & " — André y Krisli"';
   sheet.getRange(1, colRec).setFormula(F(
     '=ARRAYFORMULA({"recordatorio"; IF((' + E + '2:' + E + ' = "' + ESTADOS.sinAbrir + '") + (' +
@@ -861,7 +861,7 @@ function hojaResumen(ss, E, F) {
     // Solo las respuestas con código: las que llegan sin link (pruebas,
     // o alguien que escribió cualquier nombre) no cuentan como gente real.
     ["Personas que vienen", '=SUMIFS(Respuestas!C2:C, Respuestas!D2:D, "si", Respuestas!A2:A, "<>")'],
-    ["Días para el cierre (7 nov)", '=MAX(0, DATE(2026, 11, 7) - TODAY())'],
+    ["Días para el cierre (14 nov)", '=MAX(0, DATE(2026, 11, 14) - TODAY())'],
     ["", ""],
     ["Regalos", ""],
     ["Aportado a regalos (S/)", '=SUMIFS(Aportes!C2:C, Aportes!A2:A, "<>deposito", Aportes!A2:A, "<>")'],
@@ -898,7 +898,7 @@ function hojaResumen(ss, E, F) {
 var RESUMEN_CADA_DIAS = 3;
 var RESUMEN_HORA = 20;
 var PROP_ULTIMO_RESUMEN = "ultimo_resumen";
-var FECHA_CIERRE = new Date(2026, 10, 7); // 7 de noviembre de 2026
+var FECHA_CIERRE = new Date(2026, 10, 14); // 14 de noviembre de 2026
 var MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
   "agosto", "setiembre", "octubre", "noviembre", "diciembre"];
 
@@ -1006,7 +1006,7 @@ function mandarResumen(moverFecha) {
   var html =
     "<div style=\"font-family:Georgia,serif;color:#364c2f;max-width:560px\">" +
     "<h2 style=\"margin:0 0 4px\">Resumen de la boda</h2>" +
-    "<p style=\"margin:0 0 18px;color:#777\">" + fechaLarga(ahora) + " · faltan " + dias + " días para el cierre del 7 de noviembre</p>" +
+    "<p style=\"margin:0 0 18px;color:#777\">" + fechaLarga(ahora) + " · faltan " + dias + " días para el cierre del 14 de noviembre</p>" +
     "<h3 style=\"margin:0 0 6px\">Confirmaron " + desdeTxt + " (" + nuevosSi.length + ")</h3>" + listaSi + listaNo +
     "<h3 style=\"margin:18px 0 6px\">Totales</h3>" +
     "<p style=\"margin:0\">Confirmados: <b>" + confirmados + "</b> invitaciones · <b>" + personas + "</b> personas<br>" +

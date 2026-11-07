@@ -301,8 +301,8 @@
     "Solo si tu invitación lo indica. Al confirmar verás cuántos lugares tienes reservados.":
       "Only if your invitation says so. When you confirm you'll see how many seats are reserved for you.",
     "¿Hasta cuándo puedo confirmar?": "When is the RSVP deadline?",
-    "Puedes confirmar hasta el 7 de noviembre de 2026, pero si lo haces antes nos ayudas mucho a organizarnos. Después de esa fecha ya no podremos agregar cubiertos.":
-      "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 7, 2026. After that we won't be able to add more seats.",
+    "Puedes confirmar hasta el 14 de noviembre de 2026, pero si lo haces antes nos ayudas mucho a organizarnos. Después de esa fecha ya no podremos agregar cubiertos.":
+      "It would help our planning a lot if you replied as soon as possible; the deadline, though, is November 14, 2026. After that we won't be able to add more seats.",
     "¿Hay estacionamiento?": "Is there parking?",
     "Sí, pero los espacios son limitados. Toma tus precauciones: llega con tiempo o coordina con otros invitados para ir en un solo auto.": "Yes, but spaces are limited. Plan ahead: arrive early or carpool with other guests.",
     // oración y pie
