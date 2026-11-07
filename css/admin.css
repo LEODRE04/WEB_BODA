@@ -112,6 +112,34 @@ h2 small { font-family: var(--sans); font-size: 12.5px; font-weight: 400; color:
 .is-leido { background: var(--oro); }
 .is-nada { background: color-mix(in srgb, #364c2f 18%, transparent); }
 .adm-leyenda { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; }
+.is-menos { background: color-mix(in srgb, var(--rojo) 35%, transparent); }
+.adm-barra-alta { height: 14px; }
+.is-link { cursor: pointer; }
+/* — eventos (recepción / ceremonia) — */
+.adm-eventos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.adm-evento { display: flex; flex-direction: column; gap: 14px; }
+.adm-evento-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.adm-evento-cab small { font-size: 12.5px; color: var(--muted); }
+.adm-evento-total { display: flex; align-items: center; gap: 14px; }
+.adm-evento-total strong { font-family: var(--serif); font-size: 56px; line-height: .9; color: var(--accent-700); font-variant-numeric: lining-nums tabular-nums; }
+.adm-evento-total span { font-weight: 700; font-size: 15px; line-height: 1.35; }
+.adm-evento-total small { font-weight: 400; font-size: 13px; color: var(--muted); }
+.adm-libro { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+.adm-libro-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 6px; border-radius: 8px; }
+.adm-libro-fila b { font-variant-numeric: tabular-nums; }
+.adm-libro-fila small { color: var(--muted); font-size: 12px; }
+.adm-libro-fila i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+.adm-libro-fila.is-link:hover, .adm-libro-fila.is-link:focus-visible { background: var(--accent-100); }
+.adm-libro-fila.is-total { border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); border-radius: 0; margin: 4px 0; padding: 9px 6px; font-weight: 700; font-size: 15px; }
+.adm-estimado { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface); font-size: 13.5px; color: var(--text-soft); }
+.adm-kpi.is-link:hover { background: var(--accent-100); }
+.adm-grupo-det { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
+.adm-tabla-scroll { overflow-x: auto; }
+.adm-tabla { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.adm-tabla th, .adm-tabla td { padding: 8px 10px; border-bottom: 1px solid var(--divider); text-align: right; white-space: nowrap; }
+.adm-tabla th:first-child, .adm-tabla td:first-child { text-align: left; }
+.adm-tabla th { font-size: 12px; color: var(--muted); font-weight: 600; }
+.adm-dia em { font-style: normal; font-size: 10px; font-weight: 700; color: var(--accent-700); min-height: 12px; }
 .adm-leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 .adm-grupos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .adm-grupo {

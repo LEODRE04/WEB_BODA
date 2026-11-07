@@ -211,41 +211,45 @@
   function vistaResumen(el) {
     var inv = estado.datos.invitados;
     var c = { confirmado: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
-    var personas = 0, personasRecepcion = 0, pasesTotales = 0;
-    inv.forEach(function (g) {
-      var e = estadoDe(g);
-      c[e]++;
-      pasesTotales += g.pases;
-      if (e === "confirmado") {
-        personas += g.respuesta.num_asistentes || 1;
-        if (g.tipo !== "ceremonia") personasRecepcion += g.respuesta.num_asistentes || 1;
-      }
-    });
+    inv.forEach(function (g) { c[estadoDe(g)]++; });
     var total = inv.length || 1;
     var respondieron = c.confirmado + c.rechazado;
     var dias = Math.max(0, Math.ceil((new Date(estado.datos.cierre).getTime() - Date.now()) / 86400000));
-    var asignados = inv.filter(function (g) { return g.mesa && vaARecepcion(g) && estadoDe(g) === "confirmado"; })
+    var recepcion = inv.filter(vaARecepcion);
+    var cer = personasDe(inv), rec = personasDe(recepcion);
+    var asignados = recepcion.filter(function (g) { return g.mesa && estadoDe(g) === "confirmado"; })
       .reduce(function (s, g) { return s + asientosDe(g); }, 0);
-    var aportado = estado.datos.aportes.filter(function (a) { return a.estado !== "duplicado"; })
-      .reduce(function (s, a) { return s + a.monto; }, 0);
+    var aportes = estado.datos.aportes.filter(function (a) { return a.estado !== "duplicado"; });
+    var aportado = aportes.reduce(function (s, a) { return s + a.monto; }, 0);
+
+    // De cada pase de las invitaciones que ya respondieron, ¿qué parte
+    // confirmó? Con eso se estima cuántos de los pendientes vendrán.
+    var resp = inv.filter(function (g) { var e = estadoDe(g); return e === "confirmado" || e === "rechazado"; });
+    var pasesResp = resp.reduce(function (s, g) { return s + g.pases; }, 0);
+    var tasa = resp.length >= 5 && pasesResp ? personasDe(resp).confirmados / pasesResp : null;
 
     var kpis = [
-      ["Invitaciones", inv.length, pasesTotales + " pases en total"],
-      ["Respondieron", Math.round(respondieron / total * 100) + "%", respondieron + " de " + inv.length],
-      ["Vienen", personas, personasRecepcion + " a la recepción"],
-      ["No asisten", c.rechazado, "invitaciones"],
-      ["Sin responder", c.leido + c.sin_abrir, c.sin_abrir + " ni abrieron el link"],
+      ["Respondieron", Math.round(respondieron / total * 100) + "%", respondieron + " de " + inv.length + " invitaciones"],
+      ["Sin responder", c.leido + c.sin_abrir, c.sin_abrir + " ni abrieron el link", { estado: c.leido ? "leido" : "sin_abrir" }],
       ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "14 de noviembre"],
-      ["Sentados", asignados + "/" + personasRecepcion, "confirmados de la recepción con mesa"],
-      ["Regalos", soles(aportado), estado.datos.aportes.length + " aportes"],
+      ["Sentados", asignados + "/" + rec.confirmados, "confirmados de la recepción con mesa"],
+      ["Regalos", soles(aportado), aportes.length + " aportes"],
     ];
 
     var porGrupo = grupos().map(function (gr) {
       var del = inv.filter(function (g) { return g.grupo === gr; });
       var k = { confirmado: 0, rechazado: 0, leido: 0, sin_abrir: 0 };
       del.forEach(function (g) { k[estadoDe(g)]++; });
-      return { grupo: gr, total: del.length, k: k };
+      return { grupo: gr, total: del.length, k: k, p: personasDe(del) };
     });
+
+    var prioridades = {};
+    inv.forEach(function (g) { var p = String(g.prioridad || "").trim() || "Sin prioridad"; (prioridades[p] = prioridades[p] || []).push(g); });
+    var filasPrio = Object.keys(prioridades).sort(function (a, b) { return a === "Sin prioridad" ? 1 : b === "Sin prioridad" ? -1 : a.localeCompare(b, "es", { numeric: true }); })
+      .map(function (p) {
+        var lista = prioridades[p], r = personasDe(lista.filter(vaARecepcion));
+        return { p: p, inv: lista.length, todos: personasDe(lista), rec: r };
+      });
 
     // respuestas por día, últimos 21 días
     var conteo = {};
@@ -257,39 +261,113 @@
     }
     var maxN = Math.max(1, Math.max.apply(null, dias21.map(function (x) { return x.n; })));
 
-    function barra(k, tot) {
+    function barra(k) {
       return '<div class="adm-barra" role="img" aria-label="' + k.confirmado + ' confirmaron, ' + k.rechazado + ' no asisten, ' + k.leido + ' leyeron, ' + k.sin_abrir + ' sin abrir">' +
-        ["confirmado", "rechazado", "leido", "sin_abrir"].map(function (e) {
+        ["confirmado", "leido", "sin_abrir", "rechazado"].map(function (e) {
           return k[e] ? '<span class="is-' + ESTADOS[e].cls + '" style="flex:' + k[e] + '"></span>' : "";
         }).join("") + '</div>';
     }
+    // Barra en personas: confirmadas, pendientes, no vienen, lugares sin usar.
+    function barraPersonas(r) {
+      var partes = [["ok", r.confirmados], ["leido", r.leido], ["nada", r.sin_abrir], ["no", r.no], ["menos", r.menos]];
+      return '<div class="adm-barra adm-barra-alta" role="img" aria-label="' + r.confirmados + ' confirmadas, ' + r.pendientes + ' por confirmar, ' + (r.no + r.menos) + ' no vienen">' +
+        partes.map(function (x) { return x[1] ? '<span class="is-' + x[0] + '" style="flex:' + x[1] + '"></span>' : ""; }).join("") + '</div>';
+    }
+    function fila(cls, txt, n, signo, filtro, extra) {
+      var dato = filtro ? ' data-filtro="' + esc(JSON.stringify(filtro)) + '"' : "";
+      return '<li class="adm-libro-fila' + (filtro ? " is-link" : "") + '"' + dato + '>' +
+        '<span>' + (cls ? '<i class="is-' + cls + '"></i>' : "") + esc(txt) + (extra ? ' <small>' + esc(extra) + '</small>' : "") + '</span>' +
+        '<b>' + (signo || "") + n + '</b></li>';
+    }
+    function evento(titulo, r, tipo, invs, etiquetaTotal) {
+      var estimado = tasa === null ? null : r.confirmados + Math.round(r.pendientes * tasa);
+      return '<section class="adm-card adm-evento">' +
+        '<div class="adm-evento-cab"><h2>' + titulo + '</h2><small>' + invs + (invs === 1 ? " invitación" : " invitaciones") + '</small></div>' +
+        '<div class="adm-evento-total"><strong>' + r.maximo + '</strong><span>' + etiquetaTotal + '<br><small>' + r.confirmados + ' confirmadas · ' + r.pendientes + ' por confirmar</small></span></div>' +
+        barraPersonas(r) +
+        '<ul class="adm-libro">' +
+          fila("", "Invitados en teoría", r.teoria, "", tipo ? { tipo: tipo } : {}, "todos los pases") +
+          fila("no", "No asisten", r.no, "−", { estado: "rechazado", tipo: tipo }) +
+          (r.menos ? fila("menos", "Confirmaron con menos pases", r.menos, "−", null) : "") +
+          (r.extra ? fila("", "Confirmaron más personas que pases", r.extra, "+", null) : "") +
+          '<li class="adm-libro-fila is-total"><span>' + esc(etiquetaTotal) + '</span><b>' + r.maximo + '</b></li>' +
+          fila("ok", "Confirmadas", r.confirmados, "", { estado: "confirmado", tipo: tipo }) +
+          fila("leido", "Leyeron, sin responder", r.leido, "", { estado: "leido", tipo: tipo }) +
+          fila("nada", "Sin abrir", r.sin_abrir, "", { estado: "sin_abrir", tipo: tipo }) +
+        '</ul>' +
+        (estimado !== null && r.pendientes
+          ? '<p class="adm-estimado">Estimado: <b>≈ ' + estimado + '</b> personas si los pendientes responden como hasta ahora (' + Math.round(tasa * 100) + '% de los pases confirmados).</p>'
+          : "") +
+      '</section>';
+    }
 
     el.innerHTML =
+      '<div class="adm-eventos">' +
+        evento("Recepción", rec, "completa", recepcion.length, "Platos a contar") +
+        evento("Ceremonia", cer, "", inv.length, "Personas como máximo") +
+      '</div>' +
       '<section class="adm-kpis">' + kpis.map(function (k) {
-        return '<div class="adm-kpi"><span>' + esc(k[0]) + '</span><strong>' + esc(k[1]) + '</strong><small>' + esc(k[2]) + '</small></div>';
+        var dato = k[3] ? ' data-filtro="' + esc(JSON.stringify(k[3])) + '"' : "";
+        return '<div class="adm-kpi' + (k[3] ? " is-link" : "") + '"' + dato + '><span>' + esc(k[0]) + '</span><strong>' + esc(k[1]) + '</strong><small>' + esc(k[2]) + '</small></div>';
       }).join("") + '</section>' +
-      '<section class="adm-card"><h2>Avance general</h2>' + barra(c, total) +
-        '<ul class="adm-leyenda">' + ["confirmado", "rechazado", "leido", "sin_abrir"].map(function (e) {
+      '<section class="adm-card"><h2>Avance de invitaciones</h2>' + barra(c) +
+        '<ul class="adm-leyenda">' + ["confirmado", "leido", "sin_abrir", "rechazado"].map(function (e) {
           return '<li><i class="is-' + ESTADOS[e].cls + '"></i>' + ESTADOS[e].txt + ' <b>' + c[e] + '</b></li>';
         }).join("") + '</ul></section>' +
-      '<section class="adm-card"><h2>Por grupo</h2>' + (porGrupo.length ? '<div class="adm-grupos">' + porGrupo.map(function (p) {
+      '<section class="adm-card"><h2>Por grupo <small>personas</small></h2>' + (porGrupo.length ? '<div class="adm-grupos">' + porGrupo.map(function (p) {
         var resp = p.k.confirmado + p.k.rechazado;
         return '<button type="button" class="adm-grupo" data-grupo="' + esc(p.grupo) + '"><span class="adm-grupo-nombre">' + esc(p.grupo) + '</span>' +
-          '<span class="adm-grupo-num">' + resp + '/' + p.total + ' respondieron</span>' + barra(p.k, p.total) + '</button>';
+          '<span class="adm-grupo-num">' + resp + '/' + p.total + ' respondieron</span>' + barraPersonas(p.p) +
+          '<span class="adm-grupo-det">' + p.p.confirmados + ' vienen · ' + p.p.pendientes + ' por confirmar · ' + p.p.no + ' no</span></button>';
       }).join("") + '</div>' : '<p class="adm-vacio">Agrega la columna "grupo" en la hoja de Invitados para ver el avance por grupo.</p>') + '</section>' +
+      (filasPrio.length > 1 || (filasPrio[0] && filasPrio[0].p !== "Sin prioridad")
+        ? '<section class="adm-card"><h2>Por prioridad <small>útil si hay que ajustar la lista</small></h2><div class="adm-tabla-scroll"><table class="adm-tabla">' +
+            '<thead><tr><th>Prioridad</th><th>Invitaciones</th><th>Personas en teoría</th><th>Confirmadas</th><th>Por confirmar</th><th>No asisten</th><th>Platos (máx.)</th></tr></thead><tbody>' +
+            filasPrio.map(function (f) {
+              return '<tr><td>' + esc(f.p) + '</td><td>' + f.inv + '</td><td>' + f.todos.teoria + '</td><td>' + f.todos.confirmados + '</td><td>' + f.todos.pendientes + '</td><td>' + f.todos.no + '</td><td>' + f.rec.maximo + '</td></tr>';
+            }).join("") + '</tbody></table></div></section>'
+        : "") +
       '<section class="adm-card"><h2>Respuestas por día <small>últimos 21 días</small></h2><div class="adm-dias">' +
         dias21.map(function (x) {
-          return '<div class="adm-dia" title="' + x.d + ': ' + x.n + '"><span style="height:' + (x.n / maxN * 100) + '%"></span><small>' + x.d.slice(8) + '</small></div>';
+          return '<div class="adm-dia" title="' + x.d + ': ' + x.n + '"><em>' + (x.n || "") + '</em><span style="height:' + (x.n / maxN * 100) + '%"></span><small>' + x.d.slice(8) + '</small></div>';
         }).join("") + '</div></section>';
 
+    function irAInvitados(filtros) {
+      estado.filtros = Object.assign({ q: "", grupo: "", estado: "", tipo: "", mesa: "" }, filtros);
+      estado.vista = "invitados";
+      guardar(VISTA_KEY, "invitados");
+      render();
+    }
     [].forEach.call(el.querySelectorAll("[data-grupo]"), function (b) {
-      b.addEventListener("click", function () {
-        estado.filtros = { q: "", grupo: b.getAttribute("data-grupo"), estado: "", tipo: "", mesa: "" };
-        estado.vista = "invitados";
-        guardar(VISTA_KEY, "invitados");
-        render();
-      });
+      b.addEventListener("click", function () { irAInvitados({ grupo: b.getAttribute("data-grupo") }); });
     });
+    [].forEach.call(el.querySelectorAll("[data-filtro]"), function (b) {
+      b.setAttribute("role", "button");
+      b.setAttribute("tabindex", "0");
+      function ir() { irAInvitados(JSON.parse(b.getAttribute("data-filtro"))); }
+      b.addEventListener("click", ir);
+      b.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ir(); } });
+    });
+  }
+
+  // Personas de un conjunto de invitaciones, por estado. "teoria" son todos
+  // los pases; "maximo" descuenta a quienes no vienen y los pases que no se
+  // usaron al confirmar con menos personas.
+  function personasDe(lista) {
+    var r = { teoria: 0, confirmados: 0, leido: 0, sin_abrir: 0, no: 0, menos: 0, extra: 0 };
+    lista.forEach(function (g) {
+      var e = estadoDe(g);
+      r.teoria += g.pases;
+      if (e === "confirmado") {
+        var n = g.respuesta.num_asistentes || 1;
+        r.confirmados += n;
+        if (n < g.pases) r.menos += g.pases - n; else r.extra += n - g.pases;
+      } else if (e === "rechazado") r.no += g.pases;
+      else r[e] += g.pases;
+    });
+    r.pendientes = r.leido + r.sin_abrir;
+    r.maximo = r.confirmados + r.pendientes;
+    return r;
   }
 
   // ————— INVITADOS —————
