@@ -739,6 +739,7 @@
     el.innerHTML =
       '<div class="adm-mesas-barra">' +
         '<p><b>' + mesas.length + '</b> mesas · <b>' + sentados + '</b>/' + capacidad + ' lugares ocupados · <b>' + sinMesa.length + '</b> invitaciones sin mesa' + (hayFiltroMesa() ? " con este filtro" : "") + '</p>' +
+        '<p class="adm-leyenda"><i class="adm-asiento is-ocupado"></i> Confirmado <i class="adm-asiento is-ocupado is-pendiente"></i> Sin confirmar <i class="adm-asiento"></i> Libre</p>' +
         '<button type="button" class="adm-btn adm-btn-primary" id="mesa-nueva">+ Agregar mesa</button>' +
       '</div>' +
       '<div class="adm-filtros adm-filtros-mesas">' +
@@ -802,6 +803,9 @@
   function dibujoMesa(m) {
     var t = tamMesa(m), ocup = ocupadosEn(m.id);
     var invs = estado.datos.invitados.filter(function (g) { return enMesa(g, m.id); });
+    // Puntos llenos: primero los confirmados; los que aún no confirman, en amarillo.
+    var conf = invs.filter(function (g) { return estadoDe(g) === "confirmado"; })
+      .reduce(function (s, g) { return s + asientosEn(g, m.id); }, 0);
     var estadoMesa = ocup > m.capacidad ? "is-excedida" : ocup === m.capacidad ? "is-llena" : "";
     // puntos de los asientos alrededor (llenos = ocupados)
     var puntos = "";
@@ -817,7 +821,7 @@
         px = 50 + Math.cos(ang) * (50 + 12 / t.w * 100);
         py = 50 + Math.sin(ang) * (50 + 12 / t.h * 100);
       }
-      puntos += '<i class="adm-asiento' + (i < ocup ? " is-ocupado" : "") + '" style="left:' + px.toFixed(1) + '%;top:' + py.toFixed(1) + '%"></i>';
+      puntos += '<i class="adm-asiento' + (i < conf ? " is-ocupado" : i < ocup ? " is-ocupado is-pendiente" : "") + '" style="left:' + px.toFixed(1) + '%;top:' + py.toFixed(1) + '%"></i>';
     }
     // Con un filtro activo, los que lo cumplen van primero y en negrita, y
     // la mesa sin ninguno se atenúa.
