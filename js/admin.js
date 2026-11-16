@@ -118,9 +118,50 @@
   function vaARecepcion(g) { return g.tipo !== "ceremonia"; }
   function mesaPorId(id) { return (estado.datos.mesas || []).filter(function (m) { return m.id === id; })[0] || null; }
   function nombreMesa(id) { var m = mesaPorId(id); return m ? m.nombre : ""; }
+  // Una invitación puede sentarse entera en una mesa ("m1") o repartida
+  // entre varias ("m1:2,m3:1" = 2 lugares en una y 1 en otra). Si después
+  // confirma menos personas, el reparto se recorta desde la última mesa.
+  function partesDe(g) {
+    var v = String(g.mesa || "").trim();
+    if (!v) return [];
+    var total = asientosDe(g);
+    if (v.indexOf(":") === -1) return [{ id: v, n: total }];
+    var resto = total;
+    return v.split(",").map(function (p) {
+      var i = p.lastIndexOf(":");
+      return { id: p.slice(0, i).trim(), n: Math.max(0, parseInt(p.slice(i + 1), 10) || 0) };
+    }).filter(function (p) { return p.id; }).map(function (p) {
+      var n = Math.min(p.n, resto);
+      resto -= n;
+      return { id: p.id, n: n };
+    });
+  }
+  // Arma el valor guardado: sin dividir, la forma corta de siempre.
+  function valorMesa(partes, total) {
+    var juntas = [];
+    partes.forEach(function (p) {
+      if (!p.id || p.n <= 0) return;
+      var ya = juntas.filter(function (x) { return x.id === p.id; })[0];
+      if (ya) ya.n += p.n; else juntas.push({ id: p.id, n: p.n });
+    });
+    if (!juntas.length) return "";
+    if (juntas.length === 1 && juntas[0].n >= total) return juntas[0].id;
+    return juntas.map(function (p) { return p.id + ":" + p.n; }).join(",");
+  }
+  function asientosEn(g, idMesa) {
+    return partesDe(g).filter(function (p) { return p.id === idMesa; }).reduce(function (s, p) { return s + p.n; }, 0);
+  }
+  function enMesa(g, idMesa) { return partesDe(g).some(function (p) { return p.id === idMesa; }); }
+  function sentadosDe(g) { return partesDe(g).reduce(function (s, p) { return s + p.n; }, 0); }
+  function porSentar(g) { return Math.max(0, asientosDe(g) - sentadosDe(g)); }
+  function esDividida(g) { return partesDe(g).length > 1; }
+  function textoMesas(g) {
+    var partes = partesDe(g);
+    if (partes.length === 1) return nombreMesa(partes[0].id);
+    return partes.map(function (p) { return nombreMesa(p.id) + " (" + p.n + ")"; }).join(", ");
+  }
   function ocupadosEn(idMesa) {
-    return estado.datos.invitados.filter(function (g) { return g.mesa === idMesa; })
-      .reduce(function (s, g) { return s + asientosDe(g); }, 0);
+    return estado.datos.invitados.reduce(function (s, g) { return s + asientosEn(g, idMesa); }, 0);
   }
   function linkDe(g) {
     var base = estado.datos.urlInvitacion || (location.origin + location.pathname.replace(/[^/]*$/, ""));
@@ -227,8 +268,8 @@
     var dias = Math.max(0, Math.ceil((new Date(estado.datos.cierre).getTime() - Date.now()) / 86400000));
     var recepcion = inv.filter(vaARecepcion);
     var cer = personasDe(inv), rec = personasDe(recepcion);
-    var asignados = recepcion.filter(function (g) { return g.mesa && estadoDe(g) === "confirmado"; })
-      .reduce(function (s, g) { return s + asientosDe(g); }, 0);
+    var asignados = recepcion.filter(function (g) { return estadoDe(g) === "confirmado"; })
+      .reduce(function (s, g) { return s + sentadosDe(g); }, 0);
     var aportes = estado.datos.aportes.filter(function (a) { return a.estado !== "duplicado"; });
     var aportado = aportes.reduce(function (s, a) { return s + a.monto; }, 0);
 
@@ -393,7 +434,7 @@
         if (f.estado === "menos" ? n >= g.pases : n <= g.pases) return false;
       } else if (f.estado && estadoDe(g) !== f.estado) return false;
       if (f.tipo && g.tipo !== f.tipo) return false;
-      if (f.mesa === "sin" && g.mesa) return false;
+      if (f.mesa === "sin" && !(vaARecepcion(g) && porSentar(g) > 0)) return false;
       if (f.mesa === "con" && !g.mesa) return false;
       return true;
     }).sort(function (a, b) { return a.nombre.localeCompare(b.nombre, "es"); });
@@ -451,7 +492,8 @@
           '</div>' +
           '<span class="adm-chip is-' + ESTADOS[e].cls + '">' + ESTADOS[e].txt + (e === "confirmado" ? " · " + r.num_asistentes + (r.num_asistentes < g.pases ? " de " + g.pases : "") : "") + '</span>' +
           (vaARecepcion(g)
-            ? '<label class="adm-inv-mesa"><span>Mesa</span><select data-accion="mesa"' + (e === "rechazado" ? " disabled" : "") + '>' + opciones(mesas, g.mesa, "Sin mesa") + '</select></label>'
+            ? '<label class="adm-inv-mesa"><span>Mesa</span><select data-accion="mesa"' + (e === "rechazado" ? " disabled" : "") + '>' +
+                opciones((esDividida(g) || porSentar(g) && g.mesa ? [[g.mesa, "Repartida: " + textoMesas(g) + (porSentar(g) ? " · faltan " + porSentar(g) : "")]] : []).concat(mesas), g.mesa, "Sin mesa") + '</select></label>'
             : '<span class="adm-inv-mesa">Sin mesa · solo ceremonia</span>') +
           '<div class="adm-inv-acciones">' +
             '<button type="button" class="adm-btn adm-btn-mini" data-accion="copiar">Copiar link</button>' +
@@ -630,6 +672,27 @@
     });
   }
 
+  // Sienta en esa mesa a los que de la invitación aún no tienen lugar
+  // (todos, si no estaba en ninguna).
+  function sentarEn(g, idMesa) {
+    var faltan = porSentar(g) || (g.mesa ? 0 : asientosDe(g));
+    if (!faltan) { toast(g.nombre + " ya tiene a todos sentados.", true); return Promise.resolve(); }
+    return asignarMesa(g, valorMesa(partesDe(g).concat([{ id: idMesa, n: faltan }]), asientosDe(g)));
+  }
+  // Cambia cuántos de la invitación se sientan en esa mesa; los que salen
+  // quedan "por sentar" para llevarlos a otra.
+  function cambiarEnMesa(g, idMesa, n) {
+    var partes = partesDe(g).map(function (p) { return { id: p.id, n: p.id === idMesa ? 0 : p.n }; });
+    partes.push({ id: idMesa, n: n });
+    // conserva el orden: la mesa editada en su lugar
+    var orden = partesDe(g).map(function (p) { return p.id; });
+    partes = partes.filter(function (p) { return p.n > 0; }).sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
+    return asignarMesa(g, valorMesa(partes, asientosDe(g)));
+  }
+  function quitarDeMesa(g, idMesa) {
+    return asignarMesa(g, valorMesa(partesDe(g).filter(function (p) { return p.id !== idMesa; }), asientosDe(g)));
+  }
+
   // ————— MESAS —————
   // Plano de 1000 × 650 (coordenadas guardadas en la hoja). En pantallas
   // angostas se desplaza horizontalmente.
@@ -664,13 +727,13 @@
   function vistaMesas(el) {
     var mesas = estado.datos.mesas;
     var fm = estado.filtrosMesa;
-    var sinMesa = estado.datos.invitados.filter(function (g) { return !g.mesa && vaARecepcion(g) && estadoDe(g) !== "rechazado" && cumpleFiltroMesa(g); })
+    var sinMesa = estado.datos.invitados.filter(function (g) { return porSentar(g) > 0 && vaARecepcion(g) && estadoDe(g) !== "rechazado" && cumpleFiltroMesa(g); })
       .sort(function (a, b) {
         var ea = estadoDe(a) === "confirmado" ? 0 : 1, eb = estadoDe(b) === "confirmado" ? 0 : 1;
         return ea - eb || a.nombre.localeCompare(b.nombre, "es");
       });
     var capacidad = mesas.reduce(function (s, m) { return s + m.capacidad; }, 0);
-    var sentados = estado.datos.invitados.filter(function (g) { return g.mesa; }).reduce(function (s, g) { return s + asientosDe(g); }, 0);
+    var sentados = estado.datos.invitados.reduce(function (s, g) { return s + sentadosDe(g); }, 0);
     var sel = estado.mesaSel ? mesaPorId(estado.mesaSel) : null;
 
     el.innerHTML =
@@ -738,7 +801,7 @@
 
   function dibujoMesa(m) {
     var t = tamMesa(m), ocup = ocupadosEn(m.id);
-    var invs = estado.datos.invitados.filter(function (g) { return g.mesa === m.id; });
+    var invs = estado.datos.invitados.filter(function (g) { return enMesa(g, m.id); });
     var estadoMesa = ocup > m.capacidad ? "is-excedida" : ocup === m.capacidad ? "is-llena" : "";
     // puntos de los asientos alrededor (llenos = ocupados)
     var puntos = "";
@@ -762,7 +825,8 @@
     var cumplen = filtro ? invs.filter(cumpleFiltroMesa) : invs;
     if (filtro) invs = cumplen.concat(invs.filter(function (g) { return !cumpleFiltroMesa(g); }));
     var nombres = invs.slice(0, 6).map(function (g) {
-      var txt = esc(g.nombre.split(" ").slice(0, 2).join(" ")) + (asientosDe(g) > 1 ? " ×" + asientosDe(g) : "");
+      var n = asientosEn(g, m.id);
+      var txt = esc(g.nombre.split(" ").slice(0, 2).join(" ")) + (n > 1 ? " ×" + n : "");
       return filtro && cumpleFiltroMesa(g) ? "<b>" + txt + "</b>" : txt;
     });
     if (invs.length > 6) nombres.push("+" + (invs.length - 6) + " más");
@@ -806,7 +870,7 @@
         var g = invitado(estado.elegido);
         estado.elegido = null;
         estado.mesaSel = a.m.id;
-        asignarMesa(g, a.m.id).then(render);
+        sentarEn(g, a.m.id).then(render);
         render();
       } else {
         estado.mesaSel = estado.mesaSel === a.m.id ? null : a.m.id;
@@ -831,28 +895,47 @@
       if (!nodo || !codigo) return;
       e.preventDefault();
       estado.elegido = null;
-      asignarMesa(invitado(codigo), nodo.getAttribute("data-mesa")).then(render);
+      sentarEn(invitado(codigo), nodo.getAttribute("data-mesa")).then(render);
     });
   }
 
-  function chipInvitado(g, quitar) {
-    var e = estadoDe(g);
-    return '<li class="adm-persona" draggable="' + (!quitar) + '" data-codigo="' + esc(g.codigo) + '">' +
-      '<span><b>' + esc(g.nombre) + '</b><small>' + esc([g.grupo, asientosDe(g) + (asientosDe(g) === 1 ? " lugar" : " lugares"),
-        e === "confirmado" ? "" : "sin confirmar"].filter(String).join(" · ")) + '</small></span>' +
-      (quitar ? '<button type="button" class="adm-link" data-accion="quitar">Quitar</button>'
-              : '<button type="button" class="adm-link" data-accion="elegir">' + (estado.elegido === g.codigo ? "Elegido" : "Sentar") + '</button>') +
+  // En la lista "Sin mesa" (m vacío) o dentro de la mesa m. En la mesa,
+  // una invitación de 2 o más trae un selector para dejar ahí solo a
+  // algunos y llevar al resto a otra mesa.
+  function chipInvitado(g, m) {
+    var e = estadoDe(g), total = asientosDe(g), faltan = porSentar(g);
+    var lugares;
+    if (m) {
+      var aqui = asientosEn(g, m.id), otras = partesDe(g).filter(function (p) { return p.id !== m.id; });
+      lugares = total > 1 ? aqui + " de " + total + " aquí" : total + (total === 1 ? " lugar" : " lugares");
+      if (otras.length) lugares += " · " + otras.map(function (p) { return p.n + " en " + nombreMesa(p.id); }).join(", ");
+      if (faltan) lugares += " · " + faltan + " sin mesa";
+    } else {
+      lugares = sentadosDe(g) ? faltan + " de " + total + " sin mesa · " + textoMesas(g)
+                              : total + (total === 1 ? " lugar" : " lugares");
+    }
+    var selector = "";
+    if (m && total > 1) {
+      var max = asientosEn(g, m.id) + faltan, ops = "";
+      for (var i = 1; i <= max; i++) ops += '<option value="' + i + '"' + (i === asientosEn(g, m.id) ? " selected" : "") + '>' + i + '</option>';
+      selector = '<label class="adm-persona-cuantos" title="Cuántos se sientan en esta mesa"><select data-accion="cuantos" aria-label="Personas de ' + esc(g.nombre) + ' en esta mesa">' + ops + '</select></label>';
+    }
+    return '<li class="adm-persona" draggable="' + (!m) + '" data-codigo="' + esc(g.codigo) + '">' +
+      '<span><b>' + esc(g.nombre) + '</b><small>' + esc([g.grupo, lugares, e === "confirmado" ? "" : "sin confirmar"].filter(String).join(" · ")) + '</small></span>' +
+      selector +
+      (m ? '<button type="button" class="adm-link" data-accion="quitar">Quitar</button>'
+         : '<button type="button" class="adm-link" data-accion="elegir">' + (estado.elegido === g.codigo ? "Elegido" : "Sentar") + '</button>') +
     '</li>';
   }
 
   function panelSinMesa(lista) {
-    return '<h2>Sin mesa</h2><p class="adm-nota">Arrastra un nombre a una mesa, o toca "Sentar" y luego la mesa.</p>' +
-      (lista.length ? '<ul class="adm-personas">' + lista.map(function (g) { return chipInvitado(g, false); }).join("") + '</ul>'
+    return '<h2>Sin mesa</h2><p class="adm-nota">Arrastra un nombre a una mesa, o toca "Sentar" y luego la mesa. Para repartir una invitación entre mesas, ábrela en su mesa y elige cuántos se quedan ahí; el resto vuelve aquí.</p>' +
+      (lista.length ? '<ul class="adm-personas">' + lista.map(function (g) { return chipInvitado(g, null); }).join("") + '</ul>'
                     : '<p class="adm-vacio">Todos tienen mesa.</p>');
   }
 
   function panelMesa(m) {
-    var invs = estado.datos.invitados.filter(function (g) { return g.mesa === m.id; });
+    var invs = estado.datos.invitados.filter(function (g) { return enMesa(g, m.id); });
     var ocup = ocupadosEn(m.id);
     return '<div class="adm-mesa-edicion">' +
       '<button type="button" class="adm-link" data-accion="cerrar-mesa">← Ver invitados sin mesa</button>' +
@@ -862,7 +945,7 @@
         '<label>Lugares <input data-campo="capacidad" type="number" min="1" max="40" value="' + m.capacidad + '"></label>' +
       '</div>' +
       '<p class="' + (ocup > m.capacidad ? "adm-error" : "adm-nota") + '">' + ocup + ' de ' + m.capacidad + ' lugares ocupados' + (ocup > m.capacidad ? " — se pasa de su capacidad" : "") + '</p>' +
-      (invs.length ? '<ul class="adm-personas">' + invs.map(function (g) { return chipInvitado(g, true); }).join("") + '</ul>' : '<p class="adm-vacio">Mesa vacía.</p>') +
+      (invs.length ? '<ul class="adm-personas">' + invs.map(function (g) { return chipInvitado(g, m); }).join("") + '</ul>' : '<p class="adm-vacio">Mesa vacía.</p>') +
       '<button type="button" class="adm-btn adm-btn-peligro adm-btn-mini" data-accion="borrar-mesa">Borrar mesa</button>' +
     '</div>';
   }
@@ -882,23 +965,30 @@
         var c = li.getAttribute("data-codigo");
         estado.elegido = estado.elegido === c ? null : c;
         render();
-      } else if (accion === "quitar") {
-        asignarMesa(invitado(li.getAttribute("data-codigo")), "").then(render);
+      } else if (accion === "quitar" && m) {
+        quitarDeMesa(invitado(li.getAttribute("data-codigo")), m.id).then(render);
         render();
       } else if (accion === "cerrar-mesa") {
         estado.mesaSel = null;
         render();
       } else if (accion === "borrar-mesa" && m) {
-        var gente = estado.datos.invitados.filter(function (g) { return g.mesa === m.id; });
+        var gente = estado.datos.invitados.filter(function (g) { return enMesa(g, m.id); });
         if (!window.confirm("¿Borrar " + m.nombre + "?" + (gente.length ? " " + gente.length + " invitaciones quedarán sin mesa." : ""))) return;
+        // Las repartidas conservan sus otras mesas.
+        gente.forEach(function (g) { if (esDividida(g)) quitarDeMesa(g, m.id); else g.mesa = ""; });
         estado.datos.mesas = estado.datos.mesas.filter(function (x) { return x.id !== m.id; });
-        gente.forEach(function (g) { g.mesa = ""; });
         estado.mesaSel = null;
         guardarMesas();
         render();
       }
     });
     lado.addEventListener("change", function (e) {
+      if (e.target.getAttribute("data-accion") === "cuantos") {
+        var mm = estado.mesaSel ? mesaPorId(estado.mesaSel) : null;
+        var gg = invitado(e.target.closest("[data-codigo]").getAttribute("data-codigo"));
+        if (mm && gg) cambiarEnMesa(gg, mm.id, parseInt(e.target.value, 10)).then(render);
+        return;
+      }
       var campo = e.target.getAttribute("data-campo");
       var m = estado.mesaSel ? mesaPorId(estado.mesaSel) : null;
       if (!campo || !m) return;
@@ -928,13 +1018,13 @@
         '<h2 class="solo-imprimir">Lista de entrada · Boda de André &amp; Krisli · ' + personas + ' personas</h2>' +
         (conf.length ? '<table><thead><tr><th class="adm-check"></th><th>Nombre</th><th>Personas</th><th>Mesa</th><th>Grupo</th><th>Invitación</th></tr></thead><tbody>' +
           conf.map(function (g) {
-            return '<tr><td class="adm-check">☐</td><td>' + esc(g.nombre) + '</td><td>' + g.respuesta.num_asistentes + '</td><td>' + esc(nombreMesa(g.mesa) || "—") + '</td><td>' + esc(g.grupo) + '</td><td>' + (g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción") + '</td></tr>';
+            return '<tr><td class="adm-check">☐</td><td>' + esc(g.nombre) + '</td><td>' + g.respuesta.num_asistentes + '</td><td>' + esc(textoMesas(g) || "—") + '</td><td>' + esc(g.grupo) + '</td><td>' + (g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción") + '</td></tr>';
           }).join("") + '</tbody></table>' : '<p class="adm-vacio">Todavía nadie confirmó.</p>') +
       '</section>';
 
     $("#ent-csv", el).addEventListener("click", function () {
       descargarCsv("Lista-de-entrada.csv", ["Nombre", "Personas", "Mesa", "Grupo", "Invitación", "Llegó"], conf.map(function (g) {
-        return [g.nombre, g.respuesta.num_asistentes, nombreMesa(g.mesa), g.grupo, g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción", ""];
+        return [g.nombre, g.respuesta.num_asistentes, textoMesas(g), g.grupo, g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción", ""];
       }));
     });
     $("#ent-todos", el).addEventListener("click", descargarExcelInvitados);
@@ -987,7 +1077,7 @@
       return [g.nombre, g.grupo, /^\d+$/.test(g.prioridad) ? Number(g.prioridad) : g.prioridad,
         g.tipo === "ceremonia" ? "Solo ceremonia" : "Ceremonia y recepción", g.pases, ESTADOS[e].txt,
         e === "confirmado" ? r.num_asistentes : e === "rechazado" ? 0 : "",
-        fechaExcel(r.enviado_en), fechaExcel(r.actualizado_en), nombreMesa(g.mesa), g.telefono,
+        fechaExcel(r.enviado_en), fechaExcel(r.actualizado_en), textoMesas(g), g.telefono,
         g.aperturas, fechaExcel(g.ultima_apertura), g.codigo, linkDe(g)];
     });
     return armarXlsx("Invitados", columnas, filas);

@@ -391,8 +391,9 @@ class Handler(SimpleHTTPRequestHandler):
                 vigentes = {m["id"] for m in mesas}
                 extra = _load_json(ADMIN_EXTRA_FILE, {})
                 for e in extra.values():
-                    if e.get("mesa") and e["mesa"] not in vigentes:
-                        e["mesa"] = ""
+                    if e.get("mesa"):
+                        # "m1" o repartida "m1:2,m3:1": se quitan solo las mesas borradas
+                        e["mesa"] = ",".join(p for p in e["mesa"].split(",") if p.strip() and p.split(":")[0].strip() in vigentes)
                 _save_json(ADMIN_EXTRA_FILE, extra)
                 _save_json(MESAS_FILE, mesas)
                 return self._json(200, {"ok": True})

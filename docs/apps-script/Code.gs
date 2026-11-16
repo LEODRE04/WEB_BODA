@@ -1311,7 +1311,13 @@ function adminGuardarMesas(quien, data) {
       var col = columnaPorEncabezado(inv, "mesa");
       if (col && inv.getLastRow() > 1) {
         var rango = inv.getRange(2, col, inv.getLastRow() - 1, 1);
-        var v = rango.getValues().map(function (r) { return [borradas.indexOf(String(r[0]).trim()) !== -1 ? "" : r[0]]; });
+        // "m1" o repartida "m1:2,m3:1": se quitan solo las mesas borradas.
+        var v = rango.getValues().map(function (r) {
+          var partes = String(r[0] || "").split(",").filter(function (p) {
+            return p.trim() && borradas.indexOf(p.split(":")[0].trim()) === -1;
+          });
+          return [partes.join(",")];
+        });
         rango.setValues(v);
       }
       registrarHistorial(quien, "", "", "borró mesas", borradas.join(", "), "");
