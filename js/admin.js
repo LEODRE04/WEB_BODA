@@ -241,7 +241,7 @@
     var kpis = [
       ["Respondieron", Math.round(respondieron / total * 100) + "%", respondieron + " de " + inv.length + " invitaciones"],
       ["Sin responder", c.leido + c.sin_abrir + c.duda, (c.duda ? c.duda + " en duda · " : "") + c.sin_abrir + " ni abrieron el link", { estado: c.duda ? "duda" : c.leido ? "leido" : "sin_abrir" }],
-      ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "14 de noviembre"],
+      ["Cierre RSVP", dias + (dias === 1 ? " día" : " días"), "30 de noviembre"],
       ["Sentados", asignados + "/" + rec.confirmados, "confirmados de la recepción con mesa"],
       ["Regalos", soles(aportado), aportes.length + " aportes"],
     ];
